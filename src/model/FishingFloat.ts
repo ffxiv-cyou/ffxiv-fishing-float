@@ -2,7 +2,7 @@ import overlayToolkit, { PlayerStats } from "overlay-toolkit-lib";
 import type { Packet, PacketFilter } from "overlay-toolkit-lib";
 import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType } from "./Opcode";
 import { ActorControlType, ClassJobID, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
-import { HookType, TugType } from "./InnerEnums";
+import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 
 interface OpcodeMap {
     [key: string]: number;
@@ -33,6 +33,8 @@ export class FishingFloat {
         overlayToolkit.Start();
         overlayToolkit.SubscribePacket("FishingFloat", this.genPacketFilter(), (packet: Packet) => this.packetHandler(packet));
     }
+
+    public tracker: FishingTracker = new FishingTracker();
 
     //#region Opcode Management
 
@@ -128,30 +130,31 @@ export class FishingFloat {
 
     private handlePlayerSetup(dw: DataView, epoch: number): void {
         const playerSetup = new FFXIVIpcPlayerSetup(dw);
-        this.setBait(playerSetup.useBait);
+        this.tracker.setBait(playerSetup.useBait);
+        this.tracker.changeJob(playerSetup.currentJob);
     }
 
     private handlePlayerStats(dw: DataView, epoch: number): void {
         const playerStats = new FFXIVIpcPlayerStats(dw);
-        this.setPlayerStats(playerStats.gathering, playerStats.perception, playerStats.gp);
+        this.tracker.setPlayerStats(playerStats.gathering, playerStats.perception, playerStats.gp);
     }
 
     private handleUpdateHpMpTp(dw: DataView, epoch: number): void {
         const hpMpTp = new FFXIVIpcUpdateHpMpTp(dw);
-        this.setCurrentGP(hpMpTp.tp_gp);
+        this.tracker.setCurrentGP(hpMpTp.tp_gp);
     }
 
     private handleActorControl(dw: DataView, epoch: number): void {
         const actorControl = new FFXIVIpcActorControl(dw);
         switch (actorControl.category) {
             case ActorControlType.StatusEffectGain:
-                this.addBuff(actorControl.param1, epoch);
+                this.tracker.addBuff(actorControl.param1, epoch);
                 break;
             case ActorControlType.StatusEffectLose:
-                this.removeBuff(actorControl.param1, epoch);
+                this.tracker.removeBuff(actorControl.param1, epoch);
                 break;
             case ActorControlType.ClassJobChange:
-                this.changeJob(actorControl.param1);
+                this.tracker.changeJob(actorControl.param1);
                 break;
             default:
                 console.log("Actor Control Packet:", actorControl);
@@ -163,17 +166,17 @@ export class FishingFloat {
         const actorControlSelf = new FFXIVIpcActorControlSelf(dw);
         switch (actorControlSelf.category) {
             case ActorControlType.FishingBaitMsg:
-                this.setBait(actorControlSelf.param1);
+                this.tracker.setBait(actorControlSelf.param1);
                 break;
             case ActorControlType.FishingMsg:
                 const itemId = actorControlSelf.param1;
                 const quantity = actorControlSelf.param2 & 0xFFFF;
                 const size = (actorControlSelf.param2 >> 16) & 0xFFFF;
                 const isHQ = (actorControlSelf.param3 & 0x10) > 0;
-                this.setFishingResult(itemId, quantity, size, isHQ, epoch);
+                this.tracker.setFishingResult(itemId, quantity, size, isHQ, epoch);
                 break;
             case ActorControlType.FishingTotalFishCaught:
-                this.setFishingCaughtTotal(actorControlSelf.param1, epoch);
+                this.tracker.setFishingCaughtTotal(actorControlSelf.param1, epoch);
                 break;
             case ActorControlType.FishingSwimbait:
                 this.handleSwimbaitMsg(actorControlSelf, epoch);
@@ -195,10 +198,10 @@ export class FishingFloat {
             data.param4,
         ];
         if (currentIndex === 0xffff) {
-            this.setUsingSwimbait(0);
+            this.tracker.setUsingSwimbait(0);
         } else {
             const selectedSwimbaitId = swimbaitIds[currentIndex];
-            this.setUsingSwimbait(selectedSwimbaitId);
+            this.tracker.setUsingSwimbait(selectedSwimbaitId);
         }
     }
 
@@ -218,35 +221,34 @@ export class FishingFloat {
         const command: FishingActionType = data.param1;
         switch (command) {
             case FishingActionType.Bait:
-                this.setBait(data.param2);
+                this.tracker.setBait(data.param2);
                 break;
             // Casts
             case FishingActionType.Cast:
-                this.cast(epoch);
+                this.tracker.cast(epoch);
                 break;
             case FishingActionType.Mooch:
             case FishingActionType.MoochII:
-                const lastFishId = this.getLastCaughtFish();
-                this.cast(epoch, lastFishId);
+                this.tracker.cast(epoch, this.tracker.lastCaught);
                 break;
             // Hooks
             case FishingActionType.Hook:
-                this.hook(HookType.Normal, epoch);
+                this.tracker.hook(HookType.Normal, epoch);
                 break;
             case FishingActionType.PowerfulHookset:
-                this.hook(HookType.Powerful, epoch);
+                this.tracker.hook(HookType.Powerful, epoch);
                 break;
             case FishingActionType.PreciseHookset:
-                this.hook(HookType.Precise, epoch);
+                this.tracker.hook(HookType.Precise, epoch);
                 break;
             case FishingActionType.DoubleHook:
-                this.hook(HookType.Double, epoch);
+                this.tracker.hook(HookType.Double, epoch);
                 break;
             case FishingActionType.TripleHook:
-                this.hook(HookType.Triple, epoch);
+                this.tracker.hook(HookType.Triple, epoch);
                 break;
             case FishingActionType.StellarHookset:
-                this.hook(HookType.Stellar, epoch);
+                this.tracker.hook(HookType.Stellar, epoch);
                 break;
             // Other action is ignored
             default:
@@ -258,7 +260,7 @@ export class FishingFloat {
     private handleEventStart(dw: DataView, epoch: number): void {
         const eventStart = new FFXIVIpcEventStart(dw);
         if (eventStart.eventId === EventID.Fishing) {
-            this.setFishingEvent(true, epoch);
+            this.tracker.setFishingEvent(true, epoch);
         }
     }
     private handleEventPlay(dw: DataView, epoch: number): void {
@@ -280,7 +282,7 @@ export class FishingFloat {
     private handleEventFinish(dw: DataView, epoch: number): void {
         const eventFinish = new FFXIVIpcEventFinish(dw);
         if (eventFinish.eventId === EventID.Fishing) {
-            this.setFishingEvent(false, epoch);
+            this.tracker.setFishingEvent(false, epoch);
         }
     }
 
@@ -288,16 +290,17 @@ export class FishingFloat {
         if (args.length > 0) {
             switch (args[0]) {
                 case EventPlayParamType.FishingIdle:
-                    this.resetCastState(epoch);
+                case EventPlayParamType.FishingIdleSit:
+                    this.tracker.resetCastState(epoch);
                     break;
                 case EventPlayParamType.FishingTugLight:
-                    this.tug(TugType.Light, epoch);
+                    this.tracker.tug(TugType.Light, epoch);
                     break;
                 case EventPlayParamType.FishingTugMedium:
-                    this.tug(TugType.Medium, epoch);
+                    this.tracker.tug(TugType.Medium, epoch);
                     break;
                 case EventPlayParamType.FishingTugHeavy:
-                    this.tug(TugType.Heavy, epoch);
+                    this.tracker.tug(TugType.Heavy, epoch);
                     break;
             }
         }
@@ -314,114 +317,254 @@ export class FishingFloat {
 
     private handleLogMessage(id: number, params: number[], epoch: number): void {
         switch (id) {
+            case 1110: // ???在???甩出了鱼线开始钓鱼
+                this.tracker.setFishingZone(params[0]);
+                break;
             case 1111: // ???收回了鱼线。
             case 1112: // 陷入了无法战斗状态，钓鱼中断。
             case 1113: // 受到了敌人的攻击，钓鱼中断。
             case 1117: // 不经意间鱼饵被吃掉了……
             case 1118: // 不经意间???不见了……
-                this.resetCastState(epoch);
+            case 1127: // 没有钓到任何东西……\n现在使用的鱼饵可能不太适合这片钓场。
+            case 1129: // 没有钓到任何东西……
+                this.tracker.resetCastState(epoch); // 状态中断，或者是没钓起来东西
                 break;
 
             case 1119: // 上钩的鱼逃走了……
             case 1120: // 鱼线断了！
+                this.tracker.setFishingFail(FailReason.None, epoch);
+                break;
+
+            case 3527: // 获得力不足，无法钓起上钩的鱼。
+                this.tracker.setFishingFail(FailReason.GatheringNotEnough, epoch);
                 break;
 
             case 1121: // ???开始利用上钩的???尝试以小钓大。
+                const fishID3 = params[0];
                 break;
 
-            case 1127: // 没有钓到任何东西……\n现在使用的鱼饵可能不太适合这片钓场。
-            case 1129: // 没有钓到任何东西……
-                break;
-
-            case 3522: // 将???挂到了钓钩上。
-            case 3527: // 获得力不足，无法钓起上钩的鱼。
+            case 3522: // 将???挂到了钓钩上。 (set swimbait)
+            case 5558: // 将钓饵换成了??? (switch swimbait back)
                 break;
 
             case 5505: // 发现了很多的???！
-                const fishId2 = params[0];
+                this.tracker.setIdenticalFishID(params[0]);
                 break;
+
             case 5506: // ???开始警惕，消失了踪迹……
-                const fishId = params[0];
+                this.tracker.setSlapFishID(params[0]);
                 break;
 
             case 5564: // 鱼眼提示词（水中出现了XXXX）
+                this.tracker.setHiddenFish(params[0], epoch);
+                break;
             case 5575: // 鱼眼消失（XXXX不见了）
             case 5582: // 钓起了XXXX（鱼眼）
-                const fishIndex = params[0];
+                this.tracker.setHiddenFish(0, epoch);
                 break;
-                
+
             case 5565: // 现在感觉能钓到大型猎物！！！
+                this.tracker.setLure(LureType.Ambitious, epoch);
+                break;
             case 5569: // 现在感觉能钓到小型猎物！！！
+                this.tracker.setLure(LureType.Modest, epoch);
                 break;
         }
         console.log("Log Message Packet:", id);
     }
 
     //#endregion
-    private setCurrentGP(gp: number) {
-        console.log(`Current GP set to: ${gp}`);
+
+}
+
+export class FishingTracker {
+    private bait: number = 0;
+    private swimBait: number = 0;
+    private lastFish: number = 0;
+    private fisherStats: FisherStats = {
+        gathering: 0,
+        perception: 0,
+        gp: 0,
+    };
+    private currentZone: number = 0;
+
+    private current: FishingSession | null = null;
+
+    get currentBait(): number {
+        if (this.swimBait)
+            return this.swimBait;
+        return this.bait;
     }
 
-    private setPlayerStats(gathering: number, perception: number, gp: number) {
-        console.log(`Player Stats - Gathering: ${gathering}, Perception: ${perception}, GP: ${gp}`);
+    get lastCaught(): number {
+        return this.lastFish;
     }
 
-    private setBait(baitId: number) {
-        console.log(`Bait ID set to: ${baitId}`);
+    public setCurrentGP(gp: number) {
+        this.fisherStats.gp = gp;
     }
 
-    private setUsingSwimbait(baitId: number) {
+    public setPlayerStats(gathering: number, perception: number, gp: number) {
+        this.fisherStats = { gathering, perception, gp };
+    }
+
+    public setFishingZone(zoneId: number) {
+        // Zone extract from log message, may late than cast action
+        this.currentZone = zoneId;
+        if (this.current)
+            this.current.zone = zoneId;
+    }
+
+    public setBait(baitId: number) {
+        this.bait = baitId;
+    }
+
+    public setUsingSwimbait(baitId: number) {
+        this.swimBait = baitId;
         console.log(`Bait Override ID set to: ${baitId}`);
     }
 
-    private changeJob(classJobId: number) {
+    public changeJob(classJobId: number) {
         if (classJobId === ClassJobID.Fisher) {
             console.log("Player is now a Fisher.");
         } else {
+            this.stopRecording();
             console.log(`Player changed to a different job: ${classJobId}`);
         }
     }
 
-    private setFishingEvent(isFishing: boolean, epoch: number) {
+    public setFishingEvent(isFishing: boolean, epoch: number) {
         console.log(`Fishing event set to: ${isFishing}`);
+        if (!isFishing) {
+            this.stopRecording();
+        }
     }
 
-    private addBuff(buffId: number, epoch: number) {
+    public addBuff(buffId: number, epoch: number) {
         console.log(`Buff added: ${buffId}`);
     }
-    private removeBuff(buffId: number, epoch: number) {
+    public removeBuff(buffId: number, epoch: number) {
         console.log(`Buff removed: ${buffId}`);
     }
-    private setBuffList(buffList: number[], epoch: number) {
+    public setBuffList(buffList: number[], epoch: number) {
         console.log(`Buff list updated: ${buffList.join(", ")}`);
     }
 
-    private setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, epoch: number) {
-        console.log(`Fishing Result - Item ID: ${itemId}, Quantity: ${quantity}, Size: ${size}, HQ: ${isHQ}`);
-    }
-
-    private setFishingCaughtTotal(total: number, epoch: number) {
+    private stopRecording() {
 
     }
 
-    private getLastCaughtFish(): number {
-        // todo: 
-        return 0;
+    public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, epoch: number) {
+        this.current?.setResult(itemId, quantity, size, isHQ);
+        this.lastFish = itemId;
     }
 
-    private cast(epoch: number, bait: number = 0): void {
+    public setFishingFail(reason: FailReason, epoch: number) {
+        this.current?.setFail(reason);
+    }
+
+    public setFishingCaughtTotal(total: number, epoch: number) {
+    }
+
+    public cast(epoch: number, bait: number = 0): void {
         console.log("Casting with bait:", bait);
+        if (bait === 0)
+            bait = this.currentBait;
+
+        this.current = new FishingSession(epoch, bait);
+        this.current.zone = this.currentZone;
+
+        if (this.nextIdenticalFish) {
+            this.current.identicalFish = this.nextIdenticalFish;
+        } else if (this.nextSlapFish) {
+            this.current.slapFish = this.nextSlapFish;
+        }
     }
 
-    private hook(type: HookType, epoch: number): void {
-
+    public hook(type: HookType, epoch: number): void {
+        this.current?.hook(type);
     }
 
-    private tug(type: TugType, epoch: number): void {
-        console.log("Tug detected of type:", TugType[type]);
+    public tug(type: TugType, epoch: number): void {
+        this.current?.tug(type, epoch);
     }
 
-    private resetCastState(epoch: number): void {
+    public resetCastState(epoch: number): void {
         console.log("Resetting cast state.");
+        this.current = null;
     }
+
+    private nextIdenticalFish: number = 0;
+    private nextSlapFish: number = 0;
+
+    public setIdenticalFishID(fishID: number): void {
+        this.nextIdenticalFish = fishID;
+    }
+
+    public setSlapFishID(fishID: number): void {
+        this.nextSlapFish = fishID;
+    }
+
+    public setLure(type: LureType, epoch: number): void {
+    }
+
+    public setHiddenFish(fishID: number, epoch: number): void {
+        console.log("Hidden fish detected:", fishID);
+    }
+}
+
+export interface FisherStats {
+    gathering: number;
+    perception: number;
+    gp: number;
+}
+
+export class FishingSession {
+    startTime: number = 0;
+    endTime: number = 0;
+
+    baitId: number;
+    zone: number = 0;
+
+    identicalFish: number = 0;
+    slapFish: number = 0;
+
+    tugType: TugType | null = null;
+    hookType: HookType | null = null;
+
+    result: FishingResult | FishingFail | null = null;
+
+    constructor(epoch: number, baitId: number) {
+        this.startTime = epoch;
+        this.baitId = baitId;
+    }
+
+    public tug(tugType: TugType, epoch: number): void {
+        this.endTime = epoch;
+        this.tugType = tugType;
+    }
+
+    public hook(hookType: HookType): void {
+        this.hookType = hookType;
+    }
+
+    public setResult(itemId: number, quantity: number, size: number, isHQ: boolean): void {
+        this.result = { itemId, quantity, size, isHQ };
+    }
+    
+    public setFail(reason: FailReason): void {
+        this.result = { reason };
+    }
+
+}
+
+export interface FishingResult {
+    itemId: number;
+    quantity: number;
+    size: number;
+    isHQ: boolean;
+}
+
+export interface FishingFail {
+    reason: FailReason;
 }

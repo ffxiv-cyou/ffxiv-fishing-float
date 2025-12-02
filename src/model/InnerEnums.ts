@@ -12,3 +12,13 @@ export enum TugType {
     Medium = 1, // 中杆
     Heavy = 2, // 重杆
 };
+
+export enum FailReason {
+    None = 0,
+    GatheringNotEnough = 1,
+};
+
+export enum LureType { 
+    Ambitious,
+    Modest
+};

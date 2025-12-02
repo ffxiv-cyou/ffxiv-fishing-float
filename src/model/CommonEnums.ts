@@ -87,7 +87,7 @@ export enum EventPlayParamType {
     Fishing11a = 0x11a, // 282
 
     // 提钩动画？
-    Fishing11b = 0x11b, // 283 
+    Fishing11b = 0x11b, // 283，脱钩？
     Fishing11c = 0x11c, // 284
     Fishing11d = 0x11d, // 285
 
@@ -102,4 +102,26 @@ export enum EventPlayParamType {
     FishingTugLight = 0x124, // 292
     FishingTugMedium = 0x125, // 293
     FishingTugHeavy = 0x126, // 294
+
+    FishingIdleSit = 0xC47, // 3143
+    FishingQuitSit = 0xC48, // 3144
+    FishingCast1Sit = 0xC49, // 3145
+    FishingCast2Sit = 0xC4A, // 3146
+    FishingCast3Sit = 0xC4B, // 3147
+    FishingSustain1Sit = 0xC4C, // 3148
+    FishingSustain2Sit = 0xC4D, // 3149
+    FishingSustain3Sit = 0xC4E, // 3150
+
+    // 提钩动画？
+    FishingC52 = 0xC52, // 3154, 脱钩？
+    FishingC53 = 0xC53, // 3155
+    FishingC54 = 0xC54, // 3156
+
+    FishingC55 = 0xC55, // 3157
+    FishingC56 = 0xC56, // 3158
+    FishingC57 = 0xC57, // 3159
+
+    FishingC58 = 0xC58, // 3160
+    FishingC59 = 0xC59, // 3161
+    FishingC5a = 0xC5a, // 3162
 };
