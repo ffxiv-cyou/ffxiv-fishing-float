@@ -125,3 +125,24 @@ export enum EventPlayParamType {
     FishingC59 = 0xC59, // 3161
     FishingC5a = 0xC5a, // 3162
 };
+
+export enum BuffID {
+    FishersIntuition = 568, // 捕鱼人之识
+    Snagging = 761, // 钓组, Action = 4100 钓组
+    FishEyes = 762, // 鱼眼, Action = FishEyes
+    Chum = 763, // 撒饵, Action = Chum
+    InefficientHooking = 764, // 提钩成功率降低, Action = Patience,  764+850
+    CatchAndRelease = 765, // 捉放, Action = PatienceII, 764+765+850
+    CollectorsGlove = 805, // 收藏品采集, Action = 4101 收藏品采集
+    AnglersFortune = 850, // 钓上大尺寸的鱼几率提升
+    Fathom = 1166, // 鱼群测定
+    TruthOfOceans = 1173, //  海洋之相
+    SurfaceSlap = 1803, // 拍击水面, Action = 4595
+    IdenticalCast = 1804, // 专一垂钓, Action = 4596
+    AnglersArt = 2778, // 捕鱼人之计, Lose when Action = 26804 沙利亚克的恩宠
+    MakeshiftBait = 2779, // 不受以小钓大发动条件限制, Action = MakeshiftBait
+    PrizeCatch = 2780, // 下次必定钓到大尺寸的鱼, Action = PrizeCatch
+    BigGameFishing = 3907, // 大鱼知识, Action = BigGameFishing
+    AmbitiousLure = 3972, // 大型鱼类概率提升, Action = AmbitiousLure
+    ModestLure = 3973, // 小型鱼类概率提升, Action = ModestLure
+};

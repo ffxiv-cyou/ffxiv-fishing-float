@@ -10,5 +10,7 @@
     "EventPlay4": 471,
     "EventFinish": 710,
     "GuessDoAction": 424,
-    "SystemLogMessage": 888
+    "SystemLogMessage": 888,
+    "StatusEffectList": 370,
+    "StatusEffectList3": 275
 }

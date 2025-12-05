@@ -1,8 +1,9 @@
 import overlayToolkit, { PlayerStats } from "overlay-toolkit-lib";
 import type { Packet, PacketFilter } from "overlay-toolkit-lib";
-import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType } from "./Opcode";
-import { ActorControlType, ClassJobID, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
+import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType } from "./Opcode";
+import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
+import { FishingTracker } from "./FishingTracker";
 
 interface OpcodeMap {
     [key: string]: number;
@@ -21,10 +22,15 @@ const Direction = {
     [PacketType.EventFinish]: false,
     [PacketType.GuessDoAction]: true,
     [PacketType.SystemLogMessage]: false,
+    [PacketType.StatusEffectList]: false,
+    [PacketType.StatusEffectList3]: false,
 }
 
-export class FishingFloat {
-    constructor() {
+export class PacketHandler {
+    public tracker: FishingTracker;
+
+    constructor(tracker: FishingTracker) {
+        this.tracker = tracker;
     }
 
     opcodeMap: Map<number, PacketType> = new Map<number, PacketType>();
@@ -33,8 +39,6 @@ export class FishingFloat {
         overlayToolkit.Start();
         overlayToolkit.SubscribePacket("FishingFloat", this.genPacketFilter(), (packet: Packet) => this.packetHandler(packet));
     }
-
-    public tracker: FishingTracker = new FishingTracker();
 
     //#region Opcode Management
 
@@ -77,7 +81,7 @@ export class FishingFloat {
 
         const dw = new DataView(packet.data.buffer, packet.data.byteOffset, packet.data.byteLength);
 
-        if (!FishingFloat.isSourceEqualsTarget(dw)) {
+        if (!PacketHandler.isSourceEqualsTarget(dw)) {
             return;
         }
 
@@ -118,6 +122,12 @@ export class FishingFloat {
             case PacketType.SystemLogMessage:
                 this.handleSystemLogMessage(dw, packet.epoch);
                 break;
+            case PacketType.StatusEffectList:
+                this.handleStatusEffectList(dw, packet.epoch);
+                break;
+            case PacketType.StatusEffectList3:
+                this.handleStatusEffectList3(dw, packet.epoch);
+                break;
             default:
                 console.warn(`Unhandled packet type: ${pktType}`);
         }
@@ -148,10 +158,10 @@ export class FishingFloat {
         const actorControl = new FFXIVIpcActorControl(dw);
         switch (actorControl.category) {
             case ActorControlType.StatusEffectGain:
-                this.tracker.addBuff(actorControl.param1, epoch);
+                this.tracker.addBuff(actorControl.param1, actorControl.param2, epoch);
                 break;
             case ActorControlType.StatusEffectLose:
-                this.tracker.removeBuff(actorControl.param1, epoch);
+                this.tracker.removeBuff(actorControl.param1, actorControl.param2, epoch);
                 break;
             case ActorControlType.ClassJobChange:
                 this.tracker.changeJob(actorControl.param1);
@@ -249,6 +259,11 @@ export class FishingFloat {
                 break;
             case FishingActionType.StellarHookset:
                 this.tracker.hook(HookType.Stellar, epoch);
+                break;
+            // Lures
+            case FishingActionType.AmbitiousLure:
+            case FishingActionType.ModestLure:
+                this.tracker.resetLure(epoch);
                 break;
             // Other action is ignored
             default:
@@ -373,198 +388,26 @@ export class FishingFloat {
         console.log("Log Message Packet:", id);
     }
 
+    private handleStatusEffectList(dw: DataView, epoch: number): void {
+        const statusEffectList = new FFXIVIpcStatusEffectList(dw);
+        this.tracker.setBuffList(statusEffectList.effect.map(e => {
+            return {
+                buffId: e.effect_id,
+                stacks: e.param,
+                duration: e.duration,
+            }
+        }), epoch);
+    }
+    private handleStatusEffectList3(dw: DataView, epoch: number): void {
+        const statusEffectList = new FFXIVIpcStatusEffectList3(dw);
+        this.tracker.setBuffList(statusEffectList.effect.map(e => {
+            return {
+                buffId: e.effect_id,
+                stacks: e.param,
+                duration: e.duration,
+            }
+        }), epoch);
+    }
     //#endregion
-
 }
 
-export class FishingTracker {
-    private bait: number = 0;
-    private swimBait: number = 0;
-    private lastFish: number = 0;
-    private fisherStats: FisherStats = {
-        gathering: 0,
-        perception: 0,
-        gp: 0,
-    };
-    private currentZone: number = 0;
-
-    private current: FishingSession | null = null;
-
-    get currentBait(): number {
-        if (this.swimBait)
-            return this.swimBait;
-        return this.bait;
-    }
-
-    get lastCaught(): number {
-        return this.lastFish;
-    }
-
-    public setCurrentGP(gp: number) {
-        this.fisherStats.gp = gp;
-    }
-
-    public setPlayerStats(gathering: number, perception: number, gp: number) {
-        this.fisherStats = { gathering, perception, gp };
-    }
-
-    public setFishingZone(zoneId: number) {
-        // Zone extract from log message, may late than cast action
-        this.currentZone = zoneId;
-        if (this.current)
-            this.current.zone = zoneId;
-    }
-
-    public setBait(baitId: number) {
-        this.bait = baitId;
-    }
-
-    public setUsingSwimbait(baitId: number) {
-        this.swimBait = baitId;
-        console.log(`Bait Override ID set to: ${baitId}`);
-    }
-
-    public changeJob(classJobId: number) {
-        if (classJobId === ClassJobID.Fisher) {
-            console.log("Player is now a Fisher.");
-        } else {
-            this.stopRecording();
-            console.log(`Player changed to a different job: ${classJobId}`);
-        }
-    }
-
-    public setFishingEvent(isFishing: boolean, epoch: number) {
-        console.log(`Fishing event set to: ${isFishing}`);
-        if (!isFishing) {
-            this.stopRecording();
-        }
-    }
-
-    public addBuff(buffId: number, epoch: number) {
-        console.log(`Buff added: ${buffId}`);
-    }
-    public removeBuff(buffId: number, epoch: number) {
-        console.log(`Buff removed: ${buffId}`);
-    }
-    public setBuffList(buffList: number[], epoch: number) {
-        console.log(`Buff list updated: ${buffList.join(", ")}`);
-    }
-
-    private stopRecording() {
-
-    }
-
-    public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, epoch: number) {
-        this.current?.setResult(itemId, quantity, size, isHQ);
-        this.lastFish = itemId;
-    }
-
-    public setFishingFail(reason: FailReason, epoch: number) {
-        this.current?.setFail(reason);
-    }
-
-    public setFishingCaughtTotal(total: number, epoch: number) {
-    }
-
-    public cast(epoch: number, bait: number = 0): void {
-        console.log("Casting with bait:", bait);
-        if (bait === 0)
-            bait = this.currentBait;
-
-        this.current = new FishingSession(epoch, bait);
-        this.current.zone = this.currentZone;
-
-        if (this.nextIdenticalFish) {
-            this.current.identicalFish = this.nextIdenticalFish;
-        } else if (this.nextSlapFish) {
-            this.current.slapFish = this.nextSlapFish;
-        }
-    }
-
-    public hook(type: HookType, epoch: number): void {
-        this.current?.hook(type);
-    }
-
-    public tug(type: TugType, epoch: number): void {
-        this.current?.tug(type, epoch);
-    }
-
-    public resetCastState(epoch: number): void {
-        console.log("Resetting cast state.");
-        this.current = null;
-    }
-
-    private nextIdenticalFish: number = 0;
-    private nextSlapFish: number = 0;
-
-    public setIdenticalFishID(fishID: number): void {
-        this.nextIdenticalFish = fishID;
-    }
-
-    public setSlapFishID(fishID: number): void {
-        this.nextSlapFish = fishID;
-    }
-
-    public setLure(type: LureType, epoch: number): void {
-    }
-
-    public setHiddenFish(fishID: number, epoch: number): void {
-        console.log("Hidden fish detected:", fishID);
-    }
-}
-
-export interface FisherStats {
-    gathering: number;
-    perception: number;
-    gp: number;
-}
-
-export class FishingSession {
-    startTime: number = 0;
-    endTime: number = 0;
-
-    baitId: number;
-    zone: number = 0;
-
-    identicalFish: number = 0;
-    slapFish: number = 0;
-
-    tugType: TugType | null = null;
-    hookType: HookType | null = null;
-
-    result: FishingResult | FishingFail | null = null;
-
-    constructor(epoch: number, baitId: number) {
-        this.startTime = epoch;
-        this.baitId = baitId;
-    }
-
-    public tug(tugType: TugType, epoch: number): void {
-        this.endTime = epoch;
-        this.tugType = tugType;
-    }
-
-    public hook(hookType: HookType): void {
-        this.hookType = hookType;
-    }
-
-    public setResult(itemId: number, quantity: number, size: number, isHQ: boolean): void {
-        this.result = { itemId, quantity, size, isHQ };
-    }
-    
-    public setFail(reason: FailReason): void {
-        this.result = { reason };
-    }
-
-}
-
-export interface FishingResult {
-    itemId: number;
-    quantity: number;
-    size: number;
-    isHQ: boolean;
-}
-
-export interface FishingFail {
-    reason: FailReason;
-}

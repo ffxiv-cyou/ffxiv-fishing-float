@@ -1,11 +1,36 @@
 <script lang="ts">
-  import { FishingFloat } from "./model/FishingFloat";
+  import { PacketHandler } from "./model/FishingFloat";
   import defaultOpcode from "./lib/opcode.json";
+  import { FishingTracker, TugEvent } from "./model/FishingTracker";
+    import type { TugType } from "./model/InnerEnums";
 
-  let logic = new FishingFloat();
+  let tracker = new FishingTracker();
+  let logic = new PacketHandler(tracker);
   logic.setOpcode(defaultOpcode);
   console.log("FishingFloat logic initialized:", logic.genPacketFilter());
   logic.init();
+
+  tracker.addEventListener("begin", startSession);
+  tracker.addEventListener("end", stopSession);
+  tracker.addEventListener("tug", (evt) => {
+    tug((evt as TugEvent).tugType); 
+  });
+
+  function startSession() {
+
+  }
+
+  function stopSession() {
+  }
+
+  function stopFishing() {
+
+  }
+
+  function tug(type: TugType) {
+    console.log("Fishing tug", type);
+  }
+
 </script>
 
 <main>

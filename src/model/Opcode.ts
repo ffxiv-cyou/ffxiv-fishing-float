@@ -10,6 +10,8 @@ export enum PacketType {
     EventPlay4,
     EventFinish,
     SystemLogMessage,
+    StatusEffectList,
+    StatusEffectList3,
     GuessDoAction,
 };
 
@@ -383,5 +385,106 @@ export class FFXIVIpcSystemLogMessage extends IpcPacket {
     this.param1 = dw.getUint32(offset + 12, true);
     this.param2 = dw.getUint32(offset + 16, true);
     this.padding = dw.getUint32(offset + 20, true);
+  }
+}
+
+export class FFXIVIpcStatusEffectList extends IpcPacket {
+  classId: number;
+  level1: number;
+  level: number;
+  current_hp: number;
+  max_hp: number;
+  current_mp: number;
+  max_mp: number;
+  shieldPercentage: number;
+  unknown1: number;
+  unknown2: number;
+  effect: StatusEffect[];
+  padding: number;
+
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.classId = dw.getUint8(offset + 0);
+    this.level1 = dw.getUint8(offset + 1);
+    this.level = dw.getUint16(offset + 2, true);
+    this.current_hp = dw.getUint32(offset + 4, true);
+    this.max_hp = dw.getUint32(offset + 8, true);
+    this.current_mp = dw.getUint16(offset + 12, true);
+    this.max_mp = dw.getUint16(offset + 14, true);
+    this.shieldPercentage = dw.getUint8(offset + 16);
+    this.unknown1 = dw.getUint8(offset + 17);
+    this.unknown2 = dw.getUint16(offset + 18, true);
+    this.effect = new Array(30);
+    for (let i = 0; i < 30; i++) {
+      this.effect[i] = new StatusEffect(dw, offset + 20 + i * 12);
+    }
+    this.padding = dw.getUint32(offset + 380, true);
+  }
+}
+
+export class StatusEffect extends IpcPacket {
+  effect_id: number;
+  param: number;
+  duration: number;
+  sourceActorId: number;
+
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.effect_id = dw.getUint16(offset + 0, true);
+    this.param = dw.getUint16(offset + 2, true);
+    this.duration = dw.getFloat32(offset + 4, true);
+    this.sourceActorId = dw.getUint32(offset + 8, true);
+  }
+}
+
+export class FFXIVIpcStatusEffectList2 extends IpcPacket {
+  unknown3: number;
+  classId: number;
+  level1: number;
+  level2: number;
+  level3: number;
+  current_hp: number;
+  max_hp: number;
+  current_mp: number;
+  max_mp: number;
+  shieldPercentage: number;
+  unknown1: number;
+  unknown2: number;
+  effect: StatusEffect[];
+
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.unknown3 = dw.getUint32(offset + 0, true);
+    this.classId = dw.getUint8(offset + 4);
+    this.level1 = dw.getUint8(offset + 5);
+    this.level2 = dw.getUint8(offset + 6);
+    this.level3 = dw.getUint8(offset + 7);
+    this.current_hp = dw.getUint32(offset + 8, true);
+    this.max_hp = dw.getUint32(offset + 12, true);
+    this.current_mp = dw.getUint16(offset + 16, true);
+    this.max_mp = dw.getUint16(offset + 18, true);
+    this.shieldPercentage = dw.getUint8(offset + 20);
+    this.unknown1 = dw.getUint8(offset + 21);
+    this.unknown2 = dw.getUint16(offset + 22, true);
+    this.effect = new Array(30);
+    for (let i = 0; i < 30; i++) {
+      this.effect[i] = new StatusEffect(dw, offset + 24 + i * 12);
+    }
+  }
+}
+
+export class FFXIVIpcStatusEffectList3 extends IpcPacket {
+  effect: StatusEffect[];
+
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.effect = new Array(30);
+    for (let i = 0; i < 30; i++) {
+      this.effect[i] = new StatusEffect(dw, offset + 0 + i * 12);
+    }
   }
 }
