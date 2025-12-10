@@ -1,14 +1,16 @@
 <script lang="ts">
-  import { GetItemName } from "../model/GameDB";
+  import type { GameDatabase } from "../model/GameDB";
   import type { HistoryStatsItem } from "../model/History";
   import { TugType } from "../model/InnerEnums";
 
   let {
+    db,
     stats,
     highlight,
     now,
-    total
+    total,
   }: {
+    db: GameDatabase;
     stats: HistoryStatsItem[];
     highlight?: number[];
     now?: number;
@@ -68,7 +70,7 @@
       data-max-time={stat.maxBiteTime.toFixed(1)}
     >
       <span class="fish-name">
-        {GetItemName(stat.fish)}
+        {db.getItemName(stat.fish)}
       </span>
     </div>
   {/each}

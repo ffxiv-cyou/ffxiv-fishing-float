@@ -91,7 +91,8 @@ export class FishingHistory {
       return;
     }
 
-    this.nextUpload = setTimeout(() => this.uploadPendingSessions(), 5000);
+    // 一分钟上报一次，避免频繁请求
+    this.nextUpload = setTimeout(() => this.uploadPendingSessions(), 60 * 1000);
   }
 
   private uploadPendingSessions(): void {

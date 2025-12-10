@@ -1,13 +1,30 @@
-import placename from "../lib/placename.json";
-import items from "../lib/item.json";
+export class GameDatabase {
+  placeNames: { [key: number]: string } = {};
+  itemNames: { [key: number]: string } = {};
+  opcodes: { [key: string]: number } = {};
+  
+  constructor() {}
 
-const placeNameLib: { [key: number]: string } = placename;
-const itemLib: { [key: number]: string } = items;
+  async load(version: string): Promise<void> {
+    let placnames = await fetch(`/data/${version}/placename.json`);
+    this.placeNames = await placnames.json();
 
-export function GetZoneName(zoneId: number): string {
-  return placeNameLib[zoneId];
-}
+    let items = await fetch(`/data/${version}/item.json`);
+    this.itemNames = await items.json();
 
-export function GetItemName(itemId: number): string {
-  return itemLib[itemId];
+    let opcodes = await fetch(`/data/${version}/opcode.json`);
+    this.opcodes = await opcodes.json();
+  }
+
+  getZoneName(zoneId: number): string {
+    return this.placeNames[zoneId] || "未知区域(" + zoneId + ")";
+  }
+
+  getItemName(itemId: number): string {
+    return this.itemNames[itemId] || "未知物品(" + itemId + ")";
+  }
+
+  getOpcodes(): { [key: string]: number } {
+    return this.opcodes;
+  }
 }

@@ -1,5 +1,4 @@
 import { type TugType, type HookType, FailReason, LureType } from "./InnerEnums";
-import { GetItemName, GetZoneName } from "./GameDB";
 
 export class FishingSession {
     startTime: number = 0;
@@ -109,20 +108,6 @@ export class FishingSession {
         if (this.fishResult)
             return this.fishResult.itemId;
         return undefined;
-    }
-
-    get zoneName(): string {
-        return GetZoneName(this.zone) || "未知区域";
-    }
-
-    get baitName(): string {
-        return GetItemName(this.baitId) || "未知鱼饵";
-    }
-
-    get itemName(): string {
-        if (this.resultID)
-            return GetItemName(this.resultID) || "未知物品";
-        return "";
     }
 
     get flags(): FishingFlags {

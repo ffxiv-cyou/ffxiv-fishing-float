@@ -64,6 +64,8 @@ export class PacketHandler {
             const value = PacketType[key as keyof typeof PacketType];
             this.opcodeMap.set(opcodeMap[key], value);
         });
+
+        console.log("Opcode map set:", this.opcodeMap);
     }
 
     //#endregion

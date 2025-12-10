@@ -2,6 +2,7 @@ import { API } from "./API";
 import { ClassJobID, BuffID } from "./CommonEnums";
 import { Config } from "./Config";
 import { FishingSession } from "./FishingSession";
+import { GameDatabase } from "./GameDB";
 import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 
@@ -21,6 +22,7 @@ export class FishingTracker extends EventTarget {
     history: FishingHistory;
     api: API;
     config: Config;
+    db: GameDatabase;
 
     constructor() {
         super();
@@ -34,6 +36,11 @@ export class FishingTracker extends EventTarget {
         this.api = new API(basePath);
         this.history = new FishingHistory(this.api);
         this.config = new Config();
+        this.db = new GameDatabase();
+    }
+
+    public async loadGameData(version: string): Promise<void> {
+        await this.db.load(version);
     }
 
     get CurrentSession(): FishingSession | null {

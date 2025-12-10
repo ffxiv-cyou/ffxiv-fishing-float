@@ -119,11 +119,11 @@
 
       session = {
         duration: current.elapsedTimeMs,
-        zoneName: current.zoneName,
-        baitName: current.baitName,
+        zoneName: tracker.db.getZoneName(current.zone),
+        baitName: tracker.db.getItemName(current.baitId),
         tugType: current.tugType,
         result: result,
-        resultName: current.itemName,
+        resultName: tracker.db.getItemName(current.resultID ?? 0),
       };
     } else {
       session = null;
@@ -211,7 +211,7 @@
     {/if}
   </div>
   {#if showStats && tracker.config.ShowHistory}
-    <HistoryStats stats={historyStats} {now} {highlight} {total} />
+    <HistoryStats db={tracker.db} stats={historyStats} {now} {highlight} {total} />
   {/if}
 </div>
 

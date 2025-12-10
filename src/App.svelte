@@ -1,6 +1,5 @@
 <script lang="ts">
   import { PacketHandler } from "./model/PacketHandler";
-  import defaultOpcode from "./lib/opcode.json";
   import { FishingTracker } from "./model/FishingTracker";
   import Timer from "./pages/Timer.svelte";
   import overlayToolkit, { type GameVersion } from "overlay-toolkit-lib";
@@ -12,14 +11,9 @@
   let logic = new PacketHandler(tracker);
   let replay = $state(new PcapReplay());
 
-  logic.setOpcode(defaultOpcode);
-  console.log("FishingFloat logic initialized:", logic.genPacketFilter());
-
   // must be after overlayToolkit is imported
   overlayToolkit.Start();
   overlayToolkit.GetGameVersion().then(handleGameVersion);
-  logic.init(overlayToolkit);
-  logic.init(replay);
 
   function importPackets(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -58,6 +52,33 @@
 
   function handleGameVersion(version: GameVersion) {
     message = undefined;
+    console.log(version);
+    try {
+      loadGameData(version.version);
+    } catch (e: any) {
+      message = {
+        title: "游戏数据加载失败",
+        content: `当前版本 (${version.version}) 数据加载失败。` + e.toString(),
+        type: "error",
+      };
+      console.error("Failed to load game data:", e);
+    }
+  }
+
+  async function loadGameData(version: string) {
+    await tracker.loadGameData(version);
+
+    let opcodes = tracker.db.getOpcodes();
+    logic.setOpcode(opcodes);
+    logic.init(overlayToolkit);
+    logic.init(replay);
+
+    console.log("Game data loaded for version:", version, opcodes);
+  }
+
+  if (!prodMode) {
+    // for dev mode, load a default version
+    handleGameVersion({ version: "2025.10.23.0000.0000", lang: 5 });
   }
 </script>
 
