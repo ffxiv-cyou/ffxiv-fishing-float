@@ -1,5 +1,8 @@
+import { API } from "./API";
 import { ClassJobID, BuffID } from "./CommonEnums";
+import { Config } from "./Config";
 import { FishingSession } from "./FishingSession";
+import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 
 export class FishingTracker extends EventTarget {
@@ -14,6 +17,28 @@ export class FishingTracker extends EventTarget {
     private currentZone: number = 0;
 
     private current: FishingSession | null = null;
+    
+    history: FishingHistory;
+    api: API;
+    config: Config;
+
+    constructor() {
+        super();
+
+        var basePath = "https://api.ffxiv.cyou/fish";
+        var origin = document?.location?.origin;
+        if (origin && origin !== "https://fisher.ffxiv.cyou") {
+            basePath = origin + "/api";
+        }
+
+        this.api = new API(basePath);
+        this.history = new FishingHistory(this.api);
+        this.config = new Config();
+    }
+
+    get CurrentSession(): FishingSession | null {
+        return this.current;
+    }
 
     get currentBait(): number {
         if (this.swimBait)
@@ -36,8 +61,13 @@ export class FishingTracker extends EventTarget {
     public setFishingZone(zoneId: number) {
         // Zone extract from log message, may late than cast action
         this.currentZone = zoneId;
-        if (this.current)
+        if (this.current) {
             this.current.zone = zoneId;
+        }
+    }
+
+    public serverBegin(epoch: number) {
+        this.current?.serverCast(epoch);
     }
 
     public setBait(baitId: number) {
@@ -60,6 +90,11 @@ export class FishingTracker extends EventTarget {
 
     public setFishingEvent(isFishing: boolean, epoch: number) {
         console.log(`Fishing event set to: ${isFishing}`);
+        if (isFishing) {
+            this.dispatchEvent(new Event("start"));
+        } else {
+            this.dispatchEvent(new Event("stop"));
+        }
         if (!isFishing) {
             this.stopRecording();
         }
@@ -69,21 +104,21 @@ export class FishingTracker extends EventTarget {
 
     public addBuff(buffId: number, stacks: number, epoch: number) {
         // addBuff 和 removeBuff 可能有些buff会不存在，以SetBuffList为准
-        console.log(`Buff added: ${buffId}`);
+        // console.log(`Buff added: ${buffId}`);
     }
     public removeBuff(buffId: number, stacks: number, epoch: number) {
-        console.log(`Buff removed: ${buffId}`);
+        // console.log(`Buff removed: ${buffId}`);
     }
     public setBuffList(buffList: BuffState[], epoch: number) {
         // 过滤掉不相关的buff
         var filterBuff = Object.keys(BuffID);
-        buffList = buffList.filter(b => filterBuff.includes(BuffID[b.buffId]));
+        const filterBuffList = buffList.filter(b => filterBuff.includes(BuffID[b.buffId]));
 
         // 对比当前buff列表，找出新增和移除的buff
         var gainedBuffs: BuffState[] = [];
         var lostBuffs: BuffState[] = [];
 
-        for (let buff of buffList) {
+        for (let buff of filterBuffList) {
             if (!this.buffs.has(buff.buffId)) {
                 gainedBuffs.push(buff);
             }
@@ -96,12 +131,13 @@ export class FishingTracker extends EventTarget {
                     lostBuffs.push(buff);
                 }
             }
-            buffList[buff.buffId] = buff;
+            this.buffs.set(buff.buffId, buff);
         }
 
         for (let [buffId, oldBuff] of this.buffs) {
-            if (!buffList.find(b => b.buffId === buffId)) {
+            if (!filterBuffList.find(b => b.buffId === buffId)) {
                 lostBuffs.push(oldBuff);
+                this.buffs.delete(buffId);
             }
         }
 
@@ -111,10 +147,10 @@ export class FishingTracker extends EventTarget {
         for (let buff of lostBuffs) {
             this.onBuffLose(buff, epoch);
         }
-        console.log(`Buff list updated: ${buffList.join(", ")}`);
     }
 
     onBuffGain(buff: BuffState, epoch: number) {
+        console.log(`Buff gained: ${buff} (${BuffID[buff.buffId]})`);
         switch (buff.buffId) {
             case BuffID.AmbitiousLure:
                 this.current?.setLure(LureType.Ambitious, buff.stacks, epoch);
@@ -125,6 +161,7 @@ export class FishingTracker extends EventTarget {
         }
     }
     onBuffLose(buff: BuffState, epoch: number) {
+        console.log(`Buff lose: ${buff} (${BuffID[buff.buffId]})`);
         switch (buff.buffId) {
             case BuffID.IdenticalCast:
                 this.setIdenticalFishID(0);
@@ -156,20 +193,22 @@ export class FishingTracker extends EventTarget {
 
     public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, epoch: number) {
         this.current?.setResult(itemId, quantity, size, isHQ);
+        console.log(`Caught`, this.current);
         this.lastFish = itemId;
-        this.dispatchEvent(new EndEvent());
+        this.history.addSession(this.current!);
+        this.dispatchEvent(new Event("end"));
     }
 
     public setFishingFail(reason: FailReason, epoch: number) {
         this.current?.setFail(reason);
-        this.dispatchEvent(new EndEvent());
+        this.dispatchEvent(new Event("end"));
     }
 
     public setFishingCaughtTotal(total: number, epoch: number) {
     }
 
     public cast(epoch: number, bait: number = 0): void {
-        console.log("Casting with bait:", bait);
+        console.log("Casting with bait:", bait, this.currentBait);
         if (bait === 0)
             bait = this.currentBait;
 
@@ -183,7 +222,7 @@ export class FishingTracker extends EventTarget {
         }
 
         this.syncBuffState(this.current);
-        this.dispatchEvent(new BeginEvent());
+        this.dispatchEvent(new Event("begin"));
     }
 
     public hook(type: HookType, epoch: number): void {
@@ -192,7 +231,7 @@ export class FishingTracker extends EventTarget {
 
     public tug(type: TugType, epoch: number): void {
         this.current?.tug(type, epoch);
-        this.dispatchEvent(new TugEvent(type));
+        this.dispatchEvent(new CustomEvent<TugType>("tug", { detail: type }));
     }
 
     public resetCastState(epoch: number): void {
@@ -237,20 +276,3 @@ export interface BuffState {
     duration: number;
 }
 
-export class TugEvent extends Event {
-    constructor(public tugType: TugType) {
-        super("tug");
-    }
-}
-
-export class BeginEvent extends Event {
-    constructor() {
-        super("begin");
-    }
-}
-
-export class EndEvent extends Event {
-    constructor() {
-        super("end");
-    }
-}

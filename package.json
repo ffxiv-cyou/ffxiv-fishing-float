@@ -10,6 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
+    "cbor2": "^2.0.1",
     "overlay-toolkit-lib": "file:../overlay-toolkit-library"
   },
   "devDependencies": {

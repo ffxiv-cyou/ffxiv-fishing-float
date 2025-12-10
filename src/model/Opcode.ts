@@ -423,15 +423,13 @@ export class FFXIVIpcStatusEffectList extends IpcPacket {
   }
 }
 
-export class StatusEffect extends IpcPacket {
+export class StatusEffect {
   effect_id: number;
   param: number;
   duration: number;
   sourceActorId: number;
 
   constructor(dw: DataView, offset: number = 0) {
-    super(dw, offset);
-    offset += IpcPacket.PacketSize();
     this.effect_id = dw.getUint16(offset + 0, true);
     this.param = dw.getUint16(offset + 2, true);
     this.duration = dw.getFloat32(offset + 4, true);

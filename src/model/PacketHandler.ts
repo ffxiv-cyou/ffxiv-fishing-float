@@ -1,6 +1,5 @@
-import overlayToolkit, { PlayerStats } from "overlay-toolkit-lib";
 import type { Packet, PacketFilter } from "overlay-toolkit-lib";
-import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType } from "./Opcode";
+import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType, StatusEffect } from "./Opcode";
 import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
@@ -26,6 +25,10 @@ const Direction = {
     [PacketType.StatusEffectList3]: false,
 }
 
+export interface IPacketSource {
+    SubscribePacket(name: string, filters: PacketFilter[], handler: (packet: Packet) => void): Promise<string>;
+}
+
 export class PacketHandler {
     public tracker: FishingTracker;
 
@@ -35,9 +38,8 @@ export class PacketHandler {
 
     opcodeMap: Map<number, PacketType> = new Map<number, PacketType>();
 
-    public init(): void {
-        overlayToolkit.Start();
-        overlayToolkit.SubscribePacket("FishingFloat", this.genPacketFilter(), (packet: Packet) => this.packetHandler(packet));
+    public init(source: IPacketSource): void {
+        source.SubscribePacket("FishingFloat", this.genPacketFilter(), (packet: Packet) => this.packetHandler(packet));
     }
 
     //#region Opcode Management
@@ -167,7 +169,6 @@ export class PacketHandler {
                 this.tracker.changeJob(actorControl.param1);
                 break;
             default:
-                console.log("Actor Control Packet:", actorControl);
                 break;
         }
     }
@@ -195,7 +196,6 @@ export class PacketHandler {
                 this.handleLogMessage(actorControlSelf.param1, [actorControlSelf.param2, actorControlSelf.param3, actorControlSelf.param4], epoch);
                 break;
             default:
-                console.log("Actor Control Self Packet:", actorControlSelf);
                 break;
         }
     }
@@ -222,7 +222,6 @@ export class PacketHandler {
                 this.handleClientTriggerFishing(clientTrigger, epoch);
                 break;
             default:
-                console.log("Client Trigger Packet:", clientTrigger);
                 break;
         }
     }
@@ -267,7 +266,7 @@ export class PacketHandler {
                 break;
             // Other action is ignored
             default:
-                console.log("Fishing Client Trigger Packet:", data);
+                console.log("Ignore fishing command", FishingActionType[command], data);
                 break;
         }
     }
@@ -334,6 +333,7 @@ export class PacketHandler {
         switch (id) {
             case 1110: // ???在???甩出了鱼线开始钓鱼
                 this.tracker.setFishingZone(params[0]);
+                this.tracker.serverBegin(epoch);
                 break;
             case 1111: // ???收回了鱼线。
             case 1112: // 陷入了无法战斗状态，钓鱼中断。
@@ -390,21 +390,24 @@ export class PacketHandler {
 
     private handleStatusEffectList(dw: DataView, epoch: number): void {
         const statusEffectList = new FFXIVIpcStatusEffectList(dw);
-        this.tracker.setBuffList(statusEffectList.effect.map(e => {
-            return {
-                buffId: e.effect_id,
-                stacks: e.param,
-                duration: e.duration,
-            }
-        }), epoch);
+        this.handleBuffList(statusEffectList.effect, epoch);
     }
+
     private handleStatusEffectList3(dw: DataView, epoch: number): void {
         const statusEffectList = new FFXIVIpcStatusEffectList3(dw);
-        this.tracker.setBuffList(statusEffectList.effect.map(e => {
+        this.handleBuffList(statusEffectList.effect, epoch);
+    }
+
+    private handleBuffList(list: StatusEffect[], epoch: number): void {
+        // 处理buff列表
+        this.tracker.setBuffList(list.map(e => {
             return {
                 buffId: e.effect_id,
                 stacks: e.param,
                 duration: e.duration,
+                toString(): string {
+                    return `Buff ${this.buffId} (x${this.stacks}, ${this.duration.toFixed(1)}s)`;
+                }
             }
         }), epoch);
     }
