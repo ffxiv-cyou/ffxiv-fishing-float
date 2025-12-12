@@ -1,4 +1,4 @@
-import type { Packet, PacketFilter } from "overlay-toolkit-lib";
+import type { Packet, PacketFilter } from "overlay-toolkit";
 import { importPcapFile } from "./pcap";
 
 class Subscriber {

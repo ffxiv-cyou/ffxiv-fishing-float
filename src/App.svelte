@@ -2,7 +2,7 @@
   import { PacketHandler } from "./model/PacketHandler";
   import { FishingTracker } from "./model/FishingTracker";
   import Timer from "./pages/Timer.svelte";
-  import overlayToolkit, { type GameVersion } from "overlay-toolkit-lib";
+  import overlayToolkit, { type GameVersion } from "overlay-toolkit";
   import { PcapReplay } from "./model/dev/replay";
   import Setting from "./pages/Setting.svelte";
   import Notice from "./pages/Notice.svelte";
