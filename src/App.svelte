@@ -106,14 +106,20 @@
 
 <main data-prod={prodMode}>
   <div class="debug-tool">
-    <label for="file">Import</label>
-    <input
-      type="file"
-      id="file"
-      accept=".pcap,.xml"
-      onchange={importPackets}
-      name="pcapFile"
-    />
+    <div>
+      <h2>钓鱼悬浮窗</h2>
+      <p>在ACT中添加此悬浮窗后开始使用。<br>请参考<a href="/help.html" target="_blank">帮助页面</a>了解详细的安装步骤。</p>
+    </div>
+    <div>
+      <label for="file">导入数据包（调试）</label>
+      <input
+        type="file"
+        id="file"
+        accept=".pcap,.xml"
+        onchange={importPackets}
+        name="pcapFile"
+      />
+    </div>
   </div>
   {#if message !== undefined}
     <Notice
