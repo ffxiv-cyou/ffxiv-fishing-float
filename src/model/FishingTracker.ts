@@ -39,8 +39,12 @@ export class FishingTracker extends EventTarget {
         this.db = new GameDatabase();
     }
 
-    public async loadGameData(version: string): Promise<void> {
-        await this.db.load(version);
+    public loadGameData(version: string): Promise<void> {
+        return this.db.load(version);
+    }
+
+    public getVersions(): Promise<{[key: string]: string}> {
+        return this.db.getVersions();
     }
 
     get CurrentSession(): FishingSession | null {

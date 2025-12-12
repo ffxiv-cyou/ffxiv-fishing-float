@@ -10,10 +10,19 @@
   let tracker = $state(new FishingTracker());
   let logic = new PacketHandler(tracker);
   let replay = $state(new PcapReplay());
+  let availableVersions: { [key: string]: string } = {};
 
   // must be after overlayToolkit is imported
   overlayToolkit.Start();
-  overlayToolkit.GetGameVersion().then(handleGameVersion);
+
+  tracker
+    .getVersions()
+    .then((versions) => {
+      availableVersions = versions;
+    })
+    .finally(() => {
+      overlayToolkit.GetGameVersion().then(handleGameVersion);
+    });
 
   function importPackets(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -53,12 +62,25 @@
   function handleGameVersion(version: GameVersion) {
     message = undefined;
     console.log(version);
+
+    let ver = version.version;
+    if (!ver) {
+      const values = Object.values(availableVersions);
+      if (values.length > 0) {
+        ver = values[values.length - 1];
+      }
+      console.warn(
+        "Game version not detected, defaulting to last available version.",
+        ver,
+      );
+    }
+
     try {
-      loadGameData(version.version);
+      loadGameData(ver);
     } catch (e: any) {
       message = {
         title: "游戏数据加载失败",
-        content: `当前版本 (${version.version}) 数据加载失败。` + e.toString(),
+        content: `当前版本 (${ver}) 数据加载失败。` + e.toString(),
         type: "error",
       };
       console.error("Failed to load game data:", e);

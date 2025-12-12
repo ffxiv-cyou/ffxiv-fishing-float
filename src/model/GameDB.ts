@@ -16,6 +16,11 @@ export class GameDatabase {
     this.opcodes = await opcodes.json();
   }
 
+  async getVersions(): Promise<{[key: string]: string}> {
+    let versionsResp = await fetch(`/data/version.json`);
+    return await versionsResp.json();
+  }
+
   getZoneName(zoneId: number): string {
     return this.placeNames[zoneId] || "未知区域(" + zoneId + ")";
   }
