@@ -27,11 +27,8 @@ export class FishingTracker extends EventTarget {
     constructor() {
         super();
 
-        var basePath = "https://api.ffxiv.cyou/fish";
         var origin = document?.location?.origin;
-        if (origin && origin !== "https://fisher.ffxiv.cyou") {
-            basePath = origin + "/api";
-        }
+        var basePath = origin + "/api";
 
         this.api = new API(basePath);
         this.history = new FishingHistory(this.api);
