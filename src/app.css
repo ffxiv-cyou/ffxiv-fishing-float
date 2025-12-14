@@ -27,6 +27,7 @@ h1 {
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  overflow-x: hidden;
 
   --color-xiv-green: #7bc431;
   --color-xiv-dark-green: #1f9900;
