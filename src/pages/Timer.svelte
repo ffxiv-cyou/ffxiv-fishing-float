@@ -105,7 +105,7 @@
         maxTime = item.maxBiteTime;
       }
     }
-    return Math.max(Math.ceil(maxTime / 2) * 2, now! + 5);
+    return Math.max(Math.ceil(maxTime / 2) * 2, (now ?? 0) + 5);
   }); // in seconds
 
   function updateSession() {
