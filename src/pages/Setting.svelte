@@ -68,11 +68,29 @@
   <div class="setting-item">
     <label class="xiv-text" for="enable-sounds">音效: </label>
     <input
-      type="checkbox"
-      id="enable-sounds"
-      bind:checked={config.EnableSound}
+      type="radio"
+      name="sound"
+      value="intuition"
+      id="sound-intuition"
+      bind:group={config.Sound}
     />
-    <label class="xiv-text" for="enable-sounds">启用</label>
+    <label class="xiv-text" for="sound-intuition">直感</label>
+    <input
+      type="radio"
+      name="sound"
+      value="pastry"
+      id="sound-pastry"
+      bind:group={config.Sound}
+    />
+    <label class="xiv-text" for="sound-pastry">鱼糕</label>
+    <input
+      type="radio"
+      name="sound"
+      value=""
+      id="sound-none"
+      bind:group={config.Sound}
+    />
+    <label class="xiv-text" for="sound-none">无</label>
   </div>
 </div>
 

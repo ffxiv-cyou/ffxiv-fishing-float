@@ -157,10 +157,27 @@
   }
 
   let sounds: HTMLAudioElement[] = [];
-  let srcs = ["assets/light.ogg", "assets/medium.ogg", "assets/heavy.ogg"];
+  let srcs = $derived.by(() => {
+    const soundConfig = tracker.config.Sound;
+    let sources: string[] = [];
+    if (soundConfig === "intuition") {
+      sources = [
+        "/assets/light.ogg",
+        "/assets/medium.ogg",
+        "/assets/heavy.ogg",
+      ];
+    } else if (soundConfig === "pastry") {
+      sources = [
+        "/assets/pastry_light.ogg",
+        "/assets/pastry_medium.ogg",
+        "/assets/pastry_heavy.ogg",
+      ];
+    }
+    return sources;
+  });
 
   function playSound(type: TugType) {
-    if (!tracker.config.EnableSound) {
+    if (tracker.config.Sound === '') {
       return;
     }
     sounds[type]?.play();

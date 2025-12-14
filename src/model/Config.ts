@@ -10,7 +10,7 @@ export class Config {
   showCatch: boolean;
   showSettingBtn: boolean;
   
-  enableSound: boolean;
+  sound: 'intuition' | 'pastry' | '' = 'intuition';
   update: (() => void) | null = null;
 
   constructor() {
@@ -20,8 +20,8 @@ export class Config {
     this.showZone = obj.showZone !== undefined ? obj.showZone : true;
     this.showBait = obj.showBait !== undefined ? obj.showBait : true;
     this.showCatch = obj.showCatch !== undefined ? obj.showCatch : true;
-    this.enableSound = obj.enableSound !== undefined ? obj.enableSound : true;
     this.showSettingBtn = obj.showSettingBtn !== undefined ? obj.showSettingBtn : true;
+    this.sound = obj.sound || (obj.enableSound ? 'intuition' : '');
 
     this.#subscribe = createSubscriber((update) => {
       this.update = update;
@@ -83,12 +83,12 @@ export class Config {
     this.showSettingBtn = value;
     this.save();
   }
-  get EnableSound() {
+  get Sound() {
     this.#subscribe();
-    return this.enableSound;
+    return this.sound;
   }
-  set EnableSound(value: boolean) {
-    this.enableSound = value;
+  set Sound(value: 'intuition' | 'pastry' | '') {
+    this.sound = value;
     this.save();
   }
 }
