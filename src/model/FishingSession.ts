@@ -52,7 +52,7 @@ export class FishingSession {
         this.hookType = hookType;
     }
 
-    public setResult(itemId: number, quantity: number, size: number, isHQ: boolean): void {
+    public setResult(itemId: number, quantity: number, size: number, isHQ: boolean, isColl: boolean): void {
         this.result = { itemId, quantity, size, isHQ };
     }
 

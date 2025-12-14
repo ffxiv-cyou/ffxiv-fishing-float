@@ -183,10 +183,11 @@ export class PacketHandler {
                 break;
             case ActorControlType.FishingMsg:
                 const itemId = actorControlSelf.param1;
-                const quantity = actorControlSelf.param2 & 0xFFFF;
+                const quantity = actorControlSelf.param2 & 0xFF;
+                const isColl = ((actorControlSelf.param2 >> 8) & 0xFF) > 0;
                 const size = (actorControlSelf.param2 >> 16) & 0xFFFF;
                 const isHQ = (actorControlSelf.param3 & 0x10) > 0;
-                this.tracker.setFishingResult(itemId, quantity, size, isHQ, epoch);
+                this.tracker.setFishingResult(itemId, quantity, size, isHQ, isColl, epoch);
                 break;
             case ActorControlType.FishingTotalFishCaught:
                 this.tracker.setFishingCaughtTotal(actorControlSelf.param1, epoch);

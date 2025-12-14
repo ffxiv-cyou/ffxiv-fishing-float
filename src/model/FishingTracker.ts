@@ -199,8 +199,8 @@ export class FishingTracker extends EventTarget {
     private stopRecording() {
     }
 
-    public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, epoch: number) {
-        this.current?.setResult(itemId, quantity, size, isHQ);
+    public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, isColl: boolean, epoch: number) {
+        this.current?.setResult(itemId, quantity, size, isHQ, isColl);
         console.log(`Caught`, this.current);
         this.lastFish = itemId;
         this.history.addSession(this.current!);
