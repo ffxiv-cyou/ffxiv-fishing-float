@@ -1,4 +1,6 @@
+import { createSubscriber } from "svelte/reactivity";
 import { type TugType, type HookType, FailReason, LureType } from "./InnerEnums";
+import type { FisherStats } from "./FishingTracker";
 
 export class FishingSession {
     startTime: number = 0;
@@ -7,7 +9,7 @@ export class FishingSession {
     endLocalTime: Date | null = null;
 
     baitId: number;
-    zone: number = 0;
+    private zone: number = 0;
 
     chum: boolean = false; // 撒饵
     fishEyes: boolean = false; // 鱼眼
@@ -22,19 +24,28 @@ export class FishingSession {
     lureStacks: number = 0; // 层数
     lureAt: number = 0; // 最后一次的时间
 
-    identicalFish: number = 0; // 专一垂钓
-    slapFish: number = 0; // 拍击水面
-    hiddenFish: number = 0; // 隐藏鱼ID
+    private identicalFish: number = 0; // 专一垂钓
+    private slapFish: number = 0; // 拍击水面
+    private hiddenFish: number = 0; // 隐藏鱼ID
 
     tugType: TugType | null = null;
     hookType: HookType | null = null;
 
     result: FishingResult | FishingFail | null = null;
+    fisherStats: FisherStats; 
 
-    constructor(epoch: number, baitId: number) {
+    #subscribe;
+    update: (() => void) | null = null;
+
+    constructor(epoch: number, baitId: number, stats: FisherStats) {
         this.startTime = epoch;
         this.baitId = baitId;
         this.startLocalTime = new Date();
+        this.fisherStats = stats;
+
+        this.#subscribe = createSubscriber((update) => {
+            this.update = update;
+        });
     }
 
     public serverCast(epoch: number): void {
@@ -46,36 +57,84 @@ export class FishingSession {
         this.endTime = epoch;
         this.tugType = tugType;
         this.endLocalTime = new Date();
+
+        this.onUpdate();
     }
 
     public hook(hookType: HookType): void {
         this.hookType = hookType;
+        this.onUpdate();
     }
 
     public setResult(itemId: number, quantity: number, size: number, isHQ: boolean, isColl: boolean): void {
         this.result = { itemId, quantity, size, isHQ };
+        this.onUpdate();
     }
 
     public setFail(reason: FailReason): void {
         this.result = { reason };
+        this.onUpdate();
     }
 
-    public setHiddenFish(fishID: number): void {
+    set HiddenFish(fishID: number) {
         this.hiddenFish = fishID;
+        this.onUpdate();
+    }
+    
+    get HiddenFish(): number {
+        return this.hiddenFish;
     }
 
     public setLure(type: LureType, stacks: number, epoch: number): void {
         this.lureType = type;
         this.lureStacks = stacks;
         this.lureAt = epoch;
+        this.onUpdate();
     }
 
     public setLureTarget(isTarget: boolean): void {
         this.lureTarget = isTarget;
+        this.onUpdate();
+    }
+
+    private onUpdate() {
+        if (this.update) this.update();
+    }
+
+    get Zone(): number {
+        this.#subscribe();
+        return this.zone;
+    }
+
+    set Zone(val: number) {
+        this.zone = val;
+        this.onUpdate();
+    }
+
+    get IdenticalFish(): number {
+        this.#subscribe();
+        return this.identicalFish;
+    }
+
+    set IdenticalFish(val: number) {
+        this.identicalFish = val;
+        this.onUpdate();
+    }
+
+    get SlapFish(): number {
+        this.#subscribe();
+        return this.slapFish;
+    }
+
+    set SlapFish(val: number) {
+        this.slapFish = val;
+        this.onUpdate();
     }
 
     // 当前经过的时间
     get elapsedTimeMs(): number {
+        this.#subscribe();
+
         if (this.endTime) {
             return this.endTime - this.startTime;
         }
@@ -86,6 +145,8 @@ export class FishingSession {
 
     // 谦逊/雄心的保护时间窗
     get lureRestMs(): number {
+        this.#subscribe();
+
         if (this.lureAt === 0)
             return 0;
 
@@ -93,24 +154,30 @@ export class FishingSession {
     }
 
     get failReason(): FailReason | null {
+        this.#subscribe();
+
         if (this.result && 'reason' in this.result)
             return this.result.reason;
         return null;
     }
 
     get fishResult(): FishingResult | null {
+        this.#subscribe();
+
         if (this.result && 'itemId' in this.result)
             return this.result;
         return null;
     }
 
     get resultID(): number | undefined {
+        this.#subscribe();
+
         if (this.fishResult)
             return this.fishResult.itemId;
         return undefined;
     }
 
-    get flags(): FishingFlags {
+    private get flags(): FishingFlags {
         let flags = 0;
         if (this.chum) flags |= FishingFlags.StateChum;
         if (this.fishEyes) flags |= FishingFlags.StateFishEye;

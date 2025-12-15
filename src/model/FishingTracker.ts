@@ -1,3 +1,4 @@
+import { createSubscriber } from "svelte/reactivity";
 import { API } from "./API";
 import { ClassJobID, BuffID } from "./CommonEnums";
 import { Config } from "./Config";
@@ -24,8 +25,15 @@ export class FishingTracker extends EventTarget {
     config: Config;
     db: GameDatabase;
 
+    #subscribe;
+    update: (() => void) | null = null;
+
     constructor() {
         super();
+
+        this.#subscribe = createSubscriber((update) => {
+            this.update = update;
+        })
 
         var origin = document?.location?.origin;
         var basePath = origin + "/api";
@@ -34,6 +42,11 @@ export class FishingTracker extends EventTarget {
         this.history = new FishingHistory(this.api);
         this.config = new Config();
         this.db = new GameDatabase();
+    }
+
+    private updateSub() {
+        if (this.update)
+            this.update();
     }
 
     public loadGameData(version: string): Promise<void> {
@@ -45,6 +58,7 @@ export class FishingTracker extends EventTarget {
     }
 
     get CurrentSession(): FishingSession | null {
+        this.#subscribe();
         return this.current;
     }
 
@@ -70,7 +84,7 @@ export class FishingTracker extends EventTarget {
         // Zone extract from log message, may late than cast action
         this.currentZone = zoneId;
         if (this.current) {
-            this.current.zone = zoneId;
+            this.current.Zone = zoneId;
         }
     }
 
@@ -220,17 +234,18 @@ export class FishingTracker extends EventTarget {
         if (bait === 0)
             bait = this.currentBait;
 
-        this.current = new FishingSession(epoch, bait);
-        this.current.zone = this.currentZone;
+        this.current = new FishingSession(epoch, bait, this.fisherStats);
+        this.current.Zone = this.currentZone;
 
         if (this.nextIdenticalFish) {
-            this.current.identicalFish = this.nextIdenticalFish;
+            this.current.IdenticalFish = this.nextIdenticalFish;
         } else if (this.nextSlapFish) {
-            this.current.slapFish = this.nextSlapFish;
+            this.current.SlapFish = this.nextSlapFish;
         }
 
         this.syncBuffState(this.current);
         this.dispatchEvent(new Event("begin"));
+        this.updateSub();
     }
 
     public hook(type: HookType, epoch: number): void {
@@ -245,6 +260,7 @@ export class FishingTracker extends EventTarget {
     public resetCastState(epoch: number): void {
         console.log("Resetting cast state.");
         this.current = null;
+        this.updateSub();
     }
 
     private nextIdenticalFish: number = 0;
@@ -268,7 +284,8 @@ export class FishingTracker extends EventTarget {
 
     public setHiddenFish(fishID: number, epoch: number): void {
         console.log("Hidden fish detected:", fishID);
-        this.current?.setHiddenFish(fishID);
+        if (this.current)
+            this.current.HiddenFish = fishID;
     }
 }
 

@@ -23,12 +23,10 @@
   });
   tracker.addEventListener("begin", () => {
     intervalId = setInterval(updateSession, 100);
-    updateHistoryStats();
   });
   tracker.addEventListener("end", () => {
     clearInterval(intervalId);
     updateSession();
-    updateHistoryStats();
   });
 
   tracker.addEventListener("tug", (e) => {
@@ -119,7 +117,7 @@
 
       session = {
         duration: current.elapsedTimeMs,
-        zoneName: tracker.db.getZoneName(current.zone),
+        zoneName: tracker.db.getZoneName(current.Zone),
         baitName: tracker.db.getItemName(current.baitId),
         tugType: current.tugType,
         result: result,
@@ -142,19 +140,17 @@
     return type !== null ? colors[type] : "blue";
   }
 
-  let historyStats: HistoryStatsItem[] = $state([]);
-  function updateHistoryStats() {
+  let historyStats: HistoryStatsItem[] = $derived.by(() => {
     const current = tracker.CurrentSession;
     if (!current) {
-      historyStats = [];
-      return;
+      return [];
     }
-    historyStats = tracker.history.getHistory(
-      current.zone,
+    return tracker.history.getHistory(
+      current.Zone,
       current.baitId,
       current.chum,
     );
-  }
+  });
 
   let sounds: HTMLAudioElement[] = [];
   let srcs = $derived.by(() => {
@@ -177,7 +173,7 @@
   });
 
   function playSound(type: TugType) {
-    if (tracker.config.Sound === '') {
+    if (tracker.config.Sound === "") {
       return;
     }
     sounds[type]?.play();
@@ -228,7 +224,13 @@
     {/if}
   </div>
   {#if showStats && tracker.config.ShowHistory}
-    <HistoryStats db={tracker.db} stats={historyStats} {now} {highlight} {total} />
+    <HistoryStats
+      db={tracker.db}
+      stats={historyStats}
+      {now}
+      {highlight}
+      {total}
+    />
   {/if}
 </div>
 
