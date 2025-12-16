@@ -35,6 +35,9 @@ export class FishingHistory {
   }
 
   public addSession(session: FishingSession): void {
+    if (!session)
+      return;
+    
     this.pendingSessions.push(session);
     this.triggerUpload();
 

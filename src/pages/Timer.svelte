@@ -141,14 +141,16 @@
   }
 
   let historyStats: HistoryStatsItem[] = $derived.by(() => {
-    const current = tracker.CurrentSession;
-    if (!current) {
-      return [];
+    const zone = tracker.CurrentZone;
+    const chum = tracker.chum;
+    var bait = tracker.currentBait;
+    if (tracker.CurrentSession) {
+      bait = tracker.CurrentSession.baitId;
     }
     return tracker.history.getHistory(
-      current.Zone,
-      current.baitId,
-      current.chum,
+      zone,
+      bait,
+      chum,
     );
   });
 

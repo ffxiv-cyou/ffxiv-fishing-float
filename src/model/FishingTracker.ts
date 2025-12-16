@@ -62,6 +62,11 @@ export class FishingTracker extends EventTarget {
         return this.current;
     }
 
+    get CurrentZone(): number {
+        this.#subscribe();
+        return this.currentZone;
+    }
+
     get currentBait(): number {
         if (this.swimBait)
             return this.swimBait;
@@ -86,6 +91,7 @@ export class FishingTracker extends EventTarget {
         if (this.current) {
             this.current.Zone = zoneId;
         }
+        this.updateSub();
     }
 
     public serverBegin(epoch: number) {
@@ -169,6 +175,7 @@ export class FishingTracker extends EventTarget {
         for (let buff of lostBuffs) {
             this.onBuffLose(buff, epoch);
         }
+        this.updateSub();
     }
 
     onBuffGain(buff: BuffState, epoch: number) {
@@ -192,6 +199,11 @@ export class FishingTracker extends EventTarget {
                 this.setSlapFishID(0);
                 break;
         }
+    }
+
+    get chum(): boolean {
+        this.#subscribe();
+        return this.buffs.has(BuffID.Chum);
     }
 
     syncBuffState(session: FishingSession) {
@@ -259,8 +271,10 @@ export class FishingTracker extends EventTarget {
 
     public resetCastState(epoch: number): void {
         console.log("Resetting cast state.");
-        this.current = null;
-        this.updateSub();
+        setTimeout(() => {
+            this.current = null;
+            this.updateSub();
+        }, 100);
     }
 
     private nextIdenticalFish: number = 0;
