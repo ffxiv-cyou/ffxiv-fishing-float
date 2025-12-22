@@ -17,9 +17,7 @@
 
   tracker
     .getVersions()
-    .then((versions) => {
-      availableVersions = versions;
-    })
+    .then(onVersionListLoaded)
     .finally(() => {
       overlayToolkit.GetGameVersion().then(handleGameVersion);
     });
@@ -67,7 +65,7 @@
     if (!ver) {
       const values = Object.values(availableVersions);
       if (values.length > 0) {
-        ver = values[values.length - 1];
+        ver = values[0];
       }
       console.warn(
         "Game version not detected, defaulting to last available version.",
@@ -87,6 +85,16 @@
     }
   }
 
+  function onVersionListLoaded(versions: { [key: string]: string }) {
+    availableVersions = versions;
+    if (!prodMode) {
+      const versions = Object.values(availableVersions);
+      if (versions.length > 0) {
+        handleGameVersion({ version: versions[0], lang: 5 });
+      }
+    }
+  }
+
   async function loadGameData(version: string) {
     await tracker.loadGameData(version);
 
@@ -97,18 +105,18 @@
 
     console.log("Game data loaded for version:", version, opcodes);
   }
-
-  if (!prodMode) {
-    // for dev mode, load a default version
-    handleGameVersion({ version: "2025.10.23.0000.0000", lang: 5 });
-  }
 </script>
 
 <main data-prod={prodMode}>
   <div class="debug-tool">
     <div>
       <h2>钓鱼悬浮窗</h2>
-      <p>在ACT中添加此悬浮窗后开始使用。<br>请参考<a href="/help.html" target="_blank">帮助页面</a>了解详细的安装步骤。</p>
+      <p>
+        在ACT中添加此悬浮窗后开始使用。<br />请参考<a
+          href="/help.html"
+          target="_blank">帮助页面</a
+        >了解详细的安装步骤。
+      </p>
     </div>
     <div>
       <label for="file">导入数据包（调试）</label>
