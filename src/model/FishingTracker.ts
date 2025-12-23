@@ -68,6 +68,7 @@ export class FishingTracker extends EventTarget {
     }
 
     get currentBait(): number {
+        this.#subscribe();
         if (this.swimBait)
             return this.swimBait;
         return this.bait;
@@ -100,6 +101,7 @@ export class FishingTracker extends EventTarget {
 
     public setBait(baitId: number) {
         this.bait = baitId;
+        this.updateSub();
     }
 
     public setUsingSwimbait(baitId: number) {

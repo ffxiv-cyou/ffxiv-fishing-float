@@ -123,8 +123,6 @@
         result: result,
         resultName: tracker.db.getItemName(current.resultID ?? 0),
       };
-    } else {
-      session = null;
     }
 
     updateHighlight();
