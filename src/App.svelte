@@ -38,9 +38,18 @@
     }
   }
 
-  let prodMode = overlayToolkit.IsOverlayPluginCEF();
-  let showConfig = $state(false);
+  let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
+  let prodModeCheckInterval: number;
+  if (prodMode === false) {
+    prodModeCheckInterval = setInterval(() => {
+      prodMode = overlayToolkit.IsOverlayPluginCEF();
+      if (prodMode === true) {
+        clearInterval(prodModeCheckInterval);
+      }
+    }, 1000);
+  }
 
+  let showConfig = $state(false);
   function toggleConfig() {
     showConfig = !showConfig;
   }
