@@ -1,5 +1,6 @@
 <script lang="ts">
   import HistoryStats from "../components/HistoryStats.svelte";
+  import TugSound from "../components/Sound.svelte";
   import type { FishingResult } from "../model/FishingSession";
   import type { FishingTracker } from "../model/FishingTracker";
   import type { HistoryStatsItem } from "../model/History";
@@ -13,6 +14,7 @@
     onclick?: () => void;
   } = $props();
 
+  let sound: TugSound;
   let intervalId: number;
   tracker.addEventListener("start", () => {
     showStats = true;
@@ -31,13 +33,16 @@
 
   tracker.addEventListener("tug", (e) => {
     const evt = e as CustomEvent<TugType>;
-    playSound(evt.detail);
+    onTug(evt.detail);
+  });
 
+  function onTug(type: TugType) {
+    sound.play(type);
     if (tracker.CurrentSession) {
       console.log("tug", tracker.CurrentSession);
     }
     updateSession();
-  });
+  }
 
   interface State {
     zoneName: string;
@@ -152,33 +157,6 @@
     );
   });
 
-  let sounds: HTMLAudioElement[] = [];
-  let srcs = $derived.by(() => {
-    const soundConfig = tracker.config.Sound;
-    let sources: string[] = [];
-    if (soundConfig === "intuition") {
-      sources = [
-        "/assets/light.ogg",
-        "/assets/medium.ogg",
-        "/assets/heavy.ogg",
-      ];
-    } else if (soundConfig === "pastry") {
-      sources = [
-        "/assets/pastry_light.ogg",
-        "/assets/pastry_medium.ogg",
-        "/assets/pastry_heavy.ogg",
-      ];
-    }
-    return sources;
-  });
-
-  function playSound(type: TugType) {
-    if (tracker.config.Sound === "") {
-      return;
-    }
-    sounds[type]?.play();
-  }
-
   function divClickHandler(ev: MouseEvent) {
     if (onclick) {
       onclick();
@@ -187,11 +165,7 @@
 </script>
 
 <div class="timer" style={`--now-time:${now};--total-time:${total};`}>
-  <div>
-    {#each srcs as src, index}
-      <audio {src} bind:this={sounds[index]} preload="auto" hidden></audio>
-    {/each}
-  </div>
+  <TugSound bind:this={sound} sound={tracker.config.Sound}></TugSound>
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
