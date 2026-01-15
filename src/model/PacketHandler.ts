@@ -233,7 +233,8 @@ export class PacketHandler {
         const command: FishingActionType = data.param1;
         switch (command) {
             case FishingActionType.Bait:
-                this.tracker.setBait(data.param2);
+                // do not change bait here, may failed
+                // this.tracker.setBait(data.param2);
                 break;
             // Casts
             case FishingActionType.Cast:
