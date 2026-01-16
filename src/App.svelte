@@ -114,6 +114,8 @@
 
     console.log("Game data loaded for version:", version, opcodes);
   }
+
+  document.getElementById("loading-hint")?.remove();
 </script>
 
 <main data-prod={prodMode}>
