@@ -2,6 +2,7 @@ import { encode } from "cbor2";
 import type { API } from "./API";
 import type { FishingSession } from "./FishingSession";
 import { TugType } from "./InnerEnums";
+import { createSubscriber } from "svelte/reactivity";
 
 export interface HistoryStatsItem {
   zone: number;
@@ -21,8 +22,15 @@ export class FishingHistory {
   pendingSessions: FishingSession[] = [];
   histories: HistoryStatsItem[] = [];
 
+  #subscribe;
+  update: (() => void) | null = null;
+
   constructor(api: API) {
     this.api = api;
+
+    this.#subscribe = createSubscriber((update) => {
+      this.update = update;
+    })
 
     var text = localStorage.getItem("fishingHistory");
     if (text) {
@@ -37,7 +45,7 @@ export class FishingHistory {
   public addSession(session: FishingSession): void {
     if (!session)
       return;
-    
+
     this.pendingSessions.push(session);
     this.triggerUpload();
 
@@ -55,10 +63,10 @@ export class FishingHistory {
     }
 
     const biteTime = session.elapsedTimeMs / 1000;
-    var item = this.histories.find((h) => h.zone === session.zone && h.bait === session.baitId && h.fish === session.resultID && h.chum === session.chum);
+    var item = this.histories.find((h) => h.zone === session.Zone && h.bait === session.baitId && h.fish === session.resultID && h.chum === session.chum);
     if (item === undefined) {
       item = {
-        zone: session.zone,
+        zone: session.Zone,
         bait: session.baitId,
         fish: session.resultID,
         chum: session.chum,
@@ -80,9 +88,11 @@ export class FishingHistory {
     }
     console.log("Updated history:", item);
     localStorage.setItem("fishingHistory", JSON.stringify(this.histories));
+    this.update?.();
   }
 
   public getHistory(zone: number, bait: number, chum: boolean): HistoryStatsItem[] {
+    this.#subscribe();
     return this.histories.filter((h) => h.zone === zone && h.bait === bait && h.chum === chum);
   }
   //#endregion

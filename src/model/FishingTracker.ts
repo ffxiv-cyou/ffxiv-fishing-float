@@ -226,7 +226,7 @@ export class FishingTracker extends EventTarget {
 
     public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, isColl: boolean, epoch: number) {
         this.current?.setResult(itemId, quantity, size, isHQ, isColl);
-        console.log(`Caught`, this.current);
+        console.log(`Caught`, this.current, epoch, Date.now());
         this.lastFish = itemId;
         this.history.addSession(this.current!);
         this.dispatchEvent(new Event("end"));
@@ -269,11 +269,11 @@ export class FishingTracker extends EventTarget {
     }
 
     public resetCastState(epoch: number): void {
-        console.log("Resetting cast state.");
         setTimeout(() => {
+            console.log("Resetting cast state.", epoch, Date.now());
             this.current = null;
             this.updateSub();
-        }, 100);
+        }, 300);
     }
 
     private nextIdenticalFish: number = 0;
