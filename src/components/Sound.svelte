@@ -7,7 +7,7 @@
     sound: string;
   } = $props();
 
-  let sounds: HTMLAudioElement[] = [];
+  let sounds: HTMLAudioElement[] = $state([]);
   let srcs = $derived.by(() => {
     let sources: string[] = [];
     if (sound === "intuition") {
