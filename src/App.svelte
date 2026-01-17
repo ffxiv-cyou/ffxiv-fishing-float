@@ -164,6 +164,9 @@
   main[data-prod="true"] .debug-tool {
     display: none;
   }
+  main {
+    position: relative;
+  }
   .setting-btn {
     position: absolute;
     left: 20px;

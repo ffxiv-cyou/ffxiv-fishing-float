@@ -12,7 +12,7 @@
   "dependencies": {
     "cbor2": "^2.0.1",
     "idb": "^8.0.3",
-    "overlay-toolkit": "^0.11.1"
+    "overlay-toolkit": "^0.11.2"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
