@@ -69,34 +69,6 @@
   let session: State | null = $state(null);
   let showStats: boolean = $state(true);
 
-  let highlight: number[] = $state([]);
-  function updateHighlight() {
-    if (session && session.result) {
-      highlight = [session.result.itemId];
-      return;
-    }
-
-    if (session && session.tugType) {
-      let result = [];
-      for (let stat of historyStats) {
-        if (stat.tugType !== session.tugType) {
-          continue;
-        }
-        if (session.duration / 1000 < stat.minBiteTime) {
-          continue;
-        }
-        if (session.duration / 1000 > stat.maxBiteTime) {
-          continue;
-        }
-        result.push(stat.fish);
-      }
-      highlight = result;
-      return;
-    }
-
-    highlight = [];
-  }
-
   let now = $derived.by(() => {
     return session ? session.duration / 1000 : undefined;
   });
@@ -143,25 +115,71 @@
     return type !== null ? colors[type] : "blue";
   }
 
-  let historyStats: HistoryStatsItem[] = $derived.by(() => {
-    const zone = tracker.CurrentZone;
-    const chum = tracker.chum;
-    var bait = tracker.currentBait;
-    if (tracker.CurrentSession) {
-      bait = tracker.CurrentSession.baitId;
-    }
-    return tracker.history.getHistory(
-      zone,
-      bait,
-      chum,
-    );
-  });
-
   function divClickHandler(ev: MouseEvent) {
     if (onclick) {
       onclick();
     }
   }
+  
+  //#region History Stats
+  let highlight: number[] = $state([]);
+  function updateHighlight() {
+    if (session && session.result) {
+      highlight = [session.result.itemId];
+      return;
+    }
+
+    if (session && session.tugType) {
+      let result = [];
+      for (let stat of historyStats) {
+        if (stat.tugType !== session.tugType) {
+          continue;
+        }
+        if (session.duration / 1000 < stat.minBiteTime) {
+          continue;
+        }
+        if (session.duration / 1000 > stat.maxBiteTime) {
+          continue;
+        }
+        result.push(stat.fish);
+      }
+      highlight = result;
+      return;
+    }
+
+    highlight = [];
+  }
+
+  let historyStats: HistoryStatsItem[] = $state([]);
+  $effect(() => {
+    const zone = tracker.CurrentZone;
+    const chum = tracker.chum;
+    let bait = tracker.currentBait;
+    if (tracker.CurrentSession) {
+      bait = tracker.CurrentSession.baitId;
+    }
+
+    let cancelled = false;
+    tracker.history.getHistory(zone, bait, chum).then((stats) => {
+      if (cancelled) {
+        return;
+      }
+      historyStats = stats;
+      updateHighlight();
+    }).catch((err) => {
+      if (!cancelled) {
+        console.error("Failed to load fishing history stats:", err);
+        historyStats = [];
+        updateHighlight();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  });
+  //#endregion
+
 </script>
 
 <div class="timer" style={`--now-time:${now};--total-time:${total};`}>

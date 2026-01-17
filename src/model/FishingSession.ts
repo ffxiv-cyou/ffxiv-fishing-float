@@ -5,8 +5,8 @@ import type { FisherStats } from "./FishingTracker";
 export class FishingSession {
     startTime: number = 0;
     endTime: number = 0;
-    startLocalTime: Date;
-    endLocalTime: Date | null = null;
+    startLocalTime: number;
+    endLocalTime: number | null = null;
 
     baitId: number;
     private zone: number = 0;
@@ -40,7 +40,7 @@ export class FishingSession {
     constructor(epoch: number, baitId: number, stats: FisherStats) {
         this.startTime = epoch;
         this.baitId = baitId;
-        this.startLocalTime = new Date();
+        this.startLocalTime = Date.now();
         this.fisherStats = stats;
 
         this.#subscribe = createSubscriber((update) => {
@@ -50,13 +50,13 @@ export class FishingSession {
 
     public serverCast(epoch: number): void {
         this.startTime = epoch;
-        this.startLocalTime = new Date();
+        this.startLocalTime = Date.now();
     }
 
     public tug(tugType: TugType, epoch: number): void {
         this.endTime = epoch;
         this.tugType = tugType;
-        this.endLocalTime = new Date();
+        this.endLocalTime = Date.now();
 
         this.onUpdate();
     }
@@ -140,7 +140,7 @@ export class FishingSession {
         }
 
         const now = Date.now();
-        return now - this.startLocalTime.getTime();
+        return now - this.startLocalTime;
     }
 
     // 谦逊/雄心的保护时间窗
