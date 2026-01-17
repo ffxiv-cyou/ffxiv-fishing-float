@@ -1,159 +1,40 @@
 <script lang="ts">
-  import { PacketHandler } from "./model/PacketHandler";
-  import { FishingTracker } from "./model/FishingTracker";
-  import Timer from "./pages/Timer.svelte";
-  import overlayToolkit, { type GameVersion } from "overlay-toolkit";
-  import { PcapReplay } from "./model/dev/replay";
-  import Setting from "./pages/Setting.svelte";
-  import Notice from "./pages/Notice.svelte";
-
-  let tracker = $state(new FishingTracker());
-  let logic = new PacketHandler(tracker);
-  let replay = $state(new PcapReplay());
-  let availableVersions: { [key: string]: string } = {};
-
-  // must be after overlayToolkit is imported
-  overlayToolkit.Start();
-
-  tracker
-    .getVersions()
-    .then(onVersionListLoaded)
-    .finally(() => {
-      overlayToolkit.GetGameVersion().then(handleGameVersion);
-    });
-
-  function importPackets(event: Event) {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      const file = input.files[0];
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const arrayBuffer = e.target?.result;
-        if (arrayBuffer && arrayBuffer instanceof ArrayBuffer) {
-          replay.loadPcapPackets(arrayBuffer);
-          replay.play();
-        }
-      };
-      reader.readAsArrayBuffer(file);
-    }
-  }
+  import overlayToolkit from "overlay-toolkit";
+  import Main from "./pages/Main.svelte";
 
   let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
-  let prodModeCheckInterval: number;
-  if (prodMode === false) {
-    prodModeCheckInterval = setInterval(() => {
+  $effect(() => {
+    if (prodMode) return;
+
+    const interval = setInterval(() => {
       prodMode = overlayToolkit.IsOverlayPluginCEF();
-      if (prodMode === true) {
-        clearInterval(prodModeCheckInterval);
-      }
     }, 1000);
-  }
 
-  let showConfig = $state(false);
-  function toggleConfig() {
-    showConfig = !showConfig;
-  }
-
-  let message:
-    | {
-        title: string;
-        content: string;
-        type: "info" | "warning" | "error";
-      }
-    | undefined = $state({
-    title: "悬浮窗插件连接失败",
-    content: "请安装 overlay-toolkit 插件并重启 ACT。",
-    type: "error",
+    return () => clearInterval(interval);
   });
 
-  function handleGameVersion(version: GameVersion) {
-    message = undefined;
-    console.log(version);
-
-    let ver = version.version;
-    if (!ver) {
-      const values = Object.values(availableVersions);
-      if (values.length > 0) {
-        ver = values[0];
-      }
-      console.warn(
-        "Game version not detected, defaulting to last available version.",
-        ver,
-      );
-    }
-
-    try {
-      loadGameData(ver);
-    } catch (e: any) {
-      message = {
-        title: "游戏数据加载失败",
-        content: `当前版本 (${ver}) 数据加载失败。` + e.toString(),
-        type: "error",
-      };
-      console.error("Failed to load game data:", e);
-    }
-  }
-
-  function onVersionListLoaded(versions: { [key: string]: string }) {
-    availableVersions = versions;
-    if (!prodMode) {
-      const versions = Object.values(availableVersions);
-      if (versions.length > 0) {
-        handleGameVersion({ version: versions[0], lang: 5 });
-      }
-    }
-  }
-
-  async function loadGameData(version: string) {
-    await tracker.loadGameData(version);
-
-    let opcodes = tracker.db.getOpcodes();
-    logic.setOpcode(opcodes);
-    logic.init(overlayToolkit);
-    logic.init(replay);
-
-    console.log("Game data loaded for version:", version, opcodes);
-  }
-
+  // Loaded, remove loading hint
   document.getElementById("loading-hint")?.remove();
+
+  let hash = $state(location.hash);
+  window.addEventListener("hashchange", () => {
+    hash = location.hash;
+  });
+
+  let route = $derived.by(() => {
+    const pat = /#\/?(.+)/
+    const match = pat.exec(hash);
+    if (match && match.length > 1) {
+      return `${match[1]}`;
+    }
+    return "main";
+  });
 </script>
 
 <main data-prod={prodMode}>
-  <div class="debug-tool">
-    <div>
-      <h2>钓鱼悬浮窗</h2>
-      <p>
-        在ACT中添加此悬浮窗后开始使用。<br />请参考<a
-          href="/help.html"
-          target="_blank">帮助页面</a
-        >了解详细的安装步骤。
-      </p>
-    </div>
-    <div>
-      <label for="file">导入数据包（调试）</label>
-      <input
-        type="file"
-        id="file"
-        accept=".pcap,.xml"
-        onchange={importPackets}
-        name="pcapFile"
-      />
-    </div>
-  </div>
-  {#if message !== undefined}
-    <Notice
-      title={message.title}
-      content={message.content}
-      type={message.type}
-    />
+  {#if route === "main"}
+    <Main></Main>
   {/if}
-  {#if showConfig || tracker.config.ShowSettingBtn}
-    <button class="setting-btn" onclick={toggleConfig}>⚙</button>
-  {/if}
-  {#if showConfig}
-    <Setting config={tracker.config} />
-  {/if}
-  <Timer {tracker} onclick={toggleConfig} />
 </main>
 
 <style>
@@ -161,23 +42,7 @@
     width: 100%;
     height: 100%;
   }
-  main[data-prod="true"] .debug-tool {
-    display: none;
-  }
   main {
     position: relative;
-  }
-  .setting-btn {
-    position: absolute;
-    left: 20px;
-    border: none;
-    border-radius: 50%;
-    background-color: #ffffff80;
-    cursor: pointer;
-    width: 18px;
-    height: 18px;
-    font-size: 11px;
-    margin: 0;
-    padding: 0;
   }
 </style>

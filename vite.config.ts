@@ -12,10 +12,9 @@ export default defineConfig({
       }
     }
   },
-  // proxy to local server for api calls during development
-  server: {
-    proxy: {
-      '/api': 'http://nas.lan:9090'
+  resolve: {
+    alias: {
+      '@': '/src'
     }
-  }
+  },
 })
