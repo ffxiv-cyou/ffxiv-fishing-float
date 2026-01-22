@@ -1,6 +1,6 @@
 <script lang="ts">
-  import HistoryStats from "../components/HistoryStats.svelte";
   import TugSound from "../components/Sound.svelte";
+  import Timer from "../components/Timer.svelte";
   import type { FishingResult } from "../model/FishingSession";
   import type { FishingTracker } from "../model/FishingTracker";
   import type { HistoryStatsItem } from "../model/History";
@@ -37,7 +37,7 @@
   });
 
   function onTug(type: TugType) {
-    sound.play(type);
+    sound?.play(type);
     if (tracker.CurrentSession) {
       console.log("tug", tracker.CurrentSession);
     }
@@ -67,7 +67,7 @@
   //   resultName: "测试渔获",
   // });
   let session: State | null = $state(null);
-  let showStats: boolean = $state(true);
+  let showStats: boolean = $state(false);
 
   let now = $derived.by(() => {
     return session ? session.duration / 1000 : undefined;
@@ -105,22 +105,6 @@
     updateHighlight();
   }
 
-  function tugType(type: TugType | null): string {
-    const types = ["轻杆", "中杆", "重杆"];
-    return type !== null ? types[type] : "";
-  }
-
-  function tugColor(type: TugType | null): string {
-    const colors = ["green", "red", "brown"];
-    return type !== null ? colors[type] : "blue";
-  }
-
-  function divClickHandler(ev: MouseEvent) {
-    if (onclick) {
-      onclick();
-    }
-  }
-  
   //#region History Stats
   let highlight: number[] = $state([]);
   function updateHighlight() {
@@ -160,144 +144,43 @@
     }
 
     let cancelled = false;
-    tracker.history.getHistory(zone, bait, chum).then((stats) => {
-      if (cancelled) {
-        return;
-      }
-      historyStats = stats;
-      updateHighlight();
-    }).catch((err) => {
-      if (!cancelled) {
-        console.error("Failed to load fishing history stats:", err);
-        historyStats = [];
+    tracker.history
+      .getHistory(zone, bait, chum)
+      .then((stats) => {
+        if (cancelled) {
+          return;
+        }
+        historyStats = stats;
         updateHighlight();
-      }
-    });
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("Failed to load fishing history stats:", err);
+          historyStats = [];
+          updateHighlight();
+        }
+      });
 
     return () => {
       cancelled = true;
     };
   });
   //#endregion
-
 </script>
 
-<div class="timer" style={`--now-time:${now};--total-time:${total};`}>
-  <TugSound bind:this={sound} sound={tracker.config.Sound}></TugSound>
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="info"
-    data-style={tracker.config.Theme}
-    data-tug={session?.tugType}
-    ondblclick={divClickHandler}
-  >
-    {#if session}
-      <div class="left xiv-text blue">
-        <span class="zone" data-show={tracker.config.ShowZone}
-          >{session.zoneName}</span
-        >
-        <span class="bait" data-show={tracker.config.ShowBait}
-          >{session.baitName}</span
-        >
-      </div>
-      <div class="middle xiv-text green" data-show={tracker.config.ShowCatch}>
-        {#if session.result}
-          <span class="result-name">{session.resultName}</span>
-          <span class="result-count">{session.result.quantity}</span>
-        {/if}
-      </div>
-      <div class={["right", "xiv-text", tugColor(session.tugType)]}>
-        {#if session.tugType !== null}
-          <span class="tug">{tugType(session.tugType)}</span>
-        {/if}
-        <span class="time">{now!.toFixed(1)}s</span>
-      </div>
-    {/if}
-  </div>
-  {#if showStats && tracker.config.ShowHistory}
-    <HistoryStats
-      db={tracker.db}
-      stats={historyStats}
-      {now}
-      {highlight}
-      {total}
-    />
-  {/if}
-</div>
-
-<style>
-  .timer {
-    width: 100%;
-    position: relative;
-    user-select: none;
-  }
-
-  .timer [data-show="false"] {
-    display: none;
-  }
-
-  .info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    justify-content: space-between;
-  }
-  .zone,
-  .bait,
-  .result-name,
-  .result-count {
-    font-size: 0.8em;
-  }
-  .tug,
-  .time {
-    font-size: 0.9em;
-    font-weight: bold;
-  }
-  .result-count::before {
-    content: "x";
-  }
-
-  .left {
-    text-align: left;
-    & span + span {
-      margin-left: 5px;
-    }
-  }
-
-  .middle {
-    text-align: center;
-  }
-
-  .right {
-    text-align: right;
-  }
-
-  .info[data-style="minimal"] {
-    font-size: 12px;
-    background: #eeeeee80;
-    border-radius: 8px;
-    margin: 0 10px;
-    width: calc((100% - 20px) * var(--now-time) / var(--total-time));
-
-    &[data-tug="0"] {
-      background: #69aff380;
-    }
-    &[data-tug="1"] {
-      background: #cc99ff80;
-    }
-    &[data-tug="2"] {
-      background: #f1c64a80;
-    }
-    color: #0078d7;
-
-    .left,
-    .middle {
-      display: none;
-    }
-    .right {
-      text-align: center;
-      flex: 1;
-    }
-  }
-</style>
+{#if showStats}
+  <Timer
+    db={tracker.db}
+    config={tracker.config}
+    {onclick}
+    zone={tracker.CurrentZone}
+    bait={tracker.currentBait}
+    tug={session?.tugType ?? null}
+    result={session?.result ?? null}
+    {now}
+    {total}
+    {highlight}
+    {historyStats}
+  ></Timer>
+{/if}
+<TugSound bind:this={sound} sound={tracker.config.Sound} />
