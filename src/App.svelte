@@ -1,6 +1,7 @@
 <script lang="ts">
   import overlayToolkit from "overlay-toolkit";
   import Main from "./pages/Main.svelte";
+  import SettingPage from "./pages/SettingPage.svelte";
 
   let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
   $effect(() => {
@@ -22,7 +23,7 @@
   });
 
   let route = $derived.by(() => {
-    const pat = /#\/?(.+)/
+    const pat = /#\/?(.+)/;
     const match = pat.exec(hash);
     if (match && match.length > 1) {
       return `${match[1]}`;
@@ -33,7 +34,10 @@
 
 <main data-prod={prodMode}>
   {#if route === "main"}
-    <Main></Main>
+    <Main />
+  {/if}
+  {#if route === "setting"}
+    <SettingPage />
   {/if}
 </main>
 
