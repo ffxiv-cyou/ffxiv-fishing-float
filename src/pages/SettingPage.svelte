@@ -10,6 +10,8 @@
   let db = new GameDatabase();
   db.load("2025.12.23.0000.0000");
 
+  let showPreview: boolean = $state(false);
+
   const demoData = [
     {
       zone: 426,
@@ -108,7 +110,7 @@
 </script>
 
 <main>
-  <h1>设置页面</h1>
+  <h1>设置</h1>
   <div class="setting-page">
     <h2>样式设置</h2>
     <div class="setting-item">
@@ -210,7 +212,9 @@
         bind:checked={config.UploadHistory}
       />
       <label for="upload-history">启用上报</label>
-      <span class="setting-desc">启用后，历史统计数据会被匿名上传以帮助其他捕鱼人</span>
+      <span class="setting-desc"
+        >启用后，历史统计数据会被匿名上传以帮助其他捕鱼人</span
+      >
     </div>
     <div class="setting-item">
       <span class="setting-name">换算撒饵时间</span>
@@ -284,33 +288,47 @@
     <div class="setting-item">
       <span class="setting-name">测试</span>
       <div class="test-sound-buttons">
-        <button on:click={() => testSound(0)}>轻杆</button>
-        <button on:click={() => testSound(1)}>中杆</button>
-        <button on:click={() => testSound(2)}>重杆</button>
+        <button onclick={() => testSound(0)}>轻杆</button>
+        <button onclick={() => testSound(1)}>中杆</button>
+        <button onclick={() => testSound(2)}>重杆</button>
       </div>
       <Sound bind:this={sound} sound={config.Sound} />
     </div>
   </div>
-  <div class="preview">
-    <span class="hint">效果预览</span>
-    <Timer
-      {config}
-      {db}
-      zone={426}
-      bait={29717}
-      tug={null}
-      result={null}
-      now={12.3}
-      lureRest={14.5}
-      lureType={1}
-      total={30.0}
-      highlight={[]}
-      historyStats={demoData}
-    />
+  <div class="preview" data-show={showPreview}>
+    <button
+      class="hint"
+      aria-label="效果预览"
+      onclick={() => (showPreview = !showPreview)}>效果预览</button
+    >
+    {#if showPreview}
+      <Timer
+        {config}
+        {db}
+        zone={426}
+        bait={29717}
+        tug={null}
+        result={null}
+        now={12.3}
+        lureRest={14.5}
+        lureType={1}
+        total={30.0}
+        highlight={[]}
+        historyStats={demoData}
+      />
+    {/if}
   </div>
 </main>
 
 <style>
+  h1 {
+    margin: 0;
+    font-size: 2em;
+  }
+  h2 {
+    margin: 0;
+    font-size: 1.2em;
+  }
   .setting-page {
     padding: 10px;
     max-width: 600px;
@@ -370,7 +388,7 @@
 
   .preview {
     position: fixed;
-    left: 20px;
+    right: 20px;
     bottom: 20px;
 
     background-color: #000000c0;
@@ -380,12 +398,16 @@
     overflow: hidden;
   }
 
-  .preview .hint {
-    position: absolute;
-    top: 4px;
-    left: 10px;
-    color: #ffffff80;
-    font-size: 0.8em;
+  .preview[data-show="false"] {
+    height: 40px;
+    width: 90px;
+    padding: 0;
   }
 
+  .preview .hint {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 0.8em;
+  }
 </style>

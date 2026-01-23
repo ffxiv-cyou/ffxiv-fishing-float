@@ -36,8 +36,8 @@ export class FishingTracker extends EventTarget {
         })
 
         this.api = new API("https://api.ffxiv.cyou/fisher");
-        this.history = new FishingHistory(this.api);
         this.config = new Config();
+        this.history = new FishingHistory(this.api, this.config);
         this.db = new GameDatabase();
     }
 

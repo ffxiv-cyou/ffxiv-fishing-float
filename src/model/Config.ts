@@ -4,21 +4,31 @@ export class Config {
   #subscribe;
   update: (() => void) | null = null;
 
-  theme: string;
-  showHistory: boolean;
+  theme: string = 'default';
+  showHistory: boolean = true;
   uploadHistory: boolean = true;
-  showZone: boolean;
-  showBait: boolean;
-  showCatch: boolean;
-  showSettingBtn: boolean;
+  showZone: boolean = true;
+  showBait: boolean = true;
+  showCatch: boolean = true;
+  showSettingBtn: boolean = true;
   mergeChumTime: boolean = true;
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
 
   minimalColors: string[] = [];
-  
+
   sound: 'intuition' | 'pastry' | '' = 'intuition';
 
   constructor() {
+    this.#subscribe = createSubscriber((update) => {
+      this.update = update;
+    });
+    
+    window.addEventListener("message", this.messageHandler.bind(this), false);
+
+    this.load();
+  }
+
+  load() {
     const obj = JSON.parse(localStorage.getItem('config') || '{}');
     this.theme = obj.theme || 'default';
     this.showHistory = obj.showHistory !== undefined ? obj.showHistory : true;
@@ -28,10 +38,18 @@ export class Config {
     this.showSettingBtn = obj.showSettingBtn !== undefined ? obj.showSettingBtn : true;
     this.sound = obj.sound || (obj.enableSound ? 'intuition' : '');
     this.minimalColors = obj.minimalColors || ['#eeeeee', '#69aff3', '#cc99ff', '#f1c64a'];
+  }
 
-    this.#subscribe = createSubscriber((update) => {
-      this.update = update;
-    });
+  messageHandler(event: MessageEvent) {
+     if (event.data.type === "config-changed") {
+        this.load();
+        this.update?.();
+      }
+  }
+
+  notifyOtherWindows() {
+    const target = window.opener;
+    target?.postMessage({ type: "config-changed" }, "*");
   }
 
   save() {
@@ -39,6 +57,7 @@ export class Config {
     if (this.update) {
       this.update();
     }
+    this.notifyOtherWindows();
   }
 
   get Theme() {
@@ -130,7 +149,7 @@ export class Config {
     this.minimalColors[3] = value;
     this.save();
   }
-  
+
   get MergeChumTime() {
     this.#subscribe();
     return this.mergeChumTime;

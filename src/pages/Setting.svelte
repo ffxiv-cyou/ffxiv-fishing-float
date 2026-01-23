@@ -6,6 +6,10 @@
   }: {
     config: Config;
   } = $props();
+
+  function openSettingPage() {
+    window.open("/#/setting", "Settings", "width=800,height=600");
+  }
 </script>
 
 <div class="setting-page">
@@ -63,6 +67,7 @@
     <label class="xiv-text" for="show-stats">历史:</label>
     <input type="checkbox" id="show-stats" bind:checked={config.ShowHistory} />
     <label class="xiv-text" for="show-stats">显示</label>
+    <button class="xiv-text blue" aria-label="open window" onclick={openSettingPage}>更多设置</button>
   </div>
   <h2 class="xiv-text brown">音频设置</h2>
   <div class="setting-item">
@@ -82,7 +87,7 @@
       id="sound-pastry"
       bind:group={config.Sound}
     />
-    <label class="xiv-text" for="sound-pastry">鱼糕</label>
+    <label class="xiv-text" for="sound-pastry">鱼捞</label>
     <input
       type="radio"
       name="sound"

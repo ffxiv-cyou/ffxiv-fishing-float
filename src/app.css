@@ -60,3 +60,15 @@ h1 {
 .xiv-text.red {
   --shadow-color: var(--color-xiv-red);
 }
+
+a.xiv-text:hover {
+  text-decoration: underline;
+  color: white;
+}
+button.xiv-text {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+}
