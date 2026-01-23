@@ -9,7 +9,7 @@ export class FishingSession {
     endLocalTime: number | null = null;
 
     baitId: number;
-    private zone: number = 0;
+    private zone: number = 0; // PlaceName actually
 
     chum: boolean = false; // 撒饵
     fishEyes: boolean = false; // 鱼眼

@@ -4,6 +4,7 @@ import type { FishingSession } from "./FishingSession";
 import { TugType } from "./InnerEnums";
 import { createSubscriber } from "svelte/reactivity";
 import { openDB, type IDBPDatabase, type DBSchema } from 'idb';
+import type { Config } from "./Config";
 
 export interface HistoryStatsItem {
   zone: number;
@@ -22,12 +23,14 @@ export class FishingHistory {
   api: API;
   pendingSessions: FishingSession[] = [];
   histories: HistoryStorageBackend;
+  cfg: Config;
 
   #subscribe;
   update: (() => void) | null = null;
 
-  constructor(api: API) {
+  constructor(api: API, config: Config) {
     this.api = api;
+    this.cfg = config;
 
     this.#subscribe = createSubscriber((update) => {
       this.update = update;
@@ -100,7 +103,7 @@ export class FishingHistory {
   //#region Data Upload
   nextUpload: number | null = null;
   private triggerUpload(): void {
-    if (this.pendingSessions.length === 0 || this.nextUpload !== null) {
+    if (!this.cfg.UploadHistory || this.pendingSessions.length === 0 || this.nextUpload !== null) {
       return;
     }
 

@@ -18,6 +18,8 @@
     result,
     historyStats,
     onclick,
+    lureRest,
+    lureType,
   }: {
     db: GameDatabase;
     config: Config;
@@ -30,6 +32,8 @@
     highlight?: number[]; // highlighted fish IDs
     historyStats: HistoryStatsItem[];
     onclick?: () => void;
+    lureRest?: number;
+    lureType?: number;
   } = $props();
 
   let zoneName = $derived(db.getZoneName(zone));
@@ -49,9 +53,20 @@
     const colors = ["green", "red", "brown"];
     return type !== null ? colors[type] : "blue";
   }
+
+  let style = $derived.by(() => {
+    let str = "";
+    str += `--now-time:${now};`;
+    str += `--total-time:${total};`;
+    str += `--idle-color:${config.IdleColor}80;`;
+    str += `--tug-light-color:${config.TugLightColor}80;`;
+    str += `--tug-medium-color:${config.TugMediumColor}80;`;
+    str += `--tug-heavy-color:${config.TugHeavyColor}80;`;
+    return str;
+  });
 </script>
 
-<div class="timer" style={`--now-time:${now};--total-time:${total};`}>
+<div class="timer" {style} data-lure-window={config.lureEmptyWindowHandling}>
   <!-- svelte-ignore a11y_click_events_have_key_events -->
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
@@ -78,7 +93,16 @@
     </div>
   </div>
   {#if config.ShowHistory}
-    <HistoryStats {db} stats={historyStats} {now} {highlight} {total} />
+    <HistoryStats
+      {db}
+      stats={historyStats}
+      {now}
+      {highlight}
+      {total}
+      lureTime={lureRest}
+      {lureType}
+      tweakByLure={config.LureEmptyWindowHandling === "tweak"}
+    />
   {/if}
 </div>
 
@@ -131,19 +155,19 @@
 
   .info[data-style="minimal"] {
     font-size: 12px;
-    background: #eeeeee80;
+    background: var(--idle-color);
     border-radius: 8px;
-    margin: 0 10px;
+    margin: 3px 10px;
     width: calc((100% - 20px) * var(--now-time) / var(--total-time));
 
     &[data-tug="0"] {
-      background: #69aff380;
+      background: var(--tug-light-color);
     }
     &[data-tug="1"] {
-      background: #cc99ff80;
+      background: var(--tug-medium-color);
     }
     &[data-tug="2"] {
-      background: #f1c64a80;
+      background: var(--tug-heavy-color);
     }
     color: #0078d7;
 

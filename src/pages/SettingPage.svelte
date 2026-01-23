@@ -12,7 +12,7 @@
 
   const demoData = [
     {
-      zone: 105,
+      zone: 426,
       fish: 4932,
       bait: 2588,
       minBiteTime: 8.9,
@@ -22,7 +22,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 8.4,
       maxBiteTime: 17.4,
       fish: 4942,
@@ -32,7 +32,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 11.4,
       maxBiteTime: 18.2,
       fish: 4945,
@@ -42,7 +42,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 10.3,
       maxBiteTime: 16.7,
       fish: 4951,
@@ -52,7 +52,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 12.2,
       maxBiteTime: 19.3,
       fish: 4963,
@@ -62,7 +62,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 16.5,
       maxBiteTime: 20.9,
       fish: 4968,
@@ -72,7 +72,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 14,
       maxBiteTime: 21.6,
       fish: 4973,
@@ -82,7 +82,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 15.3,
       maxBiteTime: 25.6,
       fish: 4975,
@@ -92,7 +92,7 @@
       count: 10,
     },
     {
-      zone: 105,
+      zone: 426,
       minBiteTime: 19.3,
       maxBiteTime: 31.4,
       fish: 7923,
@@ -292,14 +292,17 @@
     </div>
   </div>
   <div class="preview">
+    <span class="hint">效果预览</span>
     <Timer
       {config}
       {db}
-      zone={105}
+      zone={426}
       bait={29717}
       tug={null}
       result={null}
       now={12.3}
+      lureRest={14.5}
+      lureType={1}
       total={30.0}
       highlight={[]}
       historyStats={demoData}
@@ -376,4 +379,13 @@
     padding: 20px;
     overflow: hidden;
   }
+
+  .preview .hint {
+    position: absolute;
+    top: 4px;
+    left: 10px;
+    color: #ffffff80;
+    font-size: 0.8em;
+  }
+
 </style>

@@ -53,19 +53,6 @@
     resultName?: string;
   }
 
-  // let session: State | null = $state({
-  //   zoneName: "薰衣草苗圃",
-  //   baitName: "万能拟饵",
-  //   duration: 12345,
-  //   tugType: TugType.Light,
-  //   result: {
-  //     itemId: 1234,
-  //     quantity: 1,
-  //     isHQ: false,
-  //     size: 234,
-  //   },
-  //   resultName: "测试渔获",
-  // });
   let session: State | null = $state(null);
   let showStats: boolean = $state(false);
 
@@ -134,6 +121,46 @@
     highlight = [];
   }
 
+  /**
+   * 合并撒饵/非撒饵的记录
+   * @param stats
+   * @param chum
+   */
+  function mergeStats(stats: HistoryStatsItem[], chum: boolean) {
+    let merged = [];
+    for (let stat of stats) {
+      let minBiteTime = stat.minBiteTime;
+      let maxBiteTime = stat.maxBiteTime;
+
+      if (chum !== stat.chum) {
+        if (stat.chum) {
+          // was chum, now not chum
+          minBiteTime = (minBiteTime - 1) * 2;
+          maxBiteTime = (maxBiteTime - 1) * 2;
+        } else {
+          // was not chum, now chum
+          minBiteTime = minBiteTime / 2 + 1;
+          maxBiteTime = maxBiteTime / 2 + 1;
+        }
+      }
+
+      let existing = merged.find(
+        (s) =>
+          s.fish === stat.fish &&
+          s.bait === stat.bait &&
+          s.tugType === stat.tugType,
+      );
+      if (existing) {
+        existing.count += stat.count;
+        existing.minBiteTime = Math.min(existing.minBiteTime, minBiteTime);
+        existing.maxBiteTime = Math.max(existing.maxBiteTime, maxBiteTime);
+      } else {
+        merged.push({ ...stat });
+      }
+    }
+    return merged;
+  }
+
   let historyStats: HistoryStatsItem[] = $state([]);
   $effect(() => {
     const zone = tracker.CurrentZone;
@@ -145,12 +172,13 @@
 
     let cancelled = false;
     tracker.history
-      .getHistory(zone, bait, chum)
+      .getHistory(zone, bait, tracker.config.MergeChumTime ? undefined : chum)
       .then((stats) => {
         if (cancelled) {
           return;
         }
-        historyStats = stats;
+
+        historyStats = mergeStats(stats, chum);
         updateHighlight();
       })
       .catch((err) => {

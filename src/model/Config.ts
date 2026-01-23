@@ -14,7 +14,7 @@ export class Config {
   mergeChumTime: boolean = true;
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
 
-  minimalColors: string[] = ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+  minimalColors: string[] = [];
   
   sound: 'intuition' | 'pastry' | '' = 'intuition';
 
@@ -27,7 +27,7 @@ export class Config {
     this.showCatch = obj.showCatch !== undefined ? obj.showCatch : true;
     this.showSettingBtn = obj.showSettingBtn !== undefined ? obj.showSettingBtn : true;
     this.sound = obj.sound || (obj.enableSound ? 'intuition' : '');
-    this.minimalColors = obj.minimalColors || ['#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF'];
+    this.minimalColors = obj.minimalColors || ['#eeeeee', '#69aff3', '#cc99ff', '#f1c64a'];
 
     this.#subscribe = createSubscriber((update) => {
       this.update = update;

@@ -9,17 +9,21 @@
     highlight,
     now,
     total,
+    lureTime,
+    lureType,
+    tweakByLure = false,
   }: {
     db: GameDatabase;
     stats: HistoryStatsItem[];
     highlight?: number[];
     now?: number;
     total: number;
+    lureTime?: number;
+    lureType?: number;
+    tweakByLure?: boolean;
   } = $props();
 
-  let nowTime = $derived(now ?? 0); // in seconds
   let totalTime = $derived(total); // in seconds
-
   let rulerSteps = $derived.by(() => {
     let step = Math.ceil(totalTime / 10);
     let steps = [];
@@ -52,6 +56,21 @@
     }
     return classes;
   }
+
+  let filtedStats = $derived.by(() => {
+    if (lureTime === undefined || !tweakByLure)
+      return stats;
+
+    let mod = [];
+    for (let item of stats) {
+      mod.push({
+        ...item,
+        minBiteTime: Math.max(item.minBiteTime, lureTime!),
+        maxBiteTime: Math.max(item.maxBiteTime, lureTime!),
+      });
+    }
+    return mod;
+  });
 </script>
 
 <div class="history-stats">
@@ -62,7 +81,7 @@
       {/each}
     </div>
   {/if}
-  {#each stats as stat}
+  {#each filtedStats as stat}
     <div
       style={getItemStyle(stat)}
       class={["stats-item", ...getItemClass(stat)]}
@@ -75,6 +94,7 @@
     </div>
   {/each}
   <div class="stats-cursor"></div>
+  <div class="lure-cursor" style={`--pos: ${lureTime};`}></div>
 </div>
 
 <style>
@@ -179,5 +199,19 @@
     width: 1px;
     background-color: #ffffff66;
     box-shadow: #000000cc 0 0 1px;
+  }
+
+  .lure-cursor {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: calc(var(--pos) / var(--total-time) * 100%);
+    top: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(45deg, #99999933, #99999933 5px, #66666633 5px, #66666633 10px);
+  }
+
+  :global([data-lure-window="label"]) .lure-cursor {
+    display: block;
   }
 </style>
