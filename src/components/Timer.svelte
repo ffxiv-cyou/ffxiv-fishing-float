@@ -12,6 +12,7 @@
     now,
     total,
     highlight,
+    downplay,
     zone,
     bait,
     tug,
@@ -19,7 +20,6 @@
     historyStats,
     onclick,
     lureRest,
-    lureType,
   }: {
     db: GameDatabase;
     config: Config;
@@ -30,10 +30,10 @@
     tug: TugType | null;
     result: FishingResult | null;
     highlight?: number[]; // highlighted fish IDs
+    downplay?: number[]; // downplayed fish IDs
     historyStats: HistoryStatsItem[];
     onclick?: () => void;
     lureRest?: number;
-    lureType?: number;
   } = $props();
 
   let zoneName = $derived(db.getZoneName(zone));
@@ -62,6 +62,9 @@
     str += `--tug-light-color:${config.TugLightColor}80;`;
     str += `--tug-medium-color:${config.TugMediumColor}80;`;
     str += `--tug-heavy-color:${config.TugHeavyColor}80;`;
+    str += `--history-light-color:${config.HistoryLightColor};`;
+    str += `--history-medium-color:${config.HistoryMediumColor};`;
+    str += `--history-heavy-color:${config.HistoryHeavyColor};`;
     return str;
   });
 </script>
@@ -96,11 +99,10 @@
     <HistoryStats
       {db}
       stats={historyStats}
-      {now}
       {highlight}
+      {downplay}
       {total}
       lureTime={lureRest}
-      {lureType}
       tweakByLure={config.LureEmptyWindowHandling === "tweak"}
     />
   {/if}
@@ -169,7 +171,6 @@
     &[data-tug="2"] {
       background: var(--tug-heavy-color);
     }
-    color: #0078d7;
 
     .left,
     .middle {

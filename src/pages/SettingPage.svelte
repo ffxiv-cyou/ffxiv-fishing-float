@@ -196,15 +196,6 @@
     </div>
     <h2>历史统计</h2>
     <div class="setting-item">
-      <span class="setting-name">历史统计</span>
-      <input
-        type="checkbox"
-        id="show-stats"
-        bind:checked={config.ShowHistory}
-      />
-      <label for="show-stats">显示</label>
-    </div>
-    <div class="setting-item">
       <span class="setting-name">上报数据</span>
       <input
         type="checkbox"
@@ -217,46 +208,78 @@
       >
     </div>
     <div class="setting-item">
-      <span class="setting-name">换算撒饵时间</span>
+      <span class="setting-name">历史统计</span>
       <input
         type="checkbox"
-        id="merge-chum-time"
-        bind:checked={config.MergeChumTime}
+        id="show-stats"
+        bind:checked={config.ShowHistory}
       />
-      <label for="merge-chum-time">启用</label>
-      <span class="setting-desc">启用后，会合并显示撒饵和非撒饵时间</span>
+      <label for="show-stats">显示</label>
     </div>
-    <div class="setting-item">
-      <span class="setting-name">雄心/谦逊空窗期</span>
-      <input
-        type="radio"
-        name="empty-window"
-        value="off"
-        id="empty-window-off"
-        bind:group={config.LureEmptyWindowHandling}
-      />
-      <label for="empty-window-off">关闭</label>
-      <input
-        type="radio"
-        name="empty-window"
-        value="label"
-        id="empty-window-label"
-        bind:group={config.LureEmptyWindowHandling}
-      />
-      <label for="empty-window-label">显示标记</label>
-      <input
-        type="radio"
-        name="empty-window"
-        value="tweak"
-        id="empty-window-tweak"
-        bind:group={config.LureEmptyWindowHandling}
-      />
-      <label for="empty-window-tweak">调整历史显示</label>
-      <span class="setting-desc">
-        "显示标记"会在历史记录上标记什么时间点后才会有鱼上钩<br />
-        "调整历史显示"则会临时调整历史杆时的显示
-      </span>
-    </div>
+    {#if config.ShowHistory}
+      <div class="setting-item">
+        <span class="setting-name">颜色</span>
+        <label for="color-history-light">轻杆</label>
+        <input
+          type="color"
+          id="color-history-light"
+          bind:value={config.HistoryLightColor}
+        />
+        <label for="color-history-medium">中杆</label>
+        <input
+          type="color"
+          id="color-history-medium"
+          bind:value={config.HistoryMediumColor}
+        />
+        <label for="color-history-heavy">重杆</label>
+        <input
+          type="color"
+          id="color-history-heavy"
+          bind:value={config.HistoryHeavyColor}
+        />
+      </div>
+      <div class="setting-item">
+        <span class="setting-name">换算撒饵时间</span>
+        <input
+          type="checkbox"
+          id="merge-chum-time"
+          bind:checked={config.MergeChumTime}
+        />
+        <label for="merge-chum-time">启用</label>
+        <span class="setting-desc">启用后，会合并显示撒饵和非撒饵时间</span>
+      </div>
+      <div class="setting-item">
+        <span class="setting-name">雄心/谦逊空窗期</span>
+        <input
+          type="radio"
+          name="empty-window"
+          value="off"
+          id="empty-window-off"
+          bind:group={config.LureEmptyWindowHandling}
+        />
+        <label for="empty-window-off">关闭</label>
+        <input
+          type="radio"
+          name="empty-window"
+          value="label"
+          id="empty-window-label"
+          bind:group={config.LureEmptyWindowHandling}
+        />
+        <label for="empty-window-label">显示标记</label>
+        <input
+          type="radio"
+          name="empty-window"
+          value="tweak"
+          id="empty-window-tweak"
+          bind:group={config.LureEmptyWindowHandling}
+        />
+        <label for="empty-window-tweak">调整历史显示</label>
+        <span class="setting-desc">
+          "显示标记"会在历史记录上标记什么时间点后才会有鱼上钩<br />
+          "调整历史显示"则会临时调整历史杆时的显示
+        </span>
+      </div>
+    {/if}
     <h2>咬钩提醒</h2>
     <div class="setting-item">
       <span class="setting-name">播放音效</span>
@@ -294,13 +317,17 @@
       </div>
       <Sound bind:this={sound} sound={config.Sound} />
     </div>
+    <h2>其他</h2>
+    <div class="setting-item">
+      <span class="setting-name">效果预览</span>
+      <button onclick={() => (showPreview = !showPreview)}>切换预览</button>
+    </div>
+    <div class="setting-item">
+      <span class="setting-name">重置</span>
+      <button onclick={() => config.reset()}>重置设置</button>
+    </div>
   </div>
   <div class="preview" data-show={showPreview}>
-    <button
-      class="hint"
-      aria-label="效果预览"
-      onclick={() => (showPreview = !showPreview)}>效果预览</button
-    >
     {#if showPreview}
       <Timer
         {config}
@@ -311,9 +338,9 @@
         result={null}
         now={12.3}
         lureRest={14.5}
-        lureType={1}
         total={30.0}
         highlight={[]}
+        downplay={[4942, 4963]}
         historyStats={demoData}
       />
     {/if}
@@ -393,21 +420,12 @@
 
     background-color: #000000c0;
     width: 400px;
-    height: 240px;
-    padding: 20px;
+    height: 260px;
+    padding: 10px 20px;
     overflow: hidden;
   }
 
   .preview[data-show="false"] {
-    height: 40px;
-    width: 90px;
-    padding: 0;
-  }
-
-  .preview .hint {
-    position: absolute;
-    top: 5px;
-    right: 10px;
-    font-size: 0.8em;
+    display: none;
   }
 </style>

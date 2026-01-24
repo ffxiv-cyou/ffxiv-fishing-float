@@ -273,7 +273,7 @@ export class FishingTracker extends EventTarget {
             console.log("Resetting cast state.", epoch, Date.now());
             this.current = null;
             this.updateSub();
-        }, 300);
+        }, 200);
     }
 
     private nextIdenticalFish: number = 0;

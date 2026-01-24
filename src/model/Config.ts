@@ -15,6 +15,7 @@ export class Config {
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
 
   minimalColors: string[] = [];
+  historyColors: string[] = [];
 
   sound: 'intuition' | 'pastry' | '' = 'intuition';
 
@@ -30,6 +31,10 @@ export class Config {
 
   load() {
     const obj = JSON.parse(localStorage.getItem('config') || '{}');
+    this.parseConfig(obj);
+  }
+
+  parseConfig(obj: any) {
     this.theme = obj.theme || 'default';
     this.showHistory = obj.showHistory !== undefined ? obj.showHistory : true;
     this.showZone = obj.showZone !== undefined ? obj.showZone : true;
@@ -38,6 +43,15 @@ export class Config {
     this.showSettingBtn = obj.showSettingBtn !== undefined ? obj.showSettingBtn : true;
     this.sound = obj.sound || (obj.enableSound ? 'intuition' : '');
     this.minimalColors = obj.minimalColors || ['#eeeeee', '#69aff3', '#cc99ff', '#f1c64a'];
+    this.mergeChumTime = obj.mergeChumTime !== undefined ? obj.mergeChumTime : true;
+    this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'off';
+    this.uploadHistory = obj.uploadHistory !== undefined ? obj.uploadHistory : true;
+    this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a'];
+  }
+
+  reset() {
+    this.parseConfig({});
+    this.save();
   }
 
   messageHandler(event: MessageEvent) {
@@ -174,6 +188,31 @@ export class Config {
   }
   set UploadHistory(value: boolean) {
     this.uploadHistory = value;
+    this.save();
+  }
+
+  get HistoryLightColor() {
+    this.#subscribe();
+    return this.historyColors[0];
+  }
+  set HistoryLightColor(value: string) {
+    this.historyColors[0] = value;
+    this.save();
+  }
+  get HistoryMediumColor() {
+    this.#subscribe();
+    return this.historyColors[1];
+  }
+  set HistoryMediumColor(value: string) {
+    this.historyColors[1] = value;
+    this.save();
+  }
+  get HistoryHeavyColor() {
+    this.#subscribe();
+    return this.historyColors[2];
+  }
+  set HistoryHeavyColor(value: string) {
+    this.historyColors[2] = value;
     this.save();
   }
 }

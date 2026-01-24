@@ -19,19 +19,19 @@ export class FishingSession {
     prizeCatch: boolean = false; // 大鱼知识
     patients: number = 0; // 耐心层数
 
-    lureType: LureType | null = null; // 雄心/谦逊
-    lureTarget: boolean = false; // 是否为目标
-    lureStacks: number = 0; // 层数
-    lureAt: number = 0; // 最后一次的时间
+    private lureType: LureType | null = null; // 雄心/谦逊
+    private lureTarget: boolean = false; // 是否为目标
+    private lureStacks: number = 0; // 层数
+    private lureAt: number = 0; // 最后一次的时间
 
     private identicalFish: number = 0; // 专一垂钓
     private slapFish: number = 0; // 拍击水面
     private hiddenFish: number = 0; // 隐藏鱼ID
 
-    tugType: TugType | null = null;
-    hookType: HookType | null = null;
+    private tugType: TugType | null = null;
+    private hookType: HookType | null = null;
 
-    result: FishingResult | FishingFail | null = null;
+    private result: FishingResult | FishingFail | null = null;
     fisherStats: FisherStats; 
 
     #subscribe;
@@ -132,7 +132,7 @@ export class FishingSession {
     }
 
     // 当前经过的时间
-    get elapsedTimeMs(): number {
+    get ElapsedTimeMs(): number {
         this.#subscribe();
 
         if (this.endTime) {
@@ -144,7 +144,7 @@ export class FishingSession {
     }
 
     // 谦逊/雄心的保护时间窗
-    get lureRestMs(): number {
+    get LureRestMs(): number {
         this.#subscribe();
 
         if (this.lureAt === 0)
@@ -153,7 +153,7 @@ export class FishingSession {
         return this.lureAt - this.startTime + 3500;
     }
 
-    get failReason(): FailReason | null {
+    get FailReason(): FailReason | null {
         this.#subscribe();
 
         if (this.result && 'reason' in this.result)
@@ -161,7 +161,7 @@ export class FishingSession {
         return null;
     }
 
-    get fishResult(): FishingResult | null {
+    get FishResult(): FishingResult | null {
         this.#subscribe();
 
         if (this.result && 'itemId' in this.result)
@@ -169,12 +169,42 @@ export class FishingSession {
         return null;
     }
 
-    get resultID(): number | undefined {
+    get ResultID(): number | undefined {
         this.#subscribe();
 
-        if (this.fishResult)
-            return this.fishResult.itemId;
+        if (this.FishResult)
+            return this.FishResult.itemId;
         return undefined;
+    }
+
+    get TugType(): TugType | null {
+        this.#subscribe();
+        return this.tugType;
+    }
+
+    get HookType(): HookType | null {
+        this.#subscribe();
+        return this.hookType;
+    }
+
+    get LureType(): LureType | null {
+        this.#subscribe();
+        return this.lureType;
+    }
+
+    get LureStacks(): number {
+        this.#subscribe();
+        return this.lureStacks;
+    }
+
+    get LureTarget(): boolean {
+        this.#subscribe();
+        return this.lureTarget;
+    }
+
+    get LureAt(): number {
+        this.#subscribe();
+        return this.lureAt;
     }
 
     private get flags(): FishingFlags {
@@ -194,9 +224,9 @@ export class FishingSession {
         if (this.hookType !== null) {
             flags |= ((this.hookType + 1) << 11);
         }
-        if (this.failReason === FailReason.GatheringNotEnough) {
+        if (this.FailReason === FailReason.GatheringNotEnough) {
             flags |= FishingFlags.StateGatheringNotEnough;
-        } else if (this.fishResult) {
+        } else if (this.FishResult) {
             flags |= FishingFlags.StateFishGet;
         }
         if (this.lureType !== null) {
@@ -219,12 +249,12 @@ export class FishingSession {
         data.push(this.endTime - this.startTime);
         data.push(this.flags);
 
-        if (this.fishResult) {
+        if (this.FishResult) {
             let result = [];
-            result.push(this.fishResult.itemId);
-            result.push(this.fishResult.size);
-            result.push(this.fishResult.isHQ);
-            result.push(this.fishResult.quantity);
+            result.push(this.FishResult.itemId);
+            result.push(this.FishResult.size);
+            result.push(this.FishResult.isHQ);
+            result.push(this.FishResult.quantity);
             data.push(result);
         } else {
             data.push(null);

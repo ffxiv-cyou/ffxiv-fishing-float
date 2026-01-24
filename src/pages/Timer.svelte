@@ -1,10 +1,9 @@
 <script lang="ts">
   import TugSound from "../components/Sound.svelte";
   import Timer from "../components/Timer.svelte";
-  import type { FishingResult } from "../model/FishingSession";
   import type { FishingTracker } from "../model/FishingTracker";
   import type { HistoryStatsItem } from "../model/History";
-  import { TugType } from "../model/InnerEnums";
+  import { LureType, TugType } from "../model/InnerEnums";
 
   let {
     tracker,
@@ -20,7 +19,6 @@
     showStats = true;
   });
   tracker.addEventListener("stop", () => {
-    session = null;
     showStats = false;
   });
   tracker.addEventListener("begin", () => {
@@ -44,21 +42,12 @@
     updateSession();
   }
 
-  interface State {
-    zoneName: string;
-    baitName: string;
-    duration: number;
-    tugType: TugType | null;
-    result: FishingResult | null;
-    resultName?: string;
-  }
-
-  let session: State | null = $state(null);
+  let current = $derived(tracker.CurrentSession);
+  // let session: State | null = $state(null);
   let showStats: boolean = $state(false);
+  let result = $derived(current?.FishResult);
 
-  let now = $derived.by(() => {
-    return session ? session.duration / 1000 : undefined;
-  });
+  let now: number | undefined = $state(undefined); // in seconds
 
   let total = $derived.by(() => {
     let maxTime = 0;
@@ -71,55 +60,54 @@
   }); // in seconds
 
   function updateSession() {
-    const current = tracker.CurrentSession;
     if (current) {
-      const result = current.result
-        ? "itemId" in current.result
-          ? (current.result as FishingResult)
-          : null
-        : null;
-
-      session = {
-        duration: current.elapsedTimeMs,
-        zoneName: tracker.db.getZoneName(current.Zone),
-        baitName: tracker.db.getItemName(current.baitId),
-        tugType: current.tugType,
-        result: result,
-        resultName: tracker.db.getItemName(current.resultID ?? 0),
-      };
+      now = current.ElapsedTimeMs / 1000;
+    } else {
+      now = undefined;
     }
-
-    updateHighlight();
   }
 
   //#region History Stats
-  let highlight: number[] = $state([]);
-  function updateHighlight() {
-    if (session && session.result) {
-      highlight = [session.result.itemId];
-      return;
+  let lureEmptyWindow = $derived(current ? current.LureRestMs / 1000 : undefined); // in seconds
+  let highlight: number[] = $derived.by(() => {
+    if (result) {
+      return [result.itemId];
     }
 
-    if (session && session.tugType) {
+    if (current?.TugType !== undefined) {
       let result = [];
       for (let stat of historyStats) {
-        if (stat.tugType !== session.tugType) {
+        if (stat.tugType !== current.TugType) {
           continue;
         }
-        if (session.duration / 1000 < stat.minBiteTime) {
+        if (current.ElapsedTimeMs / 1000 < stat.minBiteTime) {
           continue;
         }
-        if (session.duration / 1000 > stat.maxBiteTime) {
+        if (current.ElapsedTimeMs / 1000 > stat.maxBiteTime) {
           continue;
         }
         result.push(stat.fish);
       }
-      highlight = result;
-      return;
+      return result;
     }
+    return [];
+  });
 
-    highlight = [];
-  }
+  let downplay: number[] = $derived.by(() => {
+    let result = [];
+    if (current?.SlapFish)
+      result.push(current.SlapFish);
+      
+    if (current?.LureTarget) {
+      let flag = current.LureType === LureType.Modest;
+      for (let stat of historyStats) {
+        if (stat.tugType === TugType.Light && flag)
+          continue;
+        result.push(stat.fish);
+      }
+    }
+    return result;
+  });
 
   /**
    * 合并撒饵/非撒饵的记录
@@ -179,13 +167,11 @@
         }
 
         historyStats = mergeStats(stats, chum);
-        updateHighlight();
       })
       .catch((err) => {
         if (!cancelled) {
           console.error("Failed to load fishing history stats:", err);
           historyStats = [];
-          updateHighlight();
         }
       });
 
@@ -203,8 +189,10 @@
     {onclick}
     zone={tracker.CurrentZone}
     bait={tracker.currentBait}
-    tug={session?.tugType ?? null}
-    result={session?.result ?? null}
+    tug={current?.TugType ?? null}
+    result={result ?? null}
+    lureRest={lureEmptyWindow}
+    downplay={downplay}
     {now}
     {total}
     {highlight}

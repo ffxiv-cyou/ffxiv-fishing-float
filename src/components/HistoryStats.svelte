@@ -7,19 +7,17 @@
     db,
     stats,
     highlight,
-    now,
+    downplay,
     total,
     lureTime,
-    lureType,
     tweakByLure = false,
   }: {
     db: GameDatabase;
     stats: HistoryStatsItem[];
     highlight?: number[];
-    now?: number;
+    downplay?: number[];
     total: number;
     lureTime?: number;
-    lureType?: number;
     tweakByLure?: boolean;
   } = $props();
 
@@ -54,6 +52,9 @@
     if (highlight && highlight.includes(item.fish)) {
       classes.push("active");
     }
+    if (downplay && downplay.includes(item.fish)) {
+      classes.push("downplay");
+    }
     return classes;
   }
 
@@ -74,13 +75,11 @@
 </script>
 
 <div class="history-stats">
-  {#if stats.length > 0}
-    <div class="ruler">
-      {#each rulerSteps as i}
-        <span class="ruler-step" style={`--pos: ${i};`}>{i}</span>
-      {/each}
-    </div>
-  {/if}
+  <div class="ruler">
+    {#each rulerSteps as i}
+      <span class="ruler-step" style={`--pos: ${i};`}>{i}</span>
+    {/each}
+  </div>
   {#each filtedStats as stat}
     <div
       style={getItemStyle(stat)}
@@ -144,16 +143,19 @@
     &.active {
       box-shadow: 0 0 10px var(--color);
     }
+    &.downplay {
+      filter: brightness(0.8) grayscale(0.5);
+    }
   }
 
   .tug-light {
-    --color: #4caf50;
+    --color: var(--history-light-color);
   }
   .tug-medium {
-    --color: #f44336;
+    --color: var(--history-medium-color);
   }
   .tug-heavy {
-    --color: #ccaf0a;
+    --color: var(--history-heavy-color);
   }
 
   .stats-item::before,
@@ -205,7 +207,7 @@
     display: none;
     position: absolute;
     left: 0;
-    right: calc(var(--pos) / var(--total-time) * 100%);
+    right: calc(100% - var(--pos) / var(--total-time) * 100%);
     top: 0;
     bottom: 0;
     background: repeating-linear-gradient(45deg, #99999933, #99999933 5px, #66666633 5px, #66666633 10px);

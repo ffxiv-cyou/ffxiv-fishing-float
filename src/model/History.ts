@@ -72,21 +72,21 @@ export class FishingHistory {
 
   //#region Local History Management
   private updateHistory(session: FishingSession): void {
-    if (session.resultID === undefined) {
+    if (session.ResultID === undefined) {
       return;
     }
 
-    if (session.elapsedTimeMs < session.lureRestMs) {
+    if (session.ElapsedTimeMs < session.LureRestMs) {
       return;
     }
 
-    const biteTime = session.elapsedTimeMs / 1000;
+    const biteTime = session.ElapsedTimeMs / 1000;
     const item = {
       zone: session.Zone,
       bait: session.baitId,
-      fish: session.resultID,
+      fish: session.ResultID,
       chum: session.chum,
-      tugType: session.tugType || TugType.Light,
+      tugType: session.TugType || TugType.Light,
       biteTime: biteTime,
     }
     this.histories.add(item);

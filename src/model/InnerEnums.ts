@@ -19,6 +19,6 @@ export enum FailReason {
 };
 
 export enum LureType { 
-    Ambitious,
-    Modest
+    Ambitious, // 雄心
+    Modest // 谦逊
 };
