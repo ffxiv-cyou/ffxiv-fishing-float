@@ -183,6 +183,7 @@
     {onclick}
     {zone}
     {bait}
+    {chum}
     tug={current?.TugType ?? null}
     result={result ?? null}
     lureRest={lureEmptyWindow}

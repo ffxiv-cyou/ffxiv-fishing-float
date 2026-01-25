@@ -334,6 +334,7 @@
         {db}
         zone={426}
         bait={29717}
+        chum={false}
         tug={null}
         result={null}
         now={12.3}

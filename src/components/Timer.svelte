@@ -15,6 +15,7 @@
     downplay,
     zone,
     bait,
+    chum,
     tug,
     result,
     historyStats,
@@ -25,6 +26,7 @@
     config: Config;
     zone: number;
     bait: number;
+    chum: boolean;
     now?: number;
     total: number;
     tug: TugType | null;
@@ -80,7 +82,7 @@
   >
     <div class="left xiv-text blue">
       <span class="zone" data-show={config.ShowZone}>{zoneName}</span>
-      <span class="bait" data-show={config.ShowBait}>{baitName}</span>
+      <span class="bait" data-show={config.ShowBait}>{baitName}{#if chum}*{/if}</span>
     </div>
     <div class="middle xiv-text green" data-show={config.ShowCatch}>
       {#if result}
