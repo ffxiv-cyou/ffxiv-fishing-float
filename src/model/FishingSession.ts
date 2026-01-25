@@ -72,6 +72,10 @@ export class FishingSession {
     }
 
     public setFail(reason: FailReason): void {
+        // 由于提示词有点重复，如果是没有提，那么改为中断
+        if (this.hookType === null) {
+            reason = FailReason.Interrputed;
+        }
         this.result = { reason };
         this.onUpdate();
     }
