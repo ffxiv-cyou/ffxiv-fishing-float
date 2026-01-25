@@ -44,10 +44,11 @@
   }
 
   let current = $derived(tracker.CurrentSession);
+  let completeCurrent = $derived(current?.Complete ? current : undefined); // 过滤掉手动中断的记录
   let result = $derived(current?.FishResult);
-  let bait = $derived(current?.baitId ?? tracker.CurrentBait);
+  let bait = $derived(completeCurrent?.baitId ?? tracker.CurrentBait);
+  let chum = $derived(completeCurrent?.chum ?? tracker.chum);
   let zone = $derived(current?.Zone ?? tracker.CurrentZone);
-  let chum = $derived(current?.chum ?? tracker.chum);
 
   let now: number | undefined = $state(undefined); // in seconds
   let total = $derived.by(() => {
