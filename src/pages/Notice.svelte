@@ -31,15 +31,28 @@
   function onClickClose() {
     message = undefined;
   }
+
+  function onClickHelp(evt: MouseEvent) {
+    window.open("/help.html", "_blank");
+    evt.preventDefault();
+  }
+
+  function onClickReload(evt: MouseEvent) {
+    location.reload();
+    evt.preventDefault();
+  }
 </script>
 
 {#if message}
   <div class="notice">
     <h2 class={["xiv-text", msgColor]}>{message.title}</h2>
-    <button class={["xiv-text", "close", msgColor]} onclick={onClickClose}>&times;</button>
+    <button class={["xiv-text", "close", msgColor]} onclick={onClickClose}
+      >&times;</button
+    >
     <p class="xiv-text blue">{message.content}</p>
     <p class="xiv-text blue">
-      <a href="/help.html" target="_blank">点击这里获取帮助</a>
+      <a href="/help.html" target="_blank" onclick={onClickHelp}>查看帮助</a>
+      <a href="/" onclick={onClickReload}>重载页面</a>
     </p>
   </div>
 {/if}

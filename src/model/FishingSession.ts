@@ -32,7 +32,7 @@ export class FishingSession {
     private hookType: HookType | null = null;
 
     private result: FishingResult | FishingFail | null = null;
-    fisherStats: FisherStats; 
+    fisherStats: FisherStats;
 
     #subscribe;
     update: (() => void) | null = null;
@@ -76,11 +76,27 @@ export class FishingSession {
         this.onUpdate();
     }
 
+    /**
+     * 手动设置钓鱼结束
+     * @param epoch 
+     */
+    public setFinish(epoch: number): void {
+        // 防止调用顺序导致结果被覆盖
+        if (this.result === null) {
+            this.result = { reason: FailReason.Interrputed };
+            if (this.endTime === 0) {
+                this.endTime = epoch;
+                this.endLocalTime = Date.now();
+            }
+        }
+        this.onUpdate();
+    }
+
     set HiddenFish(fishID: number) {
         this.hiddenFish = fishID;
         this.onUpdate();
     }
-    
+
     get HiddenFish(): number {
         return this.hiddenFish;
     }
@@ -159,6 +175,14 @@ export class FishingSession {
         if (this.result && 'reason' in this.result)
             return this.result.reason;
         return null;
+    }
+
+    /**
+     * 是否完整钓鱼数据（非中断）
+     */
+    get Complete(): boolean {
+        this.#subscribe();
+        return this.FailReason !== FailReason.Interrputed;
     }
 
     get FishResult(): FishingResult | null {

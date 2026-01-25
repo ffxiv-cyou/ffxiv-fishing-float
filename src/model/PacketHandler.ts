@@ -242,7 +242,7 @@ export class PacketHandler {
                 break;
             case FishingActionType.Mooch:
             case FishingActionType.MoochII:
-                this.tracker.cast(epoch, this.tracker.lastCaught);
+                this.tracker.cast(epoch, this.tracker.LastCaught);
                 break;
             // Hooks
             case FishingActionType.Hook:

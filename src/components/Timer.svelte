@@ -176,6 +176,7 @@
     .middle {
       display: none;
     }
+
     .right {
       text-align: center;
       flex: 1;

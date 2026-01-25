@@ -67,7 +67,12 @@
     <label class="xiv-text" for="show-stats">历史:</label>
     <input type="checkbox" id="show-stats" bind:checked={config.ShowHistory} />
     <label class="xiv-text" for="show-stats">显示</label>
-    <button class="xiv-text blue" aria-label="open window" onclick={openSettingPage}>更多设置</button>
+    <button
+      class="xiv-text blue"
+      aria-label="open window"
+      style="margin-left: 5px;"
+      onclick={openSettingPage}>更多设置 &raquo;</button
+    >
   </div>
   <h2 class="xiv-text brown">音频设置</h2>
   <div class="setting-item">

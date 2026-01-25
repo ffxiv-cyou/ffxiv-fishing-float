@@ -43,7 +43,7 @@ export class FishingHistory {
       const dbBackend = new HistoryIndexedDBBackend();
       dbBackend.init().then(() => {
         this.histories = dbBackend;
-        
+
         // Migrate old data from localStorage to IndexedDB
         const oldData = localBackend.getAll();
         if (oldData.length > 0) {
@@ -61,7 +61,7 @@ export class FishingHistory {
   }
 
   public addSession(session: FishingSession): void {
-    if (!session)
+    if (!session || !session.Complete)
       return;
 
     this.pendingSessions.push(session);
@@ -76,7 +76,8 @@ export class FishingHistory {
       return;
     }
 
-    if (session.ElapsedTimeMs < session.LureRestMs) {
+    // 空窗期刚结束的时候的时间是不准确的，忽略掉
+    if (session.ElapsedTimeMs < session.LureRestMs + 300) {
       return;
     }
 
@@ -253,6 +254,25 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
     });
   }
 
+  /**
+   * Convert boolean to number for IndexedDB key
+   * @param value 
+   * @returns 
+   */
+  static boolToNum(value: boolean): number {
+    // Ok 我知道这很奇怪。为什么不是1和0呢？因为写错了。
+    return value ? 0 : 1;
+  }
+
+  /**
+   * Convert number to boolean for IndexedDB key
+   * @param value 
+   * @returns 
+   */
+  static numToBool(value: number): boolean {
+    return value === 0;
+  }
+
   async add(session: HistoryItem): Promise<void> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
@@ -261,7 +281,7 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
 
     const tx = this.db.transaction("history", "readwrite");
     const store = tx.objectStore("history");
-    const old = await store.get([session.zone, session.bait, session.fish, session.chum ? 0 : 1]);
+    const old = await store.get([session.zone, session.bait, session.fish, HistoryIndexedDBBackend.boolToNum(session.chum)]);
     if (old) {
       if (session.biteTime < old.minBiteTime) {
         old.minBiteTime = session.biteTime;
@@ -277,7 +297,7 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
         bait: session.bait,
         fish: session.fish,
         chum: session.chum,
-        chumNum: session.chum ? 0 : 1,
+        chumNum: HistoryIndexedDBBackend.boolToNum(session.chum),
         tugType: session.tugType || TugType.Light,
         minBiteTime: session.biteTime,
         maxBiteTime: session.biteTime,
@@ -296,7 +316,7 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const tx = this.db.transaction("history", "readwrite");
     const store = tx.objectStore("history");
     for (const session of sessions) {
-      const old = await store.get([session.zone, session.bait, session.fish, session.chum ? 0 : 1]);
+      const old = await store.get([session.zone, session.bait, session.fish, HistoryIndexedDBBackend.boolToNum(session.chum)]);
       if (old) {
         if (session.minBiteTime < old.minBiteTime) {
           old.minBiteTime = session.minBiteTime;
@@ -310,7 +330,7 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
       else {
         await store.add({
           ...session,
-          chumNum: session.chum ? 0 : 1
+          chumNum: HistoryIndexedDBBackend.boolToNum(session.chum)
         });
       }
     }
@@ -329,7 +349,11 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const tx = this.db.transaction("history", "readonly");
     const store = tx.objectStore("history");
     const useIndex = chum === undefined ? store.index("byZoneBait") : store.index("byZoneBaitChum");
-    const key = chum === undefined ? [zone, bait] : [zone, bait, chum ? 0 : 1];
-    return await useIndex.getAll(IDBKeyRange.only(key));
+    const key = chum === undefined ? [zone, bait] : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const result = await useIndex.getAll(IDBKeyRange.only(key));
+    for (const item of result) {
+      item.chum = HistoryIndexedDBBackend.numToBool(item.chumNum);
+    }
+    return result;
   }
 }

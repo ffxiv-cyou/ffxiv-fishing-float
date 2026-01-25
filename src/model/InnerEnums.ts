@@ -14,8 +14,9 @@ export enum TugType {
 };
 
 export enum FailReason {
-    None = 0,
-    GatheringNotEnough = 1,
+    None = 0, // 脱钩类
+    GatheringNotEnough = 1, // 采集力不足
+    Interrputed = 2, // 中断（提前提杆等）
 };
 
 export enum LureType { 

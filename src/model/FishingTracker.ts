@@ -19,7 +19,7 @@ export class FishingTracker extends EventTarget {
     private currentZone: number = 0;
 
     private current: FishingSession | null = null;
-    
+
     history: FishingHistory;
     api: API;
     config: Config;
@@ -50,7 +50,7 @@ export class FishingTracker extends EventTarget {
         return this.db.load(version);
     }
 
-    public getVersions(): Promise<{[key: string]: string}> {
+    public getVersions(): Promise<{ [key: string]: string }> {
         return this.db.getVersions();
     }
 
@@ -64,14 +64,15 @@ export class FishingTracker extends EventTarget {
         return this.currentZone;
     }
 
-    get currentBait(): number {
+    get CurrentBait(): number {
         this.#subscribe();
         if (this.swimBait)
             return this.swimBait;
         return this.bait;
     }
 
-    get lastCaught(): number {
+    get LastCaught(): number {
+        this.#subscribe();
         return this.lastFish;
     }
 
@@ -124,6 +125,10 @@ export class FishingTracker extends EventTarget {
         }
         if (!isFishing) {
             this.stopRecording();
+
+            // 站起来之后状态需要清空
+            this.current = null;
+            this.updateSub();
         }
     }
 
@@ -241,9 +246,9 @@ export class FishingTracker extends EventTarget {
     }
 
     public cast(epoch: number, bait: number = 0): void {
-        console.log("Casting with bait:", bait, this.currentBait);
+        console.log("Casting with bait:", bait, this.CurrentBait);
         if (bait === 0)
-            bait = this.currentBait;
+            bait = this.CurrentBait;
 
         this.current = new FishingSession(epoch, bait, this.fisherStats);
         this.current.Zone = this.currentZone;
@@ -269,11 +274,8 @@ export class FishingTracker extends EventTarget {
     }
 
     public resetCastState(epoch: number): void {
-        setTimeout(() => {
-            console.log("Resetting cast state.", epoch, Date.now());
-            this.current = null;
-            this.updateSub();
-        }, 200);
+        console.log("Cast finished at epoch:", epoch);
+        this.current?.setFinish(epoch);
     }
 
     private nextIdenticalFish: number = 0;

@@ -15,6 +15,7 @@
 
   let sound: TugSound;
   let intervalId: number;
+  let showStats: boolean = $state(false);
   tracker.addEventListener("start", () => {
     showStats = true;
   });
@@ -22,7 +23,7 @@
     showStats = false;
   });
   tracker.addEventListener("begin", () => {
-    intervalId = setInterval(updateSession, 100);
+    intervalId = setInterval(updateSession, 25);
   });
   tracker.addEventListener("end", () => {
     clearInterval(intervalId);
@@ -43,12 +44,12 @@
   }
 
   let current = $derived(tracker.CurrentSession);
-  // let session: State | null = $state(null);
-  let showStats: boolean = $state(false);
   let result = $derived(current?.FishResult);
+  let bait = $derived(current?.baitId ?? tracker.CurrentBait);
+  let zone = $derived(current?.Zone ?? tracker.CurrentZone);
+  let chum = $derived(current?.chum ?? tracker.chum);
 
   let now: number | undefined = $state(undefined); // in seconds
-
   let total = $derived.by(() => {
     let maxTime = 0;
     for (let item of historyStats) {
@@ -68,7 +69,9 @@
   }
 
   //#region History Stats
-  let lureEmptyWindow = $derived(current ? current.LureRestMs / 1000 : undefined); // in seconds
+  let lureEmptyWindow = $derived(
+    current ? current.LureRestMs / 1000 : undefined,
+  ); // in seconds
   let highlight: number[] = $derived.by(() => {
     if (result) {
       return [result.itemId];
@@ -95,14 +98,12 @@
 
   let downplay: number[] = $derived.by(() => {
     let result = [];
-    if (current?.SlapFish)
-      result.push(current.SlapFish);
-      
+    if (current?.SlapFish) result.push(current.SlapFish);
+
     if (current?.LureTarget) {
       let flag = current.LureType === LureType.Modest;
       for (let stat of historyStats) {
-        if (stat.tugType === TugType.Light && flag)
-          continue;
+        if ((stat.tugType === TugType.Light) === flag) continue;
         result.push(stat.fish);
       }
     }
@@ -143,7 +144,7 @@
         existing.minBiteTime = Math.min(existing.minBiteTime, minBiteTime);
         existing.maxBiteTime = Math.max(existing.maxBiteTime, maxBiteTime);
       } else {
-        merged.push({ ...stat });
+        merged.push({ ...stat, minBiteTime, maxBiteTime });
       }
     }
     return merged;
@@ -151,22 +152,15 @@
 
   let historyStats: HistoryStatsItem[] = $state([]);
   $effect(() => {
-    const zone = tracker.CurrentZone;
-    const chum = tracker.chum;
-    let bait = tracker.currentBait;
-    if (tracker.CurrentSession) {
-      bait = tracker.CurrentSession.baitId;
-    }
-
     let cancelled = false;
+    const chumState = chum;
     tracker.history
-      .getHistory(zone, bait, tracker.config.MergeChumTime ? undefined : chum)
+      .getHistory(zone, bait, tracker.config.MergeChumTime ? undefined : chumState)
       .then((stats) => {
         if (cancelled) {
           return;
         }
-
-        historyStats = mergeStats(stats, chum);
+        historyStats = mergeStats(stats, chumState);
       })
       .catch((err) => {
         if (!cancelled) {
@@ -187,12 +181,12 @@
     db={tracker.db}
     config={tracker.config}
     {onclick}
-    zone={tracker.CurrentZone}
-    bait={tracker.currentBait}
+    {zone}
+    {bait}
     tug={current?.TugType ?? null}
     result={result ?? null}
     lureRest={lureEmptyWindow}
-    downplay={downplay}
+    {downplay}
     {now}
     {total}
     {highlight}

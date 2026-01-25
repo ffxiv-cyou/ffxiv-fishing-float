@@ -84,7 +84,9 @@
       .catch((e) => {
         message = {
           title: "游戏数据加载失败",
-          content: `当前版本 (${version}) 数据加载失败。` + e.toString(),
+          content:
+            `当前版本 (${version}) 数据加载失败，可能是还没更新。` +
+            e.toString(),
           type: "error",
         };
         console.error("Failed to load game data:", e);
@@ -102,24 +104,27 @@
       >了解详细的安装步骤。
     </p>
   </div>
-  <div>
-    <label for="file">导入数据包（调试）</label>
-    <select
-      id="version-select"
-      onchange={(e) => loadGameData((e.target as HTMLSelectElement).value)}
-    >
-      {#each Object.entries(availableVersions) as [name, ver]}
-        <option value={ver}>{name}</option>
-      {/each}
-    </select>
-    <input
-      type="file"
-      id="file"
-      accept=".pcap,.xml"
-      onchange={importPackets}
-      name="pcapFile"
-    />
-  </div>
+  <details>
+    <summary>调试工具</summary>
+    <div>
+      <label for="file">导入数据包: </label>
+      <select
+        id="version-select"
+        onchange={(e) => loadGameData((e.target as HTMLSelectElement).value)}
+      >
+        {#each Object.entries(availableVersions) as [name, ver]}
+          <option value={ver}>{name}</option>
+        {/each}
+      </select>
+      <input
+        type="file"
+        id="file"
+        accept=".pcap,.xml"
+        onchange={importPackets}
+        name="pcapFile"
+      />
+    </div>
+  </details>
 </div>
 <Notice {message} />
 {#if showConfig || tracker.config.ShowSettingBtn}
