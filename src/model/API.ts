@@ -14,6 +14,7 @@ export class API {
         ...headers,
       },
       body: data as any,
+      credentials: "include",
     });
     this.handleResponseHeader(resp.headers);
     return resp;
