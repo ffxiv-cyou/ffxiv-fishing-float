@@ -15,6 +15,7 @@ export class API {
         ...headers,
       },
       body: bodyStream,
+      credentials: "include",
     });
     this.handleResponseHeader(resp.headers);
     return resp;
