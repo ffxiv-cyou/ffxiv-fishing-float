@@ -7,14 +7,13 @@ export class API {
 
   public async uploadFishingData(data: Uint8Array): Promise<Response> {
     const headers = this.generateHeader(data);
-    const bodyStream = this.toReadableStream(data);
     const resp = await fetch(`${this.basePath}/upload`, {
       method: "POST",
       headers: {
         "Content-Type": "application/cbor",
         ...headers,
       },
-      body: bodyStream,
+      body: data as any,
     });
     this.handleResponseHeader(resp.headers);
     return resp;
@@ -36,14 +35,5 @@ export class API {
       // todo: timestamp calibration
       console.log(`Time difference between server and client: ${timeDiff} ms`);
     }
-  }
-
-  private toReadableStream(data: Uint8Array): ReadableStream<Uint8Array> {
-    return new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(data);
-        controller.close();
-      },
-    });
   }
 }
