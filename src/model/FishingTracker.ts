@@ -9,6 +9,7 @@ import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 
 export class FishingTracker extends EventTarget {
     private bait: number = 0;
+    private wksBait: number = 0;
     private swimBait: number = 0;
     private lastFish: number = 0;
     private fisherStats: FisherStats = {
@@ -68,6 +69,8 @@ export class FishingTracker extends EventTarget {
         this.#subscribe();
         if (this.swimBait)
             return this.swimBait;
+        if (this.wksBait)
+            return this.wksBait;
         return this.bait;
     }
 
@@ -105,6 +108,13 @@ export class FishingTracker extends EventTarget {
     public setUsingSwimbait(baitId: number) {
         this.swimBait = baitId;
         console.log(`Bait Override ID set to: ${baitId}`);
+        this.updateSub();
+    }
+
+    public setWksBait(baitId: number) {
+        this.wksBait = baitId;
+        console.log(`WKS Bait ID set to: ${baitId}`);
+        this.updateSub();
     }
 
     public changeJob(classJobId: number) {
@@ -142,6 +152,15 @@ export class FishingTracker extends EventTarget {
         // console.log(`Buff removed: ${buffId}`);
     }
     public setBuffList(buffList: BuffState[], epoch: number) {
+        // 加密状态下有个偏移量，在这里临时处理掉
+        if (buffList.length > 2) {
+            var last = buffList[buffList.length - 1];
+            var secondLast = buffList[buffList.length - 2];
+            if (last.buffId !== 0 && last.stacks === 0 && last.buffId === secondLast.buffId) {
+                buffList.forEach(buff => buff.buffId -= last.buffId);
+            }
+        }
+
         // 过滤掉不相关的buff
         var filterBuff = Object.keys(BuffID);
         const filterBuffList = buffList.filter(b => filterBuff.includes(BuffID[b.buffId]));

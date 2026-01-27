@@ -192,6 +192,9 @@ export class PacketHandler {
             case ActorControlType.FishingTotalFishCaught:
                 this.tracker.setFishingCaughtTotal(actorControlSelf.param1, epoch);
                 break;
+            case ActorControlType.WKSFishingBait:
+                this.tracker.setWksBait(actorControlSelf.param1);
+                break;
             case ActorControlType.FishingSwimbait:
                 this.handleSwimbaitMsg(actorControlSelf, epoch);
                 break;
@@ -387,6 +390,9 @@ export class PacketHandler {
                 break;
             case 5569: // 现在感觉能钓到小型猎物！！！
                 this.tracker.setLure(LureType.Modest, epoch);
+                break;
+            case 10769: // 请通过“当前任务”窗口选择“汇报”，完成任务。
+                this.tracker.setWksBait(0);
                 break;
         }
         console.log("Log Message Packet:", id);

@@ -24,6 +24,11 @@ export enum ActorControlType {
     FishingSwimbait = 0x152,
 
     LogMsg = 0x205,
+
+    /**
+     * param1 = fishing bait item id
+     */
+    WKSFishingBait = 3501,
 };
 
 export enum ClassJobID {
