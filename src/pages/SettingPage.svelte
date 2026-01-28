@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { FishingHistory, HistoryIndexedDBBackend } from "@/model/History";
   import Sound from "../components/Sound.svelte";
   import Timer from "../components/Timer.svelte";
   import { Config } from "../model/Config";
@@ -9,6 +10,8 @@
   let sound: Sound;
   let db = new GameDatabase();
   db.load("2025.12.23.0000.0000");
+  let history = new HistoryIndexedDBBackend();
+  history.init();
 
   let showPreview: boolean = $state(false);
 
@@ -325,6 +328,7 @@
     <div class="setting-item">
       <span class="setting-name">重置</span>
       <button onclick={() => config.reset()}>重置设置</button>
+      <button onclick={() => { if (confirm("确定要重置历史记录吗？")) history.clear(); }}>重置历史记录</button>
     </div>
   </div>
   <div class="preview" data-show={showPreview}>

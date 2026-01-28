@@ -232,7 +232,7 @@ interface HistoryDBSchema extends DBSchema {
 /**
  * 基于 IndexedDB 的钓鱼记录存储
  */
-class HistoryIndexedDBBackend implements HistoryStorageBackend {
+export class HistoryIndexedDBBackend implements HistoryStorageBackend {
   db: IDBPDatabase<HistoryDBSchema> | null = null;
 
   constructor() {
@@ -355,5 +355,16 @@ class HistoryIndexedDBBackend implements HistoryStorageBackend {
       item.chum = HistoryIndexedDBBackend.numToBool(item.chumNum);
     }
     return result;
+  }
+
+  public async clear(): Promise<void> {
+    if (!this.db) {
+      console.error("IndexedDB is not initialized");
+      return;
+    }
+    const tx = this.db.transaction("history", "readwrite");
+    const store = tx.objectStore("history");
+    await store.clear();
+    await tx.done;
   }
 }
