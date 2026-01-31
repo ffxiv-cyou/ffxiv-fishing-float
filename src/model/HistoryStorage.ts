@@ -34,12 +34,17 @@ export interface HistoryStatsItem {
  */
 export class FishingStorage {
   histories: HistoryStorageBackend;
+  inited: boolean = false;
 
   #subscribe;
   update: (() => void) | null = null;
 
-  constructor() {
+  get Inited(): boolean {
+    this.#subscribe();
+    return this.inited;
+  }
 
+  constructor() {
     this.#subscribe = createSubscriber((update) => {
       this.update = update;
     })
@@ -51,6 +56,7 @@ export class FishingStorage {
       const dbBackend = new HistoryIndexedDBBackend();
       dbBackend.init().then(() => {
         this.histories = dbBackend;
+        this.inited = true;
 
         // Migrate old data from localStorage to IndexedDB
         const oldData = localBackend.getAll();
@@ -62,6 +68,8 @@ export class FishingStorage {
             console.error("Failed to migrate fishing history to IndexedDB:", err);
           });
         }
+
+        this.update?.();
       });
     } catch (e) {
       console.warn("IndexedDB is not available, using localStorage for fishing history.");
@@ -103,6 +111,11 @@ export class FishingStorage {
     return this.histories.getBait(zone);
   }
 
+  public async listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+    this.#subscribe();
+    return this.histories.listHistory(zone, bait, chum, limit, offset);
+  }
+
   public clear(): void {
     this.histories.clear();
     this.update?.();
@@ -126,6 +139,8 @@ export interface HistoryStorageBackend {
    * @param chum 
    */
   getHistory(zone: number, bait: number, chum?: boolean): Promise<HistoryStatsItem[]>;
+
+  listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
   
   /**
    * 获取所有鱼饵ID
@@ -186,6 +201,11 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
 
   getAll(): HistoryStatsItem[] {
     return this.histories;
+  }
+
+  listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+    // Not supported in localStorage backend
+    return Promise.resolve([]);
   }
 
   async getBait(zone: number): Promise<number[]> {

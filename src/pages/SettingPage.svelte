@@ -351,14 +351,6 @@
 </main>
 
 <style>
-  h1 {
-    margin: 0;
-    font-size: 2em;
-  }
-  h2 {
-    margin: 0;
-    font-size: 1.2em;
-  }
   .setting-page {
     padding: 10px;
     max-width: 600px;

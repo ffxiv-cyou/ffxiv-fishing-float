@@ -1,7 +1,7 @@
 <script lang="ts">
   import overlayToolkit from "overlay-toolkit";
-  import Main from "./pages/Main.svelte";
-  import SettingPage from "./pages/SettingPage.svelte";
+  import { routes } from "@/router/index";
+  import Page from "./components/page.svelte";
 
   let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
   $effect(() => {
@@ -17,28 +17,24 @@
   // Loaded, remove loading hint
   document.getElementById("loading-hint")?.remove();
 
-  let hash = $state(location.hash);
-  window.addEventListener("hashchange", () => {
-    hash = location.hash;
-  });
-
-  let route = $derived.by(() => {
-    const pat = /#\/?(.+)/;
-    const match = pat.exec(hash);
-    if (match && match.length > 1) {
-      return `${match[1]}`;
-    }
-    return "main";
-  });
+  let url = $state("");
+  function handleHashChange() {
+    url = location.hash.replace("#", "");
+    if (url === "") url = "/";
+  }
+  addEventListener("hashchange", handleHashChange);
+  handleHashChange();
 </script>
 
 <main data-prod={prodMode}>
-  {#if route === "main"}
-    <Main />
-  {/if}
-  {#if route === "setting"}
-    <SettingPage />
-  {/if}
+  {#each routes as route}
+    <Page
+      path={route.path}
+      title={route.name}
+      {url}
+      component={route.component}
+    />
+  {/each}
 </main>
 
 <style>

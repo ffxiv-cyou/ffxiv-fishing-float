@@ -296,6 +296,40 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     return result;
   }
 
+  public async listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+    if (!this.db) {
+      console.error("IndexedDB is not initialized");
+      return [];
+    }
+    if (!this.db.objectStoreNames.contains("historyLog")) {
+      return [];
+    }
+    const tx = this.db.transaction("historyLog", "readonly");
+    const store = tx.objectStore("historyLog");
+    const useIndex = chum === undefined ? store.index("byZoneBait") : store.index("byZoneBaitChum");
+    const key = chum === undefined ? [zone, bait] : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
+    if (offset) {
+      cursor?.advance(offset);
+    }
+    console.log("Listing history with cursor:", cursor);
+    const results: HistoryItem[] = [];
+    let count = 0;
+    while (cursor && (!limit || count < limit)) {
+      if (!cursor.value) {
+        break;
+      }
+      results.push({
+        ...cursor.value,
+        chum: HistoryIndexedDBBackend.numToBool(cursor.value.chumNum),
+      });
+      count++;
+      await cursor.continue();
+    }
+
+    return results;
+  }
+
   public async clear(): Promise<void> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");

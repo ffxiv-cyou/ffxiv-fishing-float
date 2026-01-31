@@ -2,7 +2,7 @@
   import type { Config } from "../model/Config";
   import type { FishingResult } from "../model/FishingSession";
   import type { GameDatabase } from "../model/GameDB";
-  import type { HistoryStatsItem } from "../model/History";
+  import type { HistoryStatsItem } from "../model/HistoryStorage";
   import type { TugType } from "../model/InnerEnums";
   import HistoryStats from "./HistoryStats.svelte";
 
