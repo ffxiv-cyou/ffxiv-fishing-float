@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { FishingHistory, HistoryIndexedDBBackend } from "@/model/History";
+  import { FishingStorage } from "@/model/HistoryStorage";
   import Sound from "../components/Sound.svelte";
   import Timer from "../components/Timer.svelte";
   import { Config } from "../model/Config";
@@ -9,10 +9,8 @@
   let config = new Config();
   let sound: Sound;
   let db = new GameDatabase();
-  db.load("2025.12.23.0000.0000");
-  let history = new HistoryIndexedDBBackend();
-  history.init();
-
+  db.loadLatest();
+  let history = new FishingStorage();
   let showPreview: boolean = $state(false);
 
   const demoData = [

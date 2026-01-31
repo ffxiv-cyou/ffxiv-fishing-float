@@ -2,7 +2,7 @@
   import TugSound from "../components/Sound.svelte";
   import Timer from "../components/Timer.svelte";
   import type { FishingTracker } from "../model/FishingTracker";
-  import type { HistoryStatsItem } from "../model/History";
+  import type { HistoryStatsItem } from "../model/HistoryStorage";
   import { LureType, TugType } from "../model/InnerEnums";
 
   let {

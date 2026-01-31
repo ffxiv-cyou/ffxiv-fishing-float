@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { GameDatabase } from "../model/GameDB";
-  import type { HistoryStatsItem } from "../model/History";
+  import type { HistoryStatsItem } from "../model/HistoryStorage";
   import { TugType } from "../model/InnerEnums";
 
   let {

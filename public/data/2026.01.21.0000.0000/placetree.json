@@ -1,0 +1,2436 @@
+[
+  {
+    "name": "黑衣森林",
+    "id": 23,
+    "children": [
+      {
+        "name": "黑衣森林中央林区",
+        "id": 54,
+        "children": [
+          {
+            "name": "叶脉水系",
+            "id": 951,
+            "children": []
+          },
+          {
+            "name": "镜池",
+            "id": 952,
+            "children": []
+          },
+          {
+            "name": "常影区",
+            "id": 101,
+            "children": []
+          },
+          {
+            "name": "萌芽池",
+            "id": 104,
+            "children": []
+          },
+          {
+            "name": "静语庄园",
+            "id": 59,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "黑衣森林东部林区",
+        "id": 55,
+        "children": [
+          {
+            "name": "花蜜栈桥",
+            "id": 155,
+            "children": []
+          },
+          {
+            "name": "落翠底",
+            "id": 953,
+            "children": []
+          },
+          {
+            "name": "涟漪小川",
+            "id": 954,
+            "children": []
+          },
+          {
+            "name": "妖精领溪谷",
+            "id": 955,
+            "children": []
+          },
+          {
+            "name": "十二神大圣堂",
+            "id": 112,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "黑衣森林南部林区",
+        "id": 56,
+        "children": [
+          {
+            "name": "哈希瓦河上游",
+            "id": 956,
+            "children": []
+          },
+          {
+            "name": "哈希瓦河中游",
+            "id": 957,
+            "children": []
+          },
+          {
+            "name": "哈希瓦河下游",
+            "id": 958,
+            "children": []
+          },
+          {
+            "name": "哈希瓦河东支流",
+            "id": 959,
+            "children": []
+          },
+          {
+            "name": "哥布林血流",
+            "id": 960,
+            "children": []
+          },
+          {
+            "name": "蔓根沼",
+            "id": 126,
+            "children": []
+          },
+          {
+            "name": "兀尔德恩惠地",
+            "id": 82,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "黑衣森林北部林区",
+        "id": 57,
+        "children": [
+          {
+            "name": "嘈杂川",
+            "id": 961,
+            "children": []
+          },
+          {
+            "name": "秋瓜湖畔",
+            "id": 962,
+            "children": []
+          },
+          {
+            "name": "荣耀溪",
+            "id": 86,
+            "children": []
+          },
+          {
+            "name": "塔赫托特尔湖",
+            "id": 963,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "格里达尼亚旧街",
+        "id": 53,
+        "children": [
+          {
+            "name": "低语河谷",
+            "id": 1000,
+            "children": []
+          },
+          {
+            "name": "红茶川水系上游",
+            "id": 999,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "格里达尼亚新街",
+        "id": 52,
+        "children": [
+          {
+            "name": "翡翠湖滨",
+            "id": 964,
+            "children": []
+          },
+          {
+            "name": "红茶川水系下游",
+            "id": 965,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "薰衣草苗圃",
+        "id": 426,
+        "children": [
+          {
+            "name": "薰衣草苗圃",
+            "id": 426,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "摩杜纳",
+    "id": 26,
+    "children": [
+      {
+        "name": "摩杜纳",
+        "id": 67,
+        "children": [
+          {
+            "name": "银泪湖北岸",
+            "id": 410,
+            "children": []
+          },
+          {
+            "name": "早霜顶",
+            "id": 414,
+            "children": []
+          },
+          {
+            "name": "纠缠沼泽林",
+            "id": 413,
+            "children": []
+          },
+          {
+            "name": "纠缠沼泽林源流",
+            "id": 966,
+            "children": []
+          },
+          {
+            "name": "歌咏裂谷",
+            "id": 417,
+            "children": []
+          },
+          {
+            "name": "歌咏裂谷北部",
+            "id": 967,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "库尔札斯",
+    "id": 25,
+    "children": [
+      {
+        "name": "库尔札斯中央高地",
+        "id": 63,
+        "children": [
+          {
+            "name": "库尔札斯河",
+            "id": 968,
+            "children": []
+          },
+          {
+            "name": "落魔崖",
+            "id": 389,
+            "children": []
+          },
+          {
+            "name": "剑峰山麓",
+            "id": 969,
+            "children": []
+          },
+          {
+            "name": "圣人泪",
+            "id": 392,
+            "children": []
+          },
+          {
+            "name": "巨龙首营地水库",
+            "id": 970,
+            "children": []
+          },
+          {
+            "name": "圣人旅道",
+            "id": 398,
+            "children": []
+          },
+          {
+            "name": "调查队冰洞",
+            "id": 971,
+            "children": []
+          },
+          {
+            "name": "披雪大冰壁",
+            "id": 404,
+            "children": []
+          },
+          {
+            "name": "伊修加德大云海",
+            "id": 972,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "库尔札斯西部高地",
+        "id": 2200,
+        "children": [
+          {
+            "name": "交汇河",
+            "id": 2201,
+            "children": []
+          },
+          {
+            "name": "灰尾瀑布",
+            "id": 2217,
+            "children": []
+          },
+          {
+            "name": "库尔札斯不冻池",
+            "id": 1003,
+            "children": []
+          },
+          {
+            "name": "清澈池",
+            "id": 1004,
+            "children": []
+          },
+          {
+            "name": "龙涎",
+            "id": 2227,
+            "children": []
+          },
+          {
+            "name": "灾祸池南",
+            "id": 1005,
+            "children": []
+          },
+          {
+            "name": "灰烬池",
+            "id": 2211,
+            "children": []
+          },
+          {
+            "name": "灾祸池西",
+            "id": 1006,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "拉诺西亚",
+    "id": 22,
+    "children": [
+      {
+        "name": "利姆萨·罗敏萨下层甲板",
+        "id": 29,
+        "children": [
+          {
+            "name": "利姆萨·罗敏萨下层甲板",
+            "id": 29,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "利姆萨·罗敏萨上层甲板",
+        "id": 28,
+        "children": [
+          {
+            "name": "利姆萨·罗敏萨上层甲板",
+            "id": 28,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "中拉诺西亚",
+        "id": 30,
+        "children": [
+          {
+            "name": "和风流地沿岸",
+            "id": 973,
+            "children": []
+          },
+          {
+            "name": "盛夏滩沿岸",
+            "id": 974,
+            "children": []
+          },
+          {
+            "name": "无赖川",
+            "id": 182,
+            "children": []
+          },
+          {
+            "name": "西永恒川",
+            "id": 975,
+            "children": []
+          },
+          {
+            "name": "尼姆河",
+            "id": 193,
+            "children": []
+          },
+          {
+            "name": "轻声谷",
+            "id": 192,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "拉诺西亚低地",
+        "id": 31,
+        "children": [
+          {
+            "name": "遗孀泪",
+            "id": 197,
+            "children": []
+          },
+          {
+            "name": "莫拉比湾西岸",
+            "id": 976,
+            "children": []
+          },
+          {
+            "name": "雪松原沿岸地",
+            "id": 977,
+            "children": []
+          },
+          {
+            "name": "莫拉比造船厂",
+            "id": 337,
+            "children": []
+          },
+          {
+            "name": "奥修昂火炬",
+            "id": 341,
+            "children": []
+          },
+          {
+            "name": "砂盐滩",
+            "id": 338,
+            "children": []
+          },
+          {
+            "name": "守炬埠头",
+            "id": 339,
+            "children": []
+          },
+          {
+            "name": "空心穴",
+            "id": 340,
+            "children": []
+          },
+          {
+            "name": "盲铁坑道",
+            "id": 202,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "东拉诺西亚",
+        "id": 32,
+        "children": [
+          {
+            "name": "南鲜血滨",
+            "id": 978,
+            "children": []
+          },
+          {
+            "name": "太阳海岸",
+            "id": 206,
+            "children": []
+          },
+          {
+            "name": "北鲜血滨",
+            "id": 979,
+            "children": []
+          },
+          {
+            "name": "隐秘瀑布",
+            "id": 211,
+            "children": []
+          },
+          {
+            "name": "东永恒川",
+            "id": 980,
+            "children": []
+          },
+          {
+            "name": "接雨草树林",
+            "id": 168,
+            "children": []
+          },
+          {
+            "name": "接雨草沼泽地",
+            "id": 981,
+            "children": []
+          },
+          {
+            "name": "红螳螂瀑布",
+            "id": 214,
+            "children": []
+          },
+          {
+            "name": "罗塔诺海（船首）",
+            "id": 1001,
+            "children": []
+          },
+          {
+            "name": "罗塔诺海（船尾）",
+            "id": 1002,
+            "children": []
+          },
+          {
+            "name": "永夏岛北",
+            "id": 1013,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "西拉诺西亚",
+        "id": 33,
+        "children": [
+          {
+            "name": "雨燕塔殖民地",
+            "id": 218,
+            "children": []
+          },
+          {
+            "name": "骷髅谷沿岸地",
+            "id": 982,
+            "children": []
+          },
+          {
+            "name": "二分石沿岸地",
+            "id": 983,
+            "children": []
+          },
+          {
+            "name": "幻影群岛北岸",
+            "id": 984,
+            "children": []
+          },
+          {
+            "name": "幻影群岛南岸",
+            "id": 985,
+            "children": []
+          },
+          {
+            "name": "酿酒师灯塔",
+            "id": 220,
+            "children": []
+          },
+          {
+            "name": "船舶墓场",
+            "id": 228,
+            "children": []
+          },
+          {
+            "name": "萨普沙产卵地",
+            "id": 363,
+            "children": []
+          },
+          {
+            "name": "隐秘港",
+            "id": 365,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "拉诺西亚高地",
+        "id": 34,
+        "children": [
+          {
+            "name": "橡树原",
+            "id": 174,
+            "children": []
+          },
+          {
+            "name": "愚者瀑布",
+            "id": 234,
+            "children": []
+          },
+          {
+            "name": "石绿湖东北岸",
+            "id": 987,
+            "children": []
+          },
+          {
+            "name": "石绿湖浅滩",
+            "id": 988,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "拉诺西亚外地",
+        "id": 350,
+        "children": [
+          {
+            "name": "登天路溪谷",
+            "id": 989,
+            "children": []
+          },
+          {
+            "name": "石绿湖西北岸",
+            "id": 1012,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "海雾村",
+        "id": 425,
+        "children": [
+          {
+            "name": "海雾村",
+            "id": 425,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "萨纳兰",
+    "id": 24,
+    "children": [
+      {
+        "name": "西萨纳兰",
+        "id": 42,
+        "children": [
+          {
+            "name": "白银集市",
+            "id": 266,
+            "children": []
+          },
+          {
+            "name": "黄昏湾",
+            "id": 274,
+            "children": []
+          },
+          {
+            "name": "月牙湾",
+            "id": 272,
+            "children": []
+          },
+          {
+            "name": "丰饶神井",
+            "id": 264,
+            "children": []
+          },
+          {
+            "name": "足迹谷",
+            "id": 245,
+            "children": []
+          },
+          {
+            "name": "西风岬",
+            "id": 246,
+            "children": []
+          },
+          {
+            "name": "帕拉塔安息地",
+            "id": 276,
+            "children": []
+          },
+          {
+            "name": "月滴洞",
+            "id": 275,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "中萨纳兰",
+        "id": 43,
+        "children": [
+          {
+            "name": "污流上游",
+            "id": 990,
+            "children": []
+          },
+          {
+            "name": "污流下游",
+            "id": 991,
+            "children": []
+          },
+          {
+            "name": "邪嗣",
+            "id": 297,
+            "children": []
+          },
+          {
+            "name": "执掌峡谷",
+            "id": 249,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "东萨纳兰",
+        "id": 44,
+        "children": [
+          {
+            "name": "枯骨北泉",
+            "id": 992,
+            "children": []
+          },
+          {
+            "name": "枯骨南泉",
+            "id": 993,
+            "children": []
+          },
+          {
+            "name": "宇格拉姆河",
+            "id": 308,
+            "children": []
+          },
+          {
+            "name": "火墙",
+            "id": 253,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "南萨纳兰",
+        "id": 45,
+        "children": [
+          {
+            "name": "火蜥蜴河",
+            "id": 314,
+            "children": []
+          },
+          {
+            "name": "不悔战泉",
+            "id": 995,
+            "children": []
+          },
+          {
+            "name": "遗忘绿洲",
+            "id": 323,
+            "children": []
+          },
+          {
+            "name": "撒沟厉沙海",
+            "id": 996,
+            "children": []
+          },
+          {
+            "name": "撒沟厉沙丘",
+            "id": 997,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "北萨纳兰",
+        "id": 46,
+        "children": [
+          {
+            "name": "青磷泉",
+            "id": 330,
+            "children": []
+          },
+          {
+            "name": "蓝雾涌泉",
+            "id": 998,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "高脚孤丘",
+        "id": 427,
+        "children": [
+          {
+            "name": "高脚孤丘",
+            "id": 427,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "龙堡",
+    "id": 498,
+    "children": [
+      {
+        "name": "龙堡参天高地",
+        "id": 2000,
+        "children": [
+          {
+            "name": "悲叹飞泉",
+            "id": 2019,
+            "children": []
+          },
+          {
+            "name": "宽慰河",
+            "id": 2020,
+            "children": []
+          },
+          {
+            "name": "荒烟野地",
+            "id": 2004,
+            "children": []
+          },
+          {
+            "name": "饵食台地",
+            "id": 2029,
+            "children": []
+          },
+          {
+            "name": "彻悟岩窟",
+            "id": 2008,
+            "children": []
+          },
+          {
+            "name": "彻悟岩窟西",
+            "id": 1007,
+            "children": []
+          },
+          {
+            "name": "不洁古像",
+            "id": 2064,
+            "children": []
+          },
+          {
+            "name": "光轮祭坛",
+            "id": 2030,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "龙堡内陆低地",
+        "id": 2001,
+        "children": [
+          {
+            "name": "沙利亚克河",
+            "id": 2039,
+            "children": []
+          },
+          {
+            "name": "湍流三角地",
+            "id": 2035,
+            "children": []
+          },
+          {
+            "name": "沙利亚克河上流",
+            "id": 1008,
+            "children": []
+          },
+          {
+            "name": "沙利亚克河中流",
+            "id": 1009,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "翻云雾海",
+        "id": 2002,
+        "children": [
+          {
+            "name": "招恶荒岛",
+            "id": 2013,
+            "children": []
+          },
+          {
+            "name": "绿茵岛",
+            "id": 2017,
+            "children": []
+          },
+          {
+            "name": "西方水泉",
+            "id": 2079,
+            "children": []
+          },
+          {
+            "name": "人王遗迹",
+            "id": 2014,
+            "children": []
+          },
+          {
+            "name": "索姆阿尔云帽",
+            "id": 1010,
+            "children": []
+          },
+          {
+            "name": "惋惜之晶遗迹",
+            "id": 2048,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "阿巴拉提亚",
+    "id": 497,
+    "children": [
+      {
+        "name": "阿巴拉提亚云海",
+        "id": 2100,
+        "children": [
+          {
+            "name": "沃仙曦染",
+            "id": 2103,
+            "children": []
+          },
+          {
+            "name": "云水塘",
+            "id": 2120,
+            "children": []
+          },
+          {
+            "name": "云顶",
+            "id": 2102,
+            "children": []
+          },
+          {
+            "name": "蓝天窗",
+            "id": 2105,
+            "children": []
+          },
+          {
+            "name": "魔窟离岛",
+            "id": 2129,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "魔大陆阿济兹拉",
+        "id": 2101,
+        "children": [
+          {
+            "name": "阿尔法管区",
+            "id": 2109,
+            "children": []
+          },
+          {
+            "name": "废液池",
+            "id": 1011,
+            "children": []
+          },
+          {
+            "name": "超星际通信塔",
+            "id": 2177,
+            "children": []
+          },
+          {
+            "name": "德尔塔管区",
+            "id": 2112,
+            "children": []
+          },
+          {
+            "name": "冠毛大树",
+            "id": 2173,
+            "children": []
+          },
+          {
+            "name": "生态园",
+            "id": 2113,
+            "children": []
+          },
+          {
+            "name": "阿济兹拉旗舰岛",
+            "id": 2114,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "其他",
+    "id": 0,
+    "children": [
+      {
+        "name": "其他",
+        "id": 0,
+        "children": [
+          {
+            "name": "云冠涌泉",
+            "id": 2257,
+            "children": []
+          },
+          {
+            "name": "云冠洞穴",
+            "id": 2258,
+            "children": []
+          },
+          {
+            "name": "云冠西南池",
+            "id": 2259,
+            "children": []
+          },
+          {
+            "name": "云冠鱼洞",
+            "id": 2260,
+            "children": []
+          },
+          {
+            "name": "云冠西北池",
+            "id": 2261,
+            "children": []
+          },
+          {
+            "name": "狂风云海",
+            "id": 2262,
+            "children": []
+          },
+          {
+            "name": "无风云海",
+            "id": 2263,
+            "children": []
+          },
+          {
+            "name": "旋风云海",
+            "id": 2264,
+            "children": []
+          },
+          {
+            "name": "多玛飞地",
+            "id": 2507,
+            "children": []
+          },
+          {
+            "name": "摇风云海",
+            "id": 3489,
+            "children": []
+          },
+          {
+            "name": "息风云海",
+            "id": 3532,
+            "children": []
+          },
+          {
+            "name": "烈风云海",
+            "id": 3533,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "远东之国",
+    "id": 2402,
+    "children": [
+      {
+        "name": "黄金港",
+        "id": 2404,
+        "children": [
+          {
+            "name": "防波堤",
+            "id": 2501,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "白银乡",
+        "id": 2412,
+        "children": [
+          {
+            "name": "白银乡",
+            "id": 2505,
+            "children": []
+          },
+          {
+            "name": "白银水路",
+            "id": 2506,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "奥萨德",
+    "id": 2401,
+    "children": [
+      {
+        "name": "红玉海",
+        "id": 2409,
+        "children": [
+          {
+            "name": "红玉炮台近海",
+            "id": 1027,
+            "children": []
+          },
+          {
+            "name": "狱之盖近海",
+            "id": 1028,
+            "children": []
+          },
+          {
+            "name": "龟甲岛近海",
+            "id": 1029,
+            "children": []
+          },
+          {
+            "name": "冲之岩近海",
+            "id": 1030,
+            "children": []
+          },
+          {
+            "name": "自凝岛近海",
+            "id": 1031,
+            "children": []
+          },
+          {
+            "name": "渔村沿岸",
+            "id": 1032,
+            "children": []
+          },
+          {
+            "name": "绝鬼岛近海",
+            "id": 1033,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "延夏",
+        "id": 2410,
+        "children": [
+          {
+            "name": "苍鹭池",
+            "id": 1034,
+            "children": []
+          },
+          {
+            "name": "苍鹭河",
+            "id": 1035,
+            "children": []
+          },
+          {
+            "name": "茨菰村水塘",
+            "id": 1036,
+            "children": []
+          },
+          {
+            "name": "七彩沟",
+            "id": 1042,
+            "children": []
+          },
+          {
+            "name": "七彩溪谷",
+            "id": 1043,
+            "children": []
+          },
+          {
+            "name": "多玛城前",
+            "id": 1037,
+            "children": []
+          },
+          {
+            "name": "城下码头",
+            "id": 1038,
+            "children": []
+          },
+          {
+            "name": "无二江东",
+            "id": 1039,
+            "children": []
+          },
+          {
+            "name": "无二江西",
+            "id": 1040,
+            "children": []
+          },
+          {
+            "name": "梅泉乡",
+            "id": 1041,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "太阳神草原",
+        "id": 2411,
+        "children": [
+          {
+            "name": "涅木卡勒河",
+            "id": 1046,
+            "children": []
+          },
+          {
+            "name": "哈克卡勒河",
+            "id": 2500,
+            "children": []
+          },
+          {
+            "name": "亚特卡勒河上游",
+            "id": 1049,
+            "children": []
+          },
+          {
+            "name": "太阳湖",
+            "id": 1045,
+            "children": []
+          },
+          {
+            "name": "塔奥卡勒河",
+            "id": 1047,
+            "children": []
+          },
+          {
+            "name": "亚特卡勒河下游",
+            "id": 1048,
+            "children": []
+          },
+          {
+            "name": "朵塔儿水洲",
+            "id": 1044,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "基拉巴尼亚",
+    "id": 2400,
+    "children": [
+      {
+        "name": "神拳痕",
+        "id": 2403,
+        "children": [
+          {
+            "name": "幻河上游",
+            "id": 2502,
+            "children": []
+          },
+          {
+            "name": "神拳痕",
+            "id": 2504,
+            "children": []
+          },
+          {
+            "name": "星导寺入口",
+            "id": 2503,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "基拉巴尼亚边区",
+        "id": 2406,
+        "children": [
+          {
+            "name": "提蒙河",
+            "id": 1014,
+            "children": []
+          },
+          {
+            "name": "昏暗林",
+            "id": 1015,
+            "children": []
+          },
+          {
+            "name": "流星尾",
+            "id": 1016,
+            "children": []
+          },
+          {
+            "name": "威罗迪纳河",
+            "id": 1017,
+            "children": []
+          },
+          {
+            "name": "幻河",
+            "id": 1018,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "基拉巴尼亚山区",
+        "id": 2407,
+        "children": [
+          {
+            "name": "夫妇池",
+            "id": 1019,
+            "children": []
+          },
+          {
+            "name": "慢水涤",
+            "id": 1020,
+            "children": []
+          },
+          {
+            "name": "石楠瀑布",
+            "id": 1021,
+            "children": []
+          },
+          {
+            "name": "判官神像",
+            "id": 1022,
+            "children": []
+          },
+          {
+            "name": "猛牛浴池",
+            "id": 1023,
+            "children": []
+          },
+          {
+            "name": "赎罪之腕",
+            "id": 1025,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "基拉巴尼亚湖区",
+        "id": 2408,
+        "children": [
+          {
+            "name": "盐湖",
+            "id": 1026,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "诺弗兰特",
+    "id": 2950,
+    "children": [
+      {
+        "name": "水晶都",
+        "id": 2951,
+        "children": [
+          {
+            "name": "三艺区",
+            "id": 3289,
+            "children": []
+          },
+          {
+            "name": "四艺区",
+            "id": 3290,
+            "children": []
+          },
+          {
+            "name": "水晶都起居室",
+            "id": 3291,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "雷克兰德",
+        "id": 2953,
+        "children": [
+          {
+            "name": "风化裂痕",
+            "id": 3292,
+            "children": []
+          },
+          {
+            "name": "锈迹贮水池",
+            "id": 3293,
+            "children": []
+          },
+          {
+            "name": "始源湖",
+            "id": 3294,
+            "children": []
+          },
+          {
+            "name": "阴沉乡",
+            "id": 3295,
+            "children": []
+          },
+          {
+            "name": "贤岛",
+            "id": 3296,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "珂露西亚岛",
+        "id": 2954,
+        "children": [
+          {
+            "name": "沃茨河上游",
+            "id": 3297,
+            "children": []
+          },
+          {
+            "name": "白油瀑布",
+            "id": 3298,
+            "children": []
+          },
+          {
+            "name": "沃茨河下游",
+            "id": 3299,
+            "children": []
+          },
+          {
+            "name": "刺舌滴",
+            "id": 3300,
+            "children": []
+          },
+          {
+            "name": "珂露西亚岛西海岸",
+            "id": 3301,
+            "children": []
+          },
+          {
+            "name": "观海湾",
+            "id": 3302,
+            "children": []
+          },
+          {
+            "name": "珂露西亚岛东海岸",
+            "id": 3303,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "游末邦",
+        "id": 2952,
+        "children": [
+          {
+            "name": "废船街",
+            "id": 3304,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "安穆·艾兰",
+        "id": 2955,
+        "children": [
+          {
+            "name": "沙河",
+            "id": 3305,
+            "children": []
+          },
+          {
+            "name": "琥珀丘",
+            "id": 3307,
+            "children": []
+          },
+          {
+            "name": "拿巴示断绝",
+            "id": 3306,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "伊尔美格",
+        "id": 2956,
+        "children": [
+          {
+            "name": "手镜湖",
+            "id": 3308,
+            "children": []
+          },
+          {
+            "name": "身镜湖",
+            "id": 3309,
+            "children": []
+          },
+          {
+            "name": "傲慢的年长溪流",
+            "id": 3310,
+            "children": []
+          },
+          {
+            "name": "嫉妒的年少溪流",
+            "id": 3311,
+            "children": []
+          },
+          {
+            "name": "科拉德排水沟",
+            "id": 3314,
+            "children": []
+          },
+          {
+            "name": "宠坏的年幼溪流",
+            "id": 3312,
+            "children": []
+          },
+          {
+            "name": "圣法斯里克天庭",
+            "id": 3313,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "拉凯提卡大森林",
+        "id": 2957,
+        "children": [
+          {
+            "name": "蛇水湖",
+            "id": 3315,
+            "children": []
+          },
+          {
+            "name": "血盅",
+            "id": 3316,
+            "children": []
+          },
+          {
+            "name": "洛查特尔河",
+            "id": 3317,
+            "children": []
+          },
+          {
+            "name": "缪栎的乡愁南部",
+            "id": 3318,
+            "children": []
+          },
+          {
+            "name": "结誓洞窟",
+            "id": 3319,
+            "children": []
+          },
+          {
+            "name": "缪栎之泪",
+            "id": 3458,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "黑风海",
+        "id": 2958,
+        "children": [
+          {
+            "name": "鳎沙地窖",
+            "id": 3320,
+            "children": []
+          },
+          {
+            "name": "陆人墓标",
+            "id": 3321,
+            "children": []
+          },
+          {
+            "name": "卡利班深海峡西北",
+            "id": 3322,
+            "children": []
+          },
+          {
+            "name": "卡利班古巢西",
+            "id": 3323,
+            "children": []
+          },
+          {
+            "name": "卡利班古巢东",
+            "id": 3324,
+            "children": []
+          },
+          {
+            "name": "尊紫洞",
+            "id": 3325,
+            "children": []
+          },
+          {
+            "name": "诺弗兰特大陆坡",
+            "id": 3326,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "出海垂钓",
+    "id": 3443,
+    "children": [
+      {
+        "name": "加拉迪翁湾",
+        "id": 3444,
+        "children": [
+          {
+            "name": "加拉迪翁湾外海",
+            "id": 3448,
+            "children": []
+          },
+          {
+            "name": "加拉迪翁湾外海幻海流",
+            "id": 3449,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "梅尔托尔海峡南",
+        "id": 3445,
+        "children": [
+          {
+            "name": "梅尔托尔海峡南",
+            "id": 3450,
+            "children": []
+          },
+          {
+            "name": "梅尔托尔海峡南幻海流",
+            "id": 3451,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "罗塔诺海",
+        "id": 3447,
+        "children": [
+          {
+            "name": "罗塔诺海海面",
+            "id": 3454,
+            "children": []
+          },
+          {
+            "name": "罗塔诺海海面幻海流",
+            "id": 3455,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "梅尔托尔海峡北",
+        "id": 3446,
+        "children": [
+          {
+            "name": "梅尔托尔海峡北",
+            "id": 3452,
+            "children": []
+          },
+          {
+            "name": "梅尔托尔海峡北幻海流",
+            "id": 3453,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "谢尔达莱群岛",
+        "id": 3641,
+        "children": [
+          {
+            "name": "谢尔达莱群岛近海",
+            "id": 3621,
+            "children": []
+          },
+          {
+            "name": "谢尔达莱群岛近海幻海流",
+            "id": 3622,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "绯汐海",
+        "id": 3642,
+        "children": [
+          {
+            "name": "绯汐海近海",
+            "id": 3623,
+            "children": []
+          },
+          {
+            "name": "绯汐海近海幻海流",
+            "id": 3624,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "罗斯利特湾",
+        "id": 3643,
+        "children": [
+          {
+            "name": "罗斯利特湾近海",
+            "id": 3625,
+            "children": []
+          },
+          {
+            "name": "罗斯利特湾近海幻海流",
+            "id": 3626,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "妖歌海",
+        "id": 4363,
+        "children": [
+          {
+            "name": "妖歌海海面",
+            "id": 4367,
+            "children": []
+          },
+          {
+            "name": "妖歌海海面幻海流",
+            "id": 4368,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "黄金港",
+        "id": 4364,
+        "children": [
+          {
+            "name": "黄金港近海",
+            "id": 4369,
+            "children": []
+          },
+          {
+            "name": "黄金港近海幻海流",
+            "id": 4370,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "红玉海",
+        "id": 4365,
+        "children": [
+          {
+            "name": "红玉海海面",
+            "id": 4371,
+            "children": []
+          },
+          {
+            "name": "红玉海海面幻海流",
+            "id": 4372,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "无二江",
+        "id": 4366,
+        "children": [
+          {
+            "name": "无二江下游",
+            "id": 4373,
+            "children": []
+          },
+          {
+            "name": "无二江下游幻海流",
+            "id": 4374,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "北洋地域",
+    "id": 3702,
+    "children": [
+      {
+        "name": "旧萨雷安",
+        "id": 3706,
+        "children": [
+          {
+            "name": "知识神海港",
+            "id": 4050,
+            "children": []
+          },
+          {
+            "name": "碧谷",
+            "id": 4051,
+            "children": []
+          },
+          {
+            "name": "沉思泉",
+            "id": 4052,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "迷津",
+        "id": 3708,
+        "children": [
+          {
+            "name": "一号天球口",
+            "id": 4053,
+            "children": []
+          },
+          {
+            "name": "一号沟渠",
+            "id": 4054,
+            "children": []
+          },
+          {
+            "name": "二号天球口",
+            "id": 4055,
+            "children": []
+          },
+          {
+            "name": "二号沟渠",
+            "id": 4056,
+            "children": []
+          },
+          {
+            "name": "深壕",
+            "id": 4057,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "伊尔萨巴德",
+    "id": 3703,
+    "children": [
+      {
+        "name": "拉札罕",
+        "id": 3707,
+        "children": [
+          {
+            "name": "云使飞沫",
+            "id": 4058,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "萨维奈岛",
+        "id": 3709,
+        "children": [
+          {
+            "name": "新港沿岸",
+            "id": 4059,
+            "children": []
+          },
+          {
+            "name": "萨维奈岛近海",
+            "id": 4060,
+            "children": []
+          },
+          {
+            "name": "代米尔遗烈乡沿岸",
+            "id": 4061,
+            "children": []
+          },
+          {
+            "name": "巨胆石采掘场",
+            "id": 4062,
+            "children": []
+          },
+          {
+            "name": "塔门",
+            "id": 4063,
+            "children": []
+          },
+          {
+            "name": "乳河",
+            "id": 4064,
+            "children": []
+          },
+          {
+            "name": "帕瓦纳的悔悟",
+            "id": 4065,
+            "children": []
+          },
+          {
+            "name": "摩耶幻泉",
+            "id": 4066,
+            "children": []
+          },
+          {
+            "name": "熏香海岸",
+            "id": 4067,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "加雷马",
+        "id": 3710,
+        "children": [
+          {
+            "name": "艾布拉纳不冻池",
+            "id": 4068,
+            "children": []
+          },
+          {
+            "name": "洁白环濠",
+            "id": 4069,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "星外天域",
+    "id": 3704,
+    "children": [
+      {
+        "name": "叹息海",
+        "id": 3711,
+        "children": [
+          {
+            "name": "最伟大的森林",
+            "id": 4070,
+            "children": []
+          },
+          {
+            "name": "荧光池",
+            "id": 4071,
+            "children": []
+          },
+          {
+            "name": "冻土裂痕",
+            "id": 4072,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "天外天垓",
+        "id": 3712,
+        "children": [
+          {
+            "name": "沼癸辛γ",
+            "id": 4076,
+            "children": []
+          },
+          {
+            "name": "沼癸辛β",
+            "id": 4077,
+            "children": []
+          },
+          {
+            "name": "沼癸辛α",
+            "id": 4078,
+            "children": []
+          },
+          {
+            "name": "逡巡泉",
+            "id": 4079,
+            "children": []
+          },
+          {
+            "name": "异亚村落",
+            "id": 4080,
+            "children": []
+          },
+          {
+            "name": "湖癸辛",
+            "id": 4081,
+            "children": []
+          },
+          {
+            "name": "湖丙α",
+            "id": 4082,
+            "children": []
+          },
+          {
+            "name": "湖丙β",
+            "id": 4083,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "至福乐土",
+        "id": 4042,
+        "children": [
+          {
+            "name": "至福乐土农业区",
+            "id": 4191,
+            "children": []
+          },
+          {
+            "name": "至福乐土海洋区α",
+            "id": 4192,
+            "children": []
+          },
+          {
+            "name": "至福乐土海洋区β",
+            "id": 4193,
+            "children": []
+          },
+          {
+            "name": "至福乐土游乐区α",
+            "id": 4194,
+            "children": []
+          },
+          {
+            "name": "至福乐土游乐区β",
+            "id": 4195,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "憧憬湾",
+        "id": 5219,
+        "children": [
+          {
+            "name": "储泪池",
+            "id": 5206,
+            "children": []
+          },
+          {
+            "name": "北侧小跳印记",
+            "id": 5207,
+            "children": []
+          },
+          {
+            "name": "西侧小跳印记",
+            "id": 5208,
+            "children": []
+          },
+          {
+            "name": "基地东南水池",
+            "id": 5209,
+            "children": []
+          },
+          {
+            "name": "空葫芦港",
+            "id": 5210,
+            "children": []
+          },
+          {
+            "name": "砷海",
+            "id": 5211,
+            "children": []
+          },
+          {
+            "name": "阿尔法闪亮池",
+            "id": 5212,
+            "children": []
+          },
+          {
+            "name": "贝塔闪亮池",
+            "id": 5213,
+            "children": []
+          },
+          {
+            "name": "月底魔泉瀑布",
+            "id": 5214,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "法恩娜行星",
+        "id": 5301,
+        "children": [
+          {
+            "name": "退火洞",
+            "id": 5286,
+            "children": []
+          },
+          {
+            "name": "玻璃匠基地西侧",
+            "id": 5287,
+            "children": []
+          },
+          {
+            "name": "蛋白石十字口",
+            "id": 5288,
+            "children": []
+          },
+          {
+            "name": "碱石灰河上游",
+            "id": 5289,
+            "children": []
+          },
+          {
+            "name": "碱石灰河中游北侧",
+            "id": 5290,
+            "children": []
+          },
+          {
+            "name": "碱石灰河中游南侧",
+            "id": 5291,
+            "children": []
+          },
+          {
+            "name": "碱石灰河下游",
+            "id": 5292,
+            "children": []
+          },
+          {
+            "name": "沉彩沙坑",
+            "id": 5293,
+            "children": []
+          },
+          {
+            "name": "胶囊池",
+            "id": 5294,
+            "children": []
+          },
+          {
+            "name": "泡泡地狱",
+            "id": 5295,
+            "children": []
+          },
+          {
+            "name": "熔火涌流",
+            "id": 5296,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "俄匊斯行星",
+        "id": 5406,
+        "children": [
+          {
+            "name": "先驱者绿洲",
+            "id": 5425,
+            "children": []
+          },
+          {
+            "name": "巨石城东侧",
+            "id": 5426,
+            "children": []
+          },
+          {
+            "name": "极界水平线",
+            "id": 5427,
+            "children": []
+          },
+          {
+            "name": "坏掉的坑道东侧",
+            "id": 5428,
+            "children": []
+          },
+          {
+            "name": "摩罗斯井",
+            "id": 5429,
+            "children": []
+          },
+          {
+            "name": "蓝裂裂界",
+            "id": 5430,
+            "children": []
+          },
+          {
+            "name": "地下池",
+            "id": 5431,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "古代世界",
+    "id": 3705,
+    "children": [
+      {
+        "name": "厄尔庇斯",
+        "id": 3713,
+        "children": [
+          {
+            "name": "逍遥水径",
+            "id": 4073,
+            "children": []
+          },
+          {
+            "name": "翠牙园下层",
+            "id": 4074,
+            "children": []
+          },
+          {
+            "name": "忘海",
+            "id": 4075,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "尤卡图拉尔",
+    "id": 4500,
+    "children": [
+      {
+        "name": "图莱尤拉",
+        "id": 4504,
+        "children": [
+          {
+            "name": "休喙泉",
+            "id": 5037,
+            "children": []
+          },
+          {
+            "name": "船头小屋",
+            "id": 5038,
+            "children": []
+          },
+          {
+            "name": "满潮港",
+            "id": 5039,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "奥阔帕恰山",
+        "id": 4505,
+        "children": [
+          {
+            "name": "沉星浮泪的池",
+            "id": 5040,
+            "children": []
+          },
+          {
+            "name": "其瓦固盐池",
+            "id": 5041,
+            "children": []
+          },
+          {
+            "name": "卡瓦胡湖",
+            "id": 5042,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "克扎玛乌卡湿地",
+        "id": 4506,
+        "children": [
+          {
+            "name": "水没羽毛树林",
+            "id": 5043,
+            "children": []
+          },
+          {
+            "name": "哈努水边",
+            "id": 5044,
+            "children": []
+          },
+          {
+            "name": "活船水路下游",
+            "id": 5045,
+            "children": []
+          },
+          {
+            "name": "露草河岸",
+            "id": 5046,
+            "children": []
+          },
+          {
+            "name": "水果岸边",
+            "id": 5047,
+            "children": []
+          },
+          {
+            "name": "大舌头瀑布潭",
+            "id": 5048,
+            "children": []
+          },
+          {
+            "name": "活船水路上游",
+            "id": 5049,
+            "children": []
+          },
+          {
+            "name": "虹彩水底",
+            "id": 5050,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "亚克特尔树海",
+        "id": 4507,
+        "children": [
+          {
+            "name": "钓神基富天坑",
+            "id": 5051,
+            "children": []
+          },
+          {
+            "name": "红豹村蓄水池",
+            "id": 5052,
+            "children": []
+          },
+          {
+            "name": "蓝咬鹃天坑",
+            "id": 5053,
+            "children": []
+          },
+          {
+            "name": "赤血天坑",
+            "id": 5054,
+            "children": []
+          },
+          {
+            "name": "白烬天坑",
+            "id": 5055,
+            "children": []
+          },
+          {
+            "name": "足尖小坑",
+            "id": 5056,
+            "children": []
+          },
+          {
+            "name": "战地天坑",
+            "id": 5057,
+            "children": []
+          },
+          {
+            "name": "抱拥天坑",
+            "id": 5058,
+            "children": []
+          },
+          {
+            "name": "甜水泉",
+            "id": 5059,
+            "children": []
+          },
+          {
+            "name": "涩水天坑",
+            "id": 5060,
+            "children": []
+          },
+          {
+            "name": "冥境天坑",
+            "id": 5061,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "萨卡图拉尔",
+    "id": 4501,
+    "children": [
+      {
+        "name": "夏劳尼荒野",
+        "id": 4508,
+        "children": [
+          {
+            "name": "尼葵瑞皮河",
+            "id": 5062,
+            "children": []
+          },
+          {
+            "name": "特利湖",
+            "id": 5063,
+            "children": []
+          },
+          {
+            "name": "佐戈海峡西侧",
+            "id": 5064,
+            "children": []
+          },
+          {
+            "name": "佐戈海峡东侧",
+            "id": 5065,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "遗产之地",
+        "id": 4509,
+        "children": [
+          {
+            "name": "边郊镇壕沟",
+            "id": 5066,
+            "children": []
+          },
+          {
+            "name": "终流地",
+            "id": 5067,
+            "children": []
+          },
+          {
+            "name": "带雷危险水域",
+            "id": 5068,
+            "children": []
+          },
+          {
+            "name": "亚历山德里亚废墟",
+            "id": 5069,
+            "children": []
+          }
+        ]
+      },
+      {
+        "name": "九号解决方案",
+        "id": 4503,
+        "children": [
+          {
+            "name": "居住区域",
+            "id": 5070,
+            "children": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "name": "无失世界",
+    "id": 4502,
+    "children": [
+      {
+        "name": "活着的记忆",
+        "id": 4510,
+        "children": [
+          {
+            "name": "易知区",
+            "id": 5071,
+            "children": []
+          },
+          {
+            "name": "亩鼠水泉",
+            "id": 5072,
+            "children": []
+          },
+          {
+            "name": "地场节点·风",
+            "id": 5073,
+            "children": []
+          },
+          {
+            "name": "运河镇南侧",
+            "id": 5074,
+            "children": []
+          },
+          {
+            "name": "运河镇北侧",
+            "id": 5075,
+            "children": []
+          },
+          {
+            "name": "原型亚历山德里亚",
+            "id": 5076,
+            "children": []
+          }
+        ]
+      }
+    ]
+  }
+]

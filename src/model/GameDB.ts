@@ -1,9 +1,16 @@
 import { createSubscriber } from "svelte/reactivity";
 
+export interface PlaceTree {
+  name: string;
+  id: number;
+  children: PlaceTree[];
+}
+
 export class GameDatabase {
   placeNames: { [key: number]: string } = {};
   itemNames: { [key: number]: string } = {};
   opcodes: { [key: string]: number } = {};
+  placeTree: PlaceTree[] = [];
 
   update: (() => void) | null = null;
   #subscribe;
@@ -24,6 +31,9 @@ export class GameDatabase {
     let opcodes = await fetch(`/data/${version}/opcode.json`);
     this.opcodes = await opcodes.json();
 
+    let placetree = await fetch(`/data/${version}/placetree.json`);
+    this.placeTree = await placetree.json();
+
     if (this.update) {
       this.update();
     }
@@ -32,6 +42,14 @@ export class GameDatabase {
   async getVersions(): Promise<{ [key: string]: string }> {
     let versionsResp = await fetch(`/data/version.json`);
     return await versionsResp.json();
+  }
+
+  async loadLatest(): Promise<void> {
+    let versions = await this.getVersions();
+    const values = Object.values(versions);
+    if (values.length > 0) {
+      await this.load(values[0]);
+    }
   }
 
   getZoneName(zoneId: number): string {
@@ -47,5 +65,10 @@ export class GameDatabase {
   getOpcodes(): { [key: string]: number } {
     this.#subscribe();
     return this.opcodes;
+  }
+
+  getPlaceTree(): PlaceTree[] {
+    this.#subscribe();
+    return this.placeTree;
   }
 }
