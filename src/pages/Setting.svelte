@@ -10,6 +10,10 @@
   function openSettingPage() {
     window.open("/#/setting", "Settings", "width=800,height=600");
   }
+
+  function openHistoryPage() {
+    window.open("/#/history", "History", "width=1000,height=600");
+  }
 </script>
 
 <div class="setting-page">
@@ -72,6 +76,12 @@
       aria-label="open window"
       style="margin-left: 5px;"
       onclick={openSettingPage}>更多设置 &raquo;</button
+    >
+    <button
+      class="xiv-text blue"
+      aria-label="open window"
+      style="margin-left: 5px;"
+      onclick={openHistoryPage}>详细记录 &raquo;</button
     >
   </div>
   <h2 class="xiv-text brown">音频设置</h2>

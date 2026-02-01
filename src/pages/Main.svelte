@@ -102,7 +102,7 @@
       return;
     }
     const hash = `#\/history/${spot}/${bait}`;
-    window.open(hash, "_blank");
+    window.open(hash, "_blank", "width=1000,height=600");
   }
 </script>
 
@@ -141,9 +141,9 @@
 <Notice {message} />
 {#if showConfig || tracker.config.ShowSettingBtn}
   <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
-{/if}
-{#if showHistory}
-  <button class="round-btn history-btn" onclick={openHistory}>↗</button>
+  {#if showHistory}
+    <button class="round-btn history-btn" onclick={openHistory}>↗</button>
+  {/if}
 {/if}
 {#if showConfig}
   <Setting config={tracker.config} />
@@ -173,6 +173,6 @@
   }
   .history-btn {
     position: absolute;
-    right: -10px;
+    left: 10px;
   }
 </style>

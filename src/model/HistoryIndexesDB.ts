@@ -238,9 +238,18 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
 
     const tx = this.db.transaction("historyV2", "readwrite");
     const store = tx.objectStore("historyV2");
+    // 清理现有数据
+    const indexToClear = chum === undefined ? store.index("byZoneBait") : store.index("byZoneBaitChum");
+    const keyToClear = chum === undefined ? [zone, bait] : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const existingRecords = await indexToClear.getAllKeys(IDBKeyRange.only(keyToClear));
+    for (const recordKey of existingRecords) {
+      await store.delete(recordKey);
+    }
+    // 重新添加统计数据
     for (const session of sessions) {
       store.put(session);
     }
+    await tx.done;
   }
 
   /**
@@ -314,6 +323,25 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     for (const item of result) {
       item.chum = HistoryIndexedDBBackend.numToBool(item.chumNum);
     }
+
+    // 根据鱼类型合并记录
+    for (let i = result.length - 1; i >= 0; i--) {
+      for (let j = i - 1; j >= 0; j--) {
+        if (result[i].fish === result[j].fish) {
+          // 合并记录
+          result[j].count += result[i].count;
+          if (result[i].minBiteTime < result[j].minBiteTime) {
+            result[j].minBiteTime = result[i].minBiteTime;
+          }
+          if (result[i].maxBiteTime > result[j].maxBiteTime) {
+            result[j].maxBiteTime = result[i].maxBiteTime;
+          }
+          result.splice(i, 1);
+          break;
+        }
+      }
+    }
+
     return result;
   }
 
@@ -329,9 +357,9 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const store = tx.objectStore("historyLog");
     const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
     const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
-    const cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
-    if (offset) {
-      cursor?.advance(offset);
+    let cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
+    if (offset && cursor) {
+      cursor = await cursor.advance(offset);
     }
     console.log("Listing history with cursor:", cursor);
     const results: HistoryItem[] = [];
@@ -345,7 +373,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
         chum: HistoryIndexedDBBackend.numToBool(cursor.value.chumNum),
       });
       count++;
-      await cursor.continue();
+      cursor = await cursor.continue();
     }
 
     return results;

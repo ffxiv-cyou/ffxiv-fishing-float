@@ -43,16 +43,20 @@
   let historyList: HistoryItem[] = $state([]);
   $effect(() => {
     if (spotID) {
-      history.getHistory(spotID, baitID ? baitID : undefined).then((records) => {
-        historyStats = records;
-        console.log(
-          `History records for spot ${spotID} and bait ${baitID}:`,
-          historyStats,
-        );
-      });
-      history.listHistory(spotID, baitID ? baitID : undefined, undefined, 100).then((records) => {
-        historyList = records;
-      });
+      history
+        .getHistory(spotID, baitID >= 0 ? baitID : undefined)
+        .then((records) => {
+          historyStats = records;
+          console.log(
+            `History records for spot ${spotID} and bait ${baitID}:`,
+            historyStats,
+          );
+        });
+      history
+        .listHistory(spotID, baitID >= 0 ? baitID : undefined, undefined, 100)
+        .then((records) => {
+          historyList = records;
+        });
 
       navigate?.({ spot: spotID.toString(), bait: baitID.toString() });
     } else {
@@ -106,14 +110,15 @@
     return `--min-time:${item.minBiteTime}; --max-time:${item.maxBiteTime};`;
   }
 
-  function getLureType(
-    lureType: number | null,
-    lureStacks: number,
-    lureAt: number,
-  ): string {
-    if (lureType === null || lureType === undefined) return "-";
+  function getLureType(item: HistoryItem): string {
+    if (
+      item.lureType === null ||
+      item.lureType === undefined ||
+      item.lureStacks === 0
+    )
+      return "-";
     var prefix = "";
-    switch (lureType) {
+    switch (item.lureType) {
       case LureType.Ambitious:
         prefix = "雄心";
         break;
@@ -121,7 +126,7 @@
         prefix = "谦逊";
         break;
     }
-    return `${prefix} (x${lureStacks} @ ${lureAt.toFixed(1)}s)`;
+    return `${prefix} (x${item.lureStacks} @ ${((item.lureAt - item.date) / 1000).toFixed(1)}s)`;
   }
 
   function deleteRecord(index: number) {
@@ -137,7 +142,7 @@
   <div>
     <SpotSelection bind:spotID></SpotSelection>
     <select bind:value={baitID}>
-      <option value={0}>所有鱼饵</option>
+      <option value={-1}>所有鱼饵</option>
       {#each baitIDs as baitID}
         <option value={baitID}>{db.getItemName(baitID)}</option>
       {/each}
@@ -186,12 +191,18 @@
             <div class="table-item item-time">
               {new Date(record.date).toLocaleString()}
             </div>
-            <div class="table-item item-bait">{db.getItemName(record.bait)}</div>
-            <div class="table-item item-fish">{db.getItemName(record.fish)}</div>
-            <div class="table-item item-bite-time">{record.biteTime.toFixed(1)}s</div>
+            <div class="table-item item-bait">
+              {db.getItemName(record.bait)}
+            </div>
+            <div class="table-item item-fish">
+              {db.getItemName(record.fish)}
+            </div>
+            <div class="table-item item-bite-time">
+              {record.biteTime.toFixed(1)}s
+            </div>
             <div class="table-item item-chum">{record.chum ? "是" : "否"}</div>
             <div class="table-item item-lure">
-              {getLureType(record.lureType, record.lureStacks, record.lureAt)}
+              {getLureType(record)}
             </div>
             <div class="table-item item-action">
               <button onclick={() => deleteRecord(record.date)}>删除</button>
@@ -233,7 +244,8 @@
   .item-time {
     flex: 150px;
   }
-  .item-fish, .item-bait {
+  .item-fish,
+  .item-bait {
     flex: 100px;
   }
   .item-chum {
