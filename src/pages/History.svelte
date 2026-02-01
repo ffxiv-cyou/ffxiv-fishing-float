@@ -6,7 +6,7 @@
   } from "@/model/HistoryStorage";
   import SpotSelection from "@/components/SpotSelection.svelte";
   import { GameDatabase } from "@/model/GameDB";
-  import { TugType } from "@/model/InnerEnums";
+  import { LureType, TugType } from "@/model/InnerEnums";
 
   let {
     spot = $bindable(""),
@@ -42,15 +42,15 @@
   let historyStats: HistoryStatsItem[] = $state([]);
   let historyList: HistoryItem[] = $state([]);
   $effect(() => {
-    if (spotID && baitID) {
-      history.getHistory(spotID, baitID).then((records) => {
+    if (spotID) {
+      history.getHistory(spotID, baitID ? baitID : undefined).then((records) => {
         historyStats = records;
         console.log(
           `History records for spot ${spotID} and bait ${baitID}:`,
           historyStats,
         );
       });
-      history.listHistory(spotID, baitID, undefined, 100).then((records) => {
+      history.listHistory(spotID, baitID ? baitID : undefined, undefined, 100).then((records) => {
         historyList = records;
       });
 
@@ -105,6 +105,31 @@
   function getItemStyle(item: HistoryStatsItem): string {
     return `--min-time:${item.minBiteTime}; --max-time:${item.maxBiteTime};`;
   }
+
+  function getLureType(
+    lureType: number | null,
+    lureStacks: number,
+    lureAt: number,
+  ): string {
+    if (lureType === null || lureType === undefined) return "-";
+    var prefix = "";
+    switch (lureType) {
+      case LureType.Ambitious:
+        prefix = "雄心";
+        break;
+      case LureType.Modest:
+        prefix = "谦逊";
+        break;
+    }
+    return `${prefix} (x${lureStacks} @ ${lureAt.toFixed(1)}s)`;
+  }
+
+  function deleteRecord(index: number) {
+    if (confirm("确定删除该记录吗？将会重新计算统计数据。")) {
+      console.log("Deleting record:", index);
+      history.deleteHistory(index);
+    }
+  }
 </script>
 
 <div class="history">
@@ -112,7 +137,7 @@
   <div>
     <SpotSelection bind:spotID></SpotSelection>
     <select bind:value={baitID}>
-      <option value={0} disabled>选择鱼饵</option>
+      <option value={0}>所有鱼饵</option>
       {#each baitIDs as baitID}
         <option value={baitID}>{db.getItemName(baitID)}</option>
       {/each}
@@ -147,22 +172,30 @@
     <h2>详细记录</h2>
     <div class="table">
       <div class="table-header">
-        <div class="table-item">时间</div>
-        <div class="table-item">鱼饵</div>
-        <div class="table-item">鱼</div>
-        <div class="table-item">咬钩时间</div>
-        <div class="table-item">撒饵</div>
+        <div class="table-item item-time">时间</div>
+        <div class="table-item item-bait">鱼饵</div>
+        <div class="table-item item-fish">鱼</div>
+        <div class="table-item item-bite-time">杆时</div>
+        <div class="table-item item-chum">撒饵</div>
+        <div class="table-item item-lure">雄心/谦逊</div>
+        <div class="table-item item-action">操作</div>
       </div>
       <div class="table-body">
         {#each historyList as record}
           <div class="table-row">
-            <div class="table-item">
+            <div class="table-item item-time">
               {new Date(record.date).toLocaleString()}
             </div>
-            <div class="table-item">{db.getItemName(record.bait)}</div>
-            <div class="table-item">{db.getItemName(record.fish)}</div>
-            <div class="table-item">{record.biteTime.toFixed(1)} 秒</div>
-            <div class="table-item">{record.chum ? "是" : "否"}</div>
+            <div class="table-item item-bait">{db.getItemName(record.bait)}</div>
+            <div class="table-item item-fish">{db.getItemName(record.fish)}</div>
+            <div class="table-item item-bite-time">{record.biteTime.toFixed(1)}s</div>
+            <div class="table-item item-chum">{record.chum ? "是" : "否"}</div>
+            <div class="table-item item-lure">
+              {getLureType(record.lureType, record.lureStacks, record.lureAt)}
+            </div>
+            <div class="table-item item-action">
+              <button onclick={() => deleteRecord(record.date)}>删除</button>
+            </div>
           </div>
         {/each}
       </div>
@@ -172,12 +205,12 @@
 
 <style>
   .history-stats {
-    width: calc(100% - 20px);
+    width: calc(100% - 4em);
     display: block;
 
     font-size: 0.85em;
     position: relative;
-    margin: 0 10px;
+    margin: 1em 2em;
 
     user-select: none;
   }
@@ -195,6 +228,25 @@
     );
     transform: translateX(-50%);
     font-size: 12px;
+  }
+
+  .item-time {
+    flex: 150px;
+  }
+  .item-fish, .item-bait {
+    flex: 100px;
+  }
+  .item-chum {
+    flex: 50px;
+  }
+  .item-bite-time {
+    flex: 50px;
+  }
+  .item-lure {
+    flex: 120px;
+  }
+  .item-action {
+    flex: 60px;
   }
 
   .stats-item {

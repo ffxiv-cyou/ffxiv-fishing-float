@@ -26,15 +26,17 @@ interface HistoryDBSchema extends DBSchema {
   };
   historyLog: {
     key: [number]; // fishing timestamp
-    value: HistoryItem & {
-      chumNum: number
-    };
+    value: HistoryLogItem;
     indexes: {
       byZone: [number];
       byZoneBait: [number, number];
       byZoneBaitChum: [number, number, number];
     };
   }
+}
+
+type HistoryLogItem = HistoryItem & {
+  chumNum: number;
 }
 
 /**
@@ -109,7 +111,6 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
    * @returns 
    */
   static boolToNum(value: boolean): number {
-    // Ok 我知道这很奇怪。为什么不是1和0呢？因为写错了。
     return value ? 1 : 0;
   }
 
@@ -122,7 +123,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     return value !== 0;
   }
 
-  async add(session: HistoryItem): Promise<void> {
+  async addRaw(item: HistoryItem): Promise<void> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return;
@@ -131,11 +132,31 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const logTx = this.db.transaction("historyLog", "readwrite");
     const logStore = logTx.objectStore("historyLog");
     const logItem = {
-      ...session,
-      chumNum: HistoryIndexedDBBackend.boolToNum(session.chum)
+      ...item,
+      chumNum: HistoryIndexedDBBackend.boolToNum(item.chum)
     };
     await logStore.add(logItem);
     await logTx.done;
+  }
+
+  async deleteRaw(date: number): Promise<HistoryItem | undefined> {
+    if (!this.db) {
+      console.error("IndexedDB is not initialized");
+      return undefined;
+    }
+    const logTx = this.db.transaction("historyLog", "readwrite");
+    const logStore = logTx.objectStore("historyLog");
+    const deletedItem = await logStore.get([date]);
+    await logStore.delete([date]);
+    await logTx.done;
+    return deletedItem;
+  }
+
+  async add(session: HistoryItem): Promise<void> {
+    if (!this.db) {
+      console.error("IndexedDB is not initialized");
+      return;
+    }
 
     const tx = this.db.transaction("historyV2", "readwrite");
     const store = tx.objectStore("historyV2");
@@ -173,7 +194,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
    * @param chum 
    * @returns 
    */
-  async reloadHistoryFromLog(zone: number, bait: number, chum?: boolean): Promise<void> {
+  async updateFromRaw(zone: number, bait: number, chum?: boolean): Promise<void> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return;
@@ -276,7 +297,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     return Array.from(baitSet);
   }
 
-  public async getHistory(zone: number, bait: number, chum?: boolean): Promise<HistoryStatsItem[]> {
+  public async getHistory(zone: number, bait?: number, chum?: boolean): Promise<HistoryStatsItem[]> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return [];
@@ -287,8 +308,8 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
 
     const tx = this.db.transaction("historyV2", "readonly");
     const store = tx.objectStore("historyV2");
-    const useIndex = chum === undefined ? store.index("byZoneBait") : store.index("byZoneBaitChum");
-    const key = chum === undefined ? [zone, bait] : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
+    const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
     const result = await useIndex.getAll(IDBKeyRange.only(key));
     for (const item of result) {
       item.chum = HistoryIndexedDBBackend.numToBool(item.chumNum);
@@ -296,7 +317,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     return result;
   }
 
-  public async listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return [];
@@ -306,8 +327,8 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     }
     const tx = this.db.transaction("historyLog", "readonly");
     const store = tx.objectStore("historyLog");
-    const useIndex = chum === undefined ? store.index("byZoneBait") : store.index("byZoneBaitChum");
-    const key = chum === undefined ? [zone, bait] : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
+    const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
     const cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
     if (offset) {
       cursor?.advance(offset);

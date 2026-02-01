@@ -13,6 +13,14 @@ export interface HistoryItem {
   biteTime: number; // 咬钩时间（秒）
 
   date: number; // 记录时间（时间戳, ms）
+
+  lureType: number | null; // 谦逊/雄心
+  lureTarget: boolean; // 是否为目标鱼
+  lureStacks: number; // 层数
+  lureAt: number; // 最后一次的时间
+  lureHidden: number; // 诱饵隐藏鱼
+
+  hookType: number;
 }
 
 // 统计记录
@@ -76,13 +84,9 @@ export class FishingStorage {
     }
   }
 
-  public updateHistory(session: FishingSession): void {
+  public async updateHistory(session: FishingSession): Promise<void> {
+    // 没上钩，不记录
     if (session.ResultID === undefined) {
-      return;
-    }
-
-    // 空窗期刚结束的时候的时间是不准确的，忽略掉
-    if (session.ElapsedTimeMs < session.LureRestMs + 300) {
       return;
     }
 
@@ -94,15 +98,36 @@ export class FishingStorage {
       chum: session.chum,
       tugType: session.TugType || TugType.Light,
       biteTime: biteTime,
-      date: session.startTime
+      date: session.startTime,
+      lureType: session.LureType,
+      lureTarget: session.LureTarget,
+      lureStacks: session.LureStacks,
+      lureAt: session.LureAt,
+      lureHidden: session.HiddenFish,
+      hookType: session.HookType!,
+    };
+
+    await this.histories.addRaw(item);
+
+    // 空窗期刚结束的时候的时间是不准确的，忽略掉
+    if (session.ElapsedTimeMs < session.LureRestMs + 300) {
+      return;
     }
-    this.histories.add(item).then(() => {
-      console.log("Updated history:", item);
-      this.update?.();
-    });
+    await this.histories.add(item);
+
+    console.log("Updated history:", item);
+    this.update?.();
   }
 
-  public async getHistory(zone: number, bait: number, chum?: boolean): Promise<HistoryStatsItem[]> {
+  public async deleteHistory(date: number): Promise<void> {
+    const deleted = await this.histories.deleteRaw(date);
+    if (deleted !== undefined) {
+      await this.histories.updateFromRaw(deleted.zone, deleted.bait, deleted.chum);
+    }
+    this.update?.();
+  }
+
+  public async getHistory(zone: number, bait?: number, chum?: boolean): Promise<HistoryStatsItem[]> {
     this.#subscribe();
     return this.histories.getHistory(zone, bait, chum);
   }
@@ -112,7 +137,7 @@ export class FishingStorage {
     return this.histories.getBait(zone);
   }
 
-  public async listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
     this.#subscribe();
     return this.histories.listHistory(zone, bait, chum, limit, offset);
   }
@@ -132,6 +157,10 @@ export interface HistoryStorageBackend {
    * @param item 
    */
   add(item: HistoryItem): Promise<void>;
+  addRaw(item: HistoryItem): Promise<void>;
+
+  deleteRaw(date: number): Promise<HistoryItem | undefined>;
+  updateFromRaw(zone: number, bait: number, chum?: boolean): Promise<void>;
 
   /**
    * 查找记录
@@ -139,9 +168,9 @@ export interface HistoryStorageBackend {
    * @param bait 
    * @param chum 
    */
-  getHistory(zone: number, bait: number, chum?: boolean): Promise<HistoryStatsItem[]>;
+  getHistory(zone: number, bait?: number, chum?: boolean): Promise<HistoryStatsItem[]>;
 
-  listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
+  listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
   
   /**
    * 获取所有鱼饵ID
@@ -198,6 +227,18 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
       item.count += 1;
     }
     localStorage.setItem("fishingHistory", JSON.stringify(this.histories));
+    return Promise.resolve();
+  }
+
+  addRaw(session: HistoryItem): Promise<void> {
+    return Promise.resolve();
+  }
+
+  async deleteRaw(date: number): Promise<HistoryItem | undefined> {
+    return undefined;
+  }
+
+  updateFromRaw(zone: number, bait: number, chum?: boolean): Promise<void> {
     return Promise.resolve();
   }
 
