@@ -92,6 +92,18 @@
         console.error("Failed to load game data:", e);
       });
   }
+
+  let showHistory = $derived(tracker.CurrentZone);
+
+  function openHistory() {
+    const spot = tracker.CurrentZone;
+    const bait = tracker.CurrentBait;
+    if (spot === 0) {
+      return;
+    }
+    const hash = `#\/history/${spot}/${bait}`;
+    window.open(hash, "_blank");
+  }
 </script>
 
 <div class="debug-tool">
@@ -128,7 +140,10 @@
 </div>
 <Notice {message} />
 {#if showConfig || tracker.config.ShowSettingBtn}
-  <button class="setting-btn" onclick={toggleConfig}>⚙</button>
+  <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
+{/if}
+{#if showHistory}
+  <button class="round-btn history-btn" onclick={openHistory}>↗</button>
 {/if}
 {#if showConfig}
   <Setting config={tracker.config} />
@@ -140,9 +155,7 @@
     display: none;
   }
 
-  .setting-btn {
-    position: absolute;
-    left: -10px;
+  .round-btn {
     border: none;
     border-radius: 50%;
     background-color: #ffffff80;
@@ -152,5 +165,14 @@
     font-size: 11px;
     margin: 0;
     padding: 0;
+  }
+
+  .setting-btn {
+    position: absolute;
+    left: -10px;
+  }
+  .history-btn {
+    position: absolute;
+    right: -10px;
   }
 </style>
