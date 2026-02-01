@@ -391,8 +391,11 @@ export class PacketHandler {
             case 5569: // 现在感觉能钓到小型猎物！！！
                 this.tracker.setLure(LureType.Modest, epoch);
                 break;
+            case 11154: // 探索任务“XXXX”已开始。
+                this.tracker.setUsingWksBait(true);
+                break;
             case 10769: // 请通过“当前任务”窗口选择“汇报”，完成任务。
-                this.tracker.setWksBait(0);
+                this.tracker.setUsingWksBait(false);
                 break;
         }
         console.log("Log Message Packet:", id);

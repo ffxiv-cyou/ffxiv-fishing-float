@@ -96,9 +96,10 @@ export class FishingStorage {
       biteTime: biteTime,
       date: session.startTime
     }
-    this.histories.add(item);
-    console.log("Updated history:", item);
-    this.update?.();
+    this.histories.add(item).then(() => {
+      console.log("Updated history:", item);
+      this.update?.();
+    });
   }
 
   public async getHistory(zone: number, bait: number, chum?: boolean): Promise<HistoryStatsItem[]> {
@@ -130,7 +131,7 @@ export interface HistoryStorageBackend {
    * 添加一条记录
    * @param item 
    */
-  add(item: HistoryItem): void;
+  add(item: HistoryItem): Promise<void>;
 
   /**
    * 查找记录
@@ -172,7 +173,7 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
     localStorage.removeItem("fishingHistory");
   }
 
-  add(session: HistoryItem): void {
+  add(session: HistoryItem): Promise<void> {
     var item = this.histories.find((h) => h.zone === session.zone && h.bait === session.bait && h.fish === session.fish && h.chum === session.chum);
     if (item === undefined) {
       item = {
@@ -197,6 +198,7 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
       item.count += 1;
     }
     localStorage.setItem("fishingHistory", JSON.stringify(this.histories));
+    return Promise.resolve();
   }
 
   getAll(): HistoryStatsItem[] {

@@ -10,6 +10,7 @@ import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 export class FishingTracker extends EventTarget {
     private bait: number = 0;
     private wksBait: number = 0;
+    private useWksBait: boolean = false;
     private swimBait: number = 0;
     private lastFish: number = 0;
     private fisherStats: FisherStats = {
@@ -69,7 +70,7 @@ export class FishingTracker extends EventTarget {
         this.#subscribe();
         if (this.swimBait)
             return this.swimBait;
-        if (this.wksBait)
+        if (this.wksBait && this.useWksBait)
             return this.wksBait;
         return this.bait;
     }
@@ -108,6 +109,12 @@ export class FishingTracker extends EventTarget {
     public setUsingSwimbait(baitId: number) {
         this.swimBait = baitId;
         console.log(`Bait Override ID set to: ${baitId}`);
+        this.updateSub();
+    }
+
+    public setUsingWksBait(use: boolean) {
+        this.useWksBait = use;
+        console.log(`Using WKS Bait set to: ${use}`);
         this.updateSub();
     }
 
