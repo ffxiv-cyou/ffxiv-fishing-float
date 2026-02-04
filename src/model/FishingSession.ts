@@ -170,7 +170,7 @@ export class FishingSession {
         if (this.lureAt === 0)
             return 0;
 
-        return this.lureAt - this.startTime + 3500;
+        return this.lureAt - this.startTime + 5000;
     }
 
     get FailReason(): FailReason | null {
