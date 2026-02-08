@@ -20,6 +20,11 @@
 
   let spotID = $derived(parseInt(spot) || 0);
   let baitID = $derived(parseInt(bait) || 0);
+  let chumStr = $state("mixed");
+  let chum: boolean | undefined = $derived.by(() => {
+    if (chumStr === "mixed") return undefined;
+    return chumStr === "true";
+  });
 
   let history = new FishingStorage();
   let db = new GameDatabase();
@@ -44,7 +49,7 @@
   $effect(() => {
     if (spotID) {
       history
-        .getHistory(spotID, baitID >= 0 ? baitID : undefined)
+        .getHistory(spotID, baitID >= 0 ? baitID : undefined, chum)
         .then((records) => {
           historyStats = records;
           console.log(
@@ -53,7 +58,7 @@
           );
         });
       history
-        .listHistory(spotID, baitID >= 0 ? baitID : undefined, undefined, 100)
+        .listHistory(spotID, baitID >= 0 ? baitID : undefined, chum, 100)
         .then((records) => {
           historyList = records;
         });
@@ -146,6 +151,11 @@
       {#each baitIDs as baitID}
         <option value={baitID}>{db.getItemName(baitID)}</option>
       {/each}
+    </select>
+    <select bind:value={chumStr}>
+      <option value={"mixed"}>混合</option>
+      <option value={"false"}>非撒饵</option>
+      <option value={"true"}>撒饵</option>
     </select>
   </div>
   {#if historyStats.length > 0}

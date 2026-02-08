@@ -327,7 +327,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     // 根据鱼类型合并记录
     for (let i = result.length - 1; i >= 0; i--) {
       for (let j = i - 1; j >= 0; j--) {
-        if (result[i].fish === result[j].fish) {
+        if (result[i].fish === result[j].fish && result[i].chum === result[j].chum) {
           // 合并记录
           result[j].count += result[i].count;
           if (result[i].minBiteTime < result[j].minBiteTime) {
