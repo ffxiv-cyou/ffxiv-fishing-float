@@ -26,7 +26,7 @@ export class FishingHistory {
   }
 
   public addSession(session: FishingSession): void {
-    if (!session || !session.Complete)
+    if (!session || session.TugType == null)
       return;
 
     this.pendingSessions.push(session);
