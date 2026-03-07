@@ -265,6 +265,7 @@ export class FishingTracker extends EventTarget {
 
     public setFishingFail(reason: FailReason, epoch: number) {
         this.current?.setFail(reason);
+        this.history.addSession(this.current!);
         this.dispatchEvent(new Event("end"));
     }
 
