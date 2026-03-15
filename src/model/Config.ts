@@ -18,6 +18,7 @@ export class Config {
   historyColors: string[] = [];
 
   sound: 'intuition' | 'pastry' | '' = 'intuition';
+  volume: number = 100;
 
   constructor() {
     this.#subscribe = createSubscriber((update) => {
@@ -42,6 +43,7 @@ export class Config {
     this.showCatch = obj.showCatch !== undefined ? obj.showCatch : true;
     this.showSettingBtn = obj.showSettingBtn !== undefined ? obj.showSettingBtn : true;
     this.sound = obj.sound || (obj.enableSound ? 'intuition' : '');
+    this.volume = obj.volume !== undefined ? obj.volume : 100;
     this.minimalColors = obj.minimalColors || ['#eeeeee', '#69aff3', '#cc99ff', '#f1c64a'];
     this.mergeChumTime = obj.mergeChumTime !== undefined ? obj.mergeChumTime : true;
     this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'off';
@@ -128,6 +130,14 @@ export class Config {
   }
   set Sound(value: 'intuition' | 'pastry' | '') {
     this.sound = value;
+    this.save();
+  }
+  get Volume() {
+    this.#subscribe();
+    return this.volume;
+  }
+  set Volume(value: number) {
+    this.volume = value;
     this.save();
   }
 

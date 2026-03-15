@@ -195,4 +195,4 @@
     {historyStats}
   ></Timer>
 {/if}
-<TugSound bind:this={sound} sound={tracker.config.Sound} />
+<TugSound bind:this={sound} sound={tracker.config.Sound} volume={tracker.config.Volume} />

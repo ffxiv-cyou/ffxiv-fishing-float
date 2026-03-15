@@ -310,13 +310,22 @@
       <label for="sound-pastry">鱼捞</label>
     </div>
     <div class="setting-item">
+      <span class="setting-name">音量大小</span>
+      <input
+        type="range"
+        min="0"
+        max="100"
+        bind:value={config.Volume}
+      />
+    </div>
+    <div class="setting-item">
       <span class="setting-name">测试</span>
       <div class="test-sound-buttons">
         <button onclick={() => testSound(0)}>轻杆</button>
         <button onclick={() => testSound(1)}>中杆</button>
         <button onclick={() => testSound(2)}>重杆</button>
       </div>
-      <Sound bind:this={sound} sound={config.Sound} />
+      <Sound bind:this={sound} sound={config.Sound} volume={config.Volume} />
     </div>
     <h2>其他</h2>
     <div class="setting-item">

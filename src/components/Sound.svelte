@@ -3,8 +3,10 @@
 
   let {
     sound,
+    volume
   }: {
     sound: string;
+    volume?: number;
   } = $props();
 
   let sounds: HTMLAudioElement[] = $state([]);
@@ -30,6 +32,7 @@
     if (sound === "") {
       return;
     }
+    sounds[type].volume = (volume ?? 100) / 100;
     sounds[type]?.play();
   }
 </script>
