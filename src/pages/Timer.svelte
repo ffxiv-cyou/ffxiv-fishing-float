@@ -4,6 +4,7 @@
   import type { FishingTracker } from "../model/FishingTracker";
   import type { HistoryStatsItem } from "../model/HistoryStorage";
   import { LureType, TugType } from "../model/InnerEnums";
+  import type { FishDurationResponse } from "@/model/API";
 
   let {
     tracker,
@@ -97,6 +98,9 @@
     return [];
   });
 
+  /**
+   * 当前不可能钓到的鱼，用于淡化显示
+   */
   let downplay: number[] = $derived.by(() => {
     let result = [];
     if (current?.SlapFish) result.push(current.SlapFish);
@@ -151,22 +155,29 @@
     return merged;
   }
 
-  let historyStats: HistoryStatsItem[] = $state([]);
+  /**
+   * 本地的钓鱼记录
+   */
+  let localHistory: HistoryStatsItem[] = $state([]);
   $effect(() => {
     let cancelled = false;
     const chumState = chum;
     tracker.history
-      .getHistory(zone, bait, tracker.config.MergeChumTime ? undefined : chumState)
+      .getHistory(
+        zone,
+        bait,
+        tracker.config.MergeChumTime ? undefined : chumState,
+      )
       .then((stats) => {
         if (cancelled) {
           return;
         }
-        historyStats = mergeStats(stats, chumState);
+        localHistory = mergeStats(stats, chumState);
       })
       .catch((err) => {
         if (!cancelled) {
           console.error("Failed to load fishing history stats:", err);
-          historyStats = [];
+          localHistory = [];
         }
       });
 
@@ -174,6 +185,81 @@
       cancelled = true;
     };
   });
+
+  /**
+   * 在线的钓鱼记录
+   */
+  let onlineHistory: FishDurationResponse | undefined = $state(undefined);
+  $effect(() => {
+    let cancelled = false;
+    if (!tracker.config.UploadHistory || zone === 0) {
+      onlineHistory = undefined;
+      return;
+    }
+
+    tracker.api
+      .getFishingDuration(zone, {})
+      .then((response) => {
+        if (!cancelled) {
+          onlineHistory = response;
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("Failed to load online fishing history:", err);
+          onlineHistory = undefined;
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  });
+
+  let historyStats: HistoryStatsItem[] = $derived.by(() => {
+    if (onlineHistory === undefined) {
+      return localHistory;
+    }
+
+    // 转换在线数据
+    let filtered = onlineHistory.distributions.filter(
+      (d) => d.bait_id === bait,
+    );
+    if (!tracker.config.MergeChumTime) {
+      filtered = filtered.filter((d) => d.is_chum === chum);
+    }
+    let converted : HistoryStatsItem[] = filtered.map((d) => ({
+      zone: zone,
+      fish: d.fish_id,
+      bait: d.bait_id,
+      tugType: d.tug_type - 1, // 在线数据的tug_type是从1开始的，而本地数据是从0开始的
+      count: d.count,
+      minBiteTime: d.range.effective_min / 1000,
+      maxBiteTime: d.range.effective_max / 1000,
+      chum: d.is_chum,
+    }));
+    let remoteHistory = mergeStats(converted, chum);
+
+    // 合并本地和在线数据
+    let merged = localHistory.map((item) => ({ ...item }));
+    for (let stat of remoteHistory) {
+      let existing = merged.find(
+        (s) =>
+          s.fish === stat.fish &&
+          s.bait === stat.bait &&
+          s.chum === stat.chum,
+      );
+      if (existing) {
+        existing.count += stat.count;
+        existing.minBiteTime = Math.min(existing.minBiteTime, stat.minBiteTime);
+        existing.maxBiteTime = Math.max(existing.maxBiteTime, stat.maxBiteTime);
+      } else {
+        merged.push(stat);
+      }
+    }
+    return merged;
+  });
+
   //#endregion
 </script>
 
@@ -195,4 +281,8 @@
     {historyStats}
   ></Timer>
 {/if}
-<TugSound bind:this={sound} sound={tracker.config.Sound} volume={tracker.config.Volume} />
+<TugSound
+  bind:this={sound}
+  sound={tracker.config.Sound}
+  volume={tracker.config.Volume}
+/>

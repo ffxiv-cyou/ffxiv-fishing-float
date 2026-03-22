@@ -361,7 +361,6 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     if (offset && cursor) {
       cursor = await cursor.advance(offset);
     }
-    console.log("Listing history with cursor:", cursor);
     const results: HistoryItem[] = [];
     let count = 0;
     while (cursor && (!limit || count < limit)) {
@@ -377,6 +376,22 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     }
 
     return results;
+  }
+
+  public async countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+    if (!this.db) {
+      console.error("IndexedDB is not initialized");
+      return 0;
+    }
+    if (!this.db.objectStoreNames.contains("historyLog")) {
+      return 0;
+    }
+    const tx = this.db.transaction("historyLog", "readonly");
+    const store = tx.objectStore("historyLog");
+    const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
+    const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
+    const count = await useIndex.count(IDBKeyRange.only(key));
+    return count;
   }
 
   public async clear(): Promise<void> {

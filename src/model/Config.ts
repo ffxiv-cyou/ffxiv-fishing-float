@@ -4,20 +4,35 @@ export class Config {
   #subscribe;
   update: (() => void) | null = null;
 
+  /** 样式: 'default'-默认, 'minimal'-极简(渔人的直感) */
   theme: string = 'default';
+  /** 是否显示历史统计 */
   showHistory: boolean = true;
+  /** 是否启用数据上报(匿名上传历史统计以帮助其他捕鱼人) */
   uploadHistory: boolean = true;
+  /** 是否使用在线历史数据（如果启用数据上报则默认为true） */
+  useOnlineHistory: boolean = false;
+  /** 是否显示钓场组件(默认样式下) */
   showZone: boolean = true;
+  /** 是否显示鱼饵组件(默认样式下) */
   showBait: boolean = true;
+  /** 是否显示渔获组件(默认样式下) */
   showCatch: boolean = true;
+  /** 设置入口显示方式: true-显示按钮, false-双击进度条打开 */
   showSettingBtn: boolean = true;
+  /** 是否合并显示撒饵和非撒饵时间 */
   mergeChumTime: boolean = true;
+  /** 雄心/谦逊空窗期处理: 'off'-关闭, 'label'-显示标记, 'tweak'-调整历史显示 */
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
 
+  /** 极简模式颜色: [抛竿, 轻杆, 中杆, 重杆] */
   minimalColors: string[] = [];
+  /** 历史统计颜色: [轻杆, 中杆, 重杆] */
   historyColors: string[] = [];
 
+  /** 咬钩提醒音效: 'intuition'-渔人的直感, 'pastry'-鱼捞, ''-关 */
   sound: 'intuition' | 'pastry' | '' = 'intuition';
+  /** 音量大小 (0-100) */
   volume: number = 100;
 
   constructor() {
@@ -49,6 +64,7 @@ export class Config {
     this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'off';
     this.uploadHistory = obj.uploadHistory !== undefined ? obj.uploadHistory : true;
     this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a'];
+    this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
   }
 
   reset() {
@@ -76,6 +92,7 @@ export class Config {
     this.notifyOtherWindows();
   }
 
+  /** 样式: 'default'-默认, 'minimal'-极简(渔人的直感) */
   get Theme() {
     this.#subscribe();
     return this.theme;
@@ -84,6 +101,7 @@ export class Config {
     this.theme = value;
     this.save();
   }
+  /** 是否显示历史统计 */
   get ShowHistory() {
     this.#subscribe();
     return this.showHistory;
@@ -92,6 +110,7 @@ export class Config {
     this.showHistory = value;
     this.save();
   }
+  /** 是否显示钓场组件(默认样式下) */
   get ShowZone() {
     this.#subscribe();
     return this.showZone;
@@ -100,6 +119,7 @@ export class Config {
     this.showZone = value;
     this.save();
   }
+  /** 是否显示鱼饵组件(默认样式下) */
   get ShowBait() {
     this.#subscribe();
     return this.showBait;
@@ -108,6 +128,7 @@ export class Config {
     this.showBait = value;
     this.save();
   }
+  /** 是否显示渔获组件(默认样式下) */
   get ShowCatch() {
     this.#subscribe();
     return this.showCatch;
@@ -116,6 +137,7 @@ export class Config {
     this.showCatch = value;
     this.save();
   }
+  /** 设置入口显示方式: true-显示按钮, false-双击进度条打开 */
   get ShowSettingBtn() {
     this.#subscribe();
     return this.showSettingBtn;
@@ -124,6 +146,7 @@ export class Config {
     this.showSettingBtn = value;
     this.save();
   }
+  /** 咬钩提醒音效: 'intuition'-渔人的直感, 'pastry'-鱼捞, ''-关 */
   get Sound() {
     this.#subscribe();
     return this.sound;
@@ -132,6 +155,7 @@ export class Config {
     this.sound = value;
     this.save();
   }
+  /** 音量大小 (0-100) */
   get Volume() {
     this.#subscribe();
     return this.volume;
@@ -141,6 +165,7 @@ export class Config {
     this.save();
   }
 
+  /** 极简模式-抛竿颜色 */
   get IdleColor() {
     this.#subscribe();
     return this.minimalColors[0];
@@ -149,6 +174,7 @@ export class Config {
     this.minimalColors[0] = value;
     this.save();
   }
+  /** 极简模式-轻杆颜色 */
   get TugLightColor() {
     this.#subscribe();
     return this.minimalColors[1];
@@ -157,6 +183,7 @@ export class Config {
     this.minimalColors[1] = value;
     this.save();
   }
+  /** 极简模式-中杆颜色 */
   get TugMediumColor() {
     this.#subscribe();
     return this.minimalColors[2];
@@ -165,6 +192,7 @@ export class Config {
     this.minimalColors[2] = value;
     this.save();
   }
+  /** 极简模式-重杆颜色 */
   get TugHeavyColor() {
     this.#subscribe();
     return this.minimalColors[3];
@@ -174,6 +202,7 @@ export class Config {
     this.save();
   }
 
+  /** 是否合并显示撒饵和非撒饵时间 */
   get MergeChumTime() {
     this.#subscribe();
     return this.mergeChumTime;
@@ -183,6 +212,7 @@ export class Config {
     this.save();
   }
 
+  /** 雄心/谦逊空窗期处理: 'off'-关闭, 'label'-显示标记, 'tweak'-调整历史显示 */
   get LureEmptyWindowHandling() {
     this.#subscribe();
     return this.lureEmptyWindowHandling;
@@ -192,6 +222,7 @@ export class Config {
     this.save();
   }
 
+  /** 是否启用数据上报(匿名上传历史统计以帮助其他捕鱼人) */
   get UploadHistory() {
     this.#subscribe();
     return this.uploadHistory;
@@ -201,6 +232,17 @@ export class Config {
     this.save();
   }
 
+  /** 是否使用在线历史数据（如果启用数据上报则默认为true） */
+  get UseOnlineHistory() {
+    this.#subscribe();
+    return this.useOnlineHistory;
+  }
+  set UseOnlineHistory(value: boolean) {
+    this.useOnlineHistory = value;
+    this.save();
+  }
+
+  /** 历史统计-轻杆颜色 */
   get HistoryLightColor() {
     this.#subscribe();
     return this.historyColors[0];
@@ -209,6 +251,7 @@ export class Config {
     this.historyColors[0] = value;
     this.save();
   }
+  /** 历史统计-中杆颜色 */
   get HistoryMediumColor() {
     this.#subscribe();
     return this.historyColors[1];
@@ -217,6 +260,7 @@ export class Config {
     this.historyColors[1] = value;
     this.save();
   }
+  /** 历史统计-重杆颜色 */
   get HistoryHeavyColor() {
     this.#subscribe();
     return this.historyColors[2];

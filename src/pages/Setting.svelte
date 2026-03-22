@@ -12,7 +12,7 @@
   }
 
   function openHistoryPage() {
-    window.open("/#/history", "History", "width=1000,height=600");
+    window.open("/web/#/info", "History", "width=1000,height=600");
   }
 </script>
 

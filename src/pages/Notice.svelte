@@ -33,7 +33,7 @@
   }
 
   function onClickHelp(evt: MouseEvent) {
-    window.open("/help.html", "_blank");
+    window.open("/web/#/help/overlay", "_blank");
     evt.preventDefault();
   }
 
@@ -51,7 +51,7 @@
     >
     <p class="xiv-text blue">{message.content}</p>
     <p class="xiv-text blue">
-      <a href="/help.html" target="_blank" onclick={onClickHelp}>查看帮助</a>
+      <a href="/web/#/help/overlay" target="_blank" onclick={onClickHelp}>查看帮助</a>
       <a href="/" onclick={onClickReload}>重载页面</a>
     </p>
   </div>

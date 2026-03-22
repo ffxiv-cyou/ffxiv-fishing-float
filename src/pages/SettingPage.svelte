@@ -280,6 +280,20 @@
           "调整历史显示"则会临时调整历史杆时的显示
         </span>
       </div>
+      {#if config.UploadHistory}
+        <div class="setting-item">
+          <span class="setting-name">在线数据</span>
+          <input
+            type="checkbox"
+            id="use-online-history"
+            bind:checked={config.UseOnlineHistory}
+          />
+          <label for="use-online-history">启用</label>
+          <span class="setting-desc"
+            >启用后，会将其他捕鱼人上报的数据与本地数据合并显示</span
+          >
+        </div>
+      {/if}
     {/if}
     <h2>咬钩提醒</h2>
     <div class="setting-item">
@@ -311,12 +325,7 @@
     </div>
     <div class="setting-item">
       <span class="setting-name">音量大小</span>
-      <input
-        type="range"
-        min="0"
-        max="100"
-        bind:value={config.Volume}
-      />
+      <input type="range" min="0" max="100" bind:value={config.Volume} />
     </div>
     <div class="setting-item">
       <span class="setting-name">测试</span>
@@ -335,7 +344,11 @@
     <div class="setting-item">
       <span class="setting-name">重置</span>
       <button onclick={() => config.reset()}>重置设置</button>
-      <button onclick={() => { if (confirm("确定要重置历史记录吗？")) history.clear(); }}>重置历史记录</button>
+      <button
+        onclick={() => {
+          if (confirm("确定要重置所有历史记录吗？重置之后无法恢复。\n你可以在历史页面单独删除指定的记录。")) history.clear();
+        }}>重置历史记录</button
+      >
     </div>
   </div>
   <div class="preview" data-show={showPreview}>

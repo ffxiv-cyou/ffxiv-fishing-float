@@ -142,6 +142,11 @@ export class FishingStorage {
     return this.histories.listHistory(zone, bait, chum, limit, offset);
   }
 
+  public async countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+    this.#subscribe();
+    return this.histories.countHistory(zone, bait, chum);
+  }
+
   public clear(): void {
     this.histories.clear();
     this.update?.();
@@ -171,7 +176,8 @@ export interface HistoryStorageBackend {
   getHistory(zone: number, bait?: number, chum?: boolean): Promise<HistoryStatsItem[]>;
 
   listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
-  
+  countHistory(zone: number, bait?: number, chum?: boolean): Promise<number>;
+
   /**
    * 获取所有鱼饵ID
    */
@@ -249,6 +255,11 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
   listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
     // Not supported in localStorage backend
     return Promise.resolve([]);
+  }
+
+  countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+    // Not supported in localStorage backend
+    return Promise.resolve(0);
   }
 
   async getBait(zone: number): Promise<number[]> {

@@ -1,12 +1,7 @@
-import History from "@/pages/History.svelte";
 import Main from "@/pages/Main.svelte";
 import SettingPage from "@/pages/SettingPage.svelte";
 
-export interface RouteConfig {
-  path: string;
-  name: string;
-  component: any;
-}
+import type { RouteConfig } from "./define";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -19,9 +14,4 @@ export const routes: Array<RouteConfig> = [
     name: "设置",
     component: SettingPage
   },
-  {
-    path: "/history/:spot/:bait",
-    name: "钓鱼记录",
-    component: History
-  }
 ];

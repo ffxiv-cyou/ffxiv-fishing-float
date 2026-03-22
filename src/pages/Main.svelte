@@ -93,15 +93,13 @@
       });
   }
 
-  let showHistory = $derived(tracker.CurrentZone);
-
   function openHistory() {
     const spot = tracker.CurrentZone;
     const bait = tracker.CurrentBait;
+    let hash = `/web/#/info/${spot}/${bait}`;
     if (spot === 0) {
-      return;
+      hash = `/web/#/info`;
     }
-    const hash = `#\/history/${spot}/${bait}`;
     window.open(hash, "_blank", "width=1000,height=600");
   }
 </script>
@@ -109,11 +107,10 @@
 <div class="debug-tool">
   <div>
     <h2>钓鱼悬浮窗</h2>
+    <p>在ACT中添加此悬浮窗后开始使用</p>
     <p>
-      在ACT中添加此悬浮窗后开始使用。<br />请参考<a
-        href="/help.html"
-        target="_blank">帮助页面</a
-      >了解详细的安装步骤。
+      <a href="/web/#/help/overlay" target="_blank">安装方法</a> |
+      <a href="/web/" target="_blank">查看数据</a>
     </p>
   </div>
   <details>
@@ -141,9 +138,7 @@
 <Notice {message} />
 {#if showConfig || tracker.config.ShowSettingBtn}
   <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
-  {#if showHistory}
-    <button class="round-btn history-btn" onclick={openHistory}>↗</button>
-  {/if}
+  <button class="round-btn history-btn" onclick={openHistory}>↗</button>
 {/if}
 {#if showConfig}
   <Setting config={tracker.config} />
@@ -170,9 +165,11 @@
   .setting-btn {
     position: absolute;
     left: -10px;
+    top: -16px;
   }
   .history-btn {
     position: absolute;
     left: 10px;
+    top: -16px;
   }
 </style>

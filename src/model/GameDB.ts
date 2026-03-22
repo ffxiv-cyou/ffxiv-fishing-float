@@ -3,7 +3,8 @@ import { createSubscriber } from "svelte/reactivity";
 export interface PlaceTree {
   name: string;
   id: number;
-  children: PlaceTree[];
+  children?: PlaceTree[];
+  fish?: number[];
 }
 
 export class GameDatabase {
@@ -70,5 +71,21 @@ export class GameDatabase {
   getPlaceTree(): PlaceTree[] {
     this.#subscribe();
     return this.placeTree;
+  }
+
+  getPlaceTreeByID(id: number, tree: PlaceTree[] = this.placeTree): PlaceTree | null {
+    this.#subscribe();
+    for (const node of tree) {
+      if (node.id === id && node.children === undefined) {
+        return node;
+      }
+      if (node.children) {
+        const found = this.getPlaceTreeByID(id, node.children);
+        if (found) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 }

@@ -8,6 +8,7 @@
   export type RouteProps = {
     path?: string;
     url?: string;
+    title?: string;
     component?: Component<any, Record<string, any>>; //| AsyncSvelteComponent;
     [additionalProp: string]: unknown;
   };
@@ -73,14 +74,23 @@
     for (const [key, value] of Object.entries(params)) {
       newHash = newHash.replace(`:${key}`, encodeURIComponent(value));
     }
-    console.log("Navigating to hash:", newHash);
     location.hash = `#${newHash}`;
   }
+
+  function setTitle(title: string) {
+    document.title = title;
+  }
+
+  $effect(() => {
+    if (matched && title) {
+      setTitle(title);
+    }
+  });
 
 </script>
 
 {#if matched}
   {#if PropComponent}
-    <PropComponent {...routeParams} {...rest} navigate={updateHash} />
+    <PropComponent {...routeParams} {...rest} navigate={updateHash} setTitle={setTitle} />
   {/if}
 {/if}
