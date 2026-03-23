@@ -149,7 +149,7 @@
         existing.minBiteTime = Math.min(existing.minBiteTime, minBiteTime);
         existing.maxBiteTime = Math.max(existing.maxBiteTime, maxBiteTime);
       } else {
-        merged.push({ ...stat, minBiteTime, maxBiteTime });
+        merged.push({ ...stat, minBiteTime, maxBiteTime, chum });
       }
     }
     return merged;
