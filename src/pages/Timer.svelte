@@ -217,7 +217,7 @@
   });
 
   let historyStats: HistoryStatsItem[] = $derived.by(() => {
-    if (onlineHistory === undefined) {
+    if (onlineHistory === undefined || onlineHistory.distributions == null) {
       return localHistory;
     }
 
