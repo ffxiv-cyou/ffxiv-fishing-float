@@ -3,23 +3,25 @@
   import { Tabs, TabItem } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
-  import type {
-    FishDurationDistribution,
-    FishDurationResponse,
-  } from "@/model/API";
+  import type { DurationBucket, FishDurationDistribution } from "@/model/API";
+  import { downSampleBuckets, mergeChumBuckets } from "./data_helper";
+  import HeatmapView from "./HeatmapView.svelte";
 
   let {
     fishes,
     tracker,
     durations,
+    buckets,
   }: {
     fishes: number[];
     durations: FishDurationDistribution[];
     tracker: FishingTracker;
+    buckets: DurationBucket[];
   } = $props();
 
   let isFiltered = $state(false);
   let isChum = $state(false);
+  let showHeatmap = $state(false);
 
   function filter(d: FishDurationDistribution) {
     if (!isFiltered) return true;
@@ -28,6 +30,27 @@
     } else {
       return !d.is_chum;
     }
+  }
+
+  function filterBucket(d: DurationBucket) {
+    if (!isFiltered) return true;
+    if (isChum) {
+      return d.is_chum;
+    } else {
+      return !d.is_chum;
+    }
+  }
+
+  function getHeatmapBuckets(fishID: number) {
+    let filtered = buckets.filter(
+      (b) => b.fish_id === fishID && filterBucket(b),
+    );
+    if (!isFiltered) {
+      filtered = mergeChumBuckets(filtered);
+    }
+    return downSampleBuckets(filtered, 500).sort(
+      (a, b) => b.fish_id - a.fish_id,
+    );
   }
 
   function getFishDistribution(fishID: number) {
@@ -55,17 +78,25 @@
       {/snippet}
 
       <div class="flex gap-4">
+        <Toggle bind:checked={showHeatmap}>热力图</Toggle>
         <Toggle bind:checked={isFiltered}>过滤</Toggle>
         {#if isFiltered}
           <Toggle bind:checked={isChum}>撒饵</Toggle>
         {/if}
       </div>
-
-      <SpotFishView
-        title="bait"
-        durations={getFishDistribution(fishID)}
-        db={tracker.db}
-      />
+      {#if showHeatmap}
+        <HeatmapView
+          title="bait"
+          buckets={getHeatmapBuckets(fishID)}
+          db={tracker.db}
+        />
+      {:else}
+        <SpotFishView
+          title="bait"
+          durations={getFishDistribution(fishID)}
+          db={tracker.db}
+        />
+      {/if}
     </TabItem>
   {/each}
 </Tabs>

@@ -1,13 +1,15 @@
 <script lang="ts">
-  import type { FishDurationDistribution } from "@/model/API";
+  import type { DurationBucket, FishDurationDistribution } from "@/model/API";
   import type { GameDatabase } from "@/model/GameDB";
   import type uPlot from "uplot";
 
   let {
     data,
+    buckets,
     db,
   }: {
-    data: FishDurationDistribution[];
+    data?: FishDurationDistribution[];
+    buckets?: DurationBucket[];
     db: GameDatabase;
   } = $props();
 
@@ -34,10 +36,32 @@
   }
 
   let single = $derived.by(() => {
+    if (!data) return null;
     if (index < 0 || index >= data.length) {
       return null;
     }
     return data[index];
+  });
+
+  let bucket = $derived.by(() => {
+    if (!buckets) return null;
+    if (index < 0 || index >= buckets.length) {
+      return null;
+    }
+    return buckets[index];
+  });
+
+  let bucketInfo = $derived.by(() => {
+    if (!bucket) return null;
+    const beginTime = bucket.start_ms / 1000;
+    const endTime =
+      (bucket.start_ms + bucket.size_ms * bucket.buckets.length) / 1000;
+    const blockIdx = Math.floor((value - beginTime) / (bucket.size_ms / 1000));
+    const count = bucket.buckets[blockIdx] || 0;
+    const blockBegin = beginTime + (blockIdx * bucket.size_ms) / 1000;
+    const blockEnd = blockBegin + bucket.size_ms / 1000;
+
+    return { beginTime, endTime, blockIdx, count, blockBegin, blockEnd };
   });
 </script>
 
@@ -45,7 +69,9 @@
   <div class="p-2 bg-white rounded shadow">
     <div>
       <span class="font-semibold">{db.getItemName(single.fish_id)}</span>
-      <span class="text-sm text-gray-500">{getTugTypeName(single.tug_type)}</span>
+      <span class="text-sm text-gray-500"
+        >{getTugTypeName(single.tug_type)}</span
+      >
       <span class="text-sm text-gray-500">{value.toFixed(1)}s</span>
       {#if single.bait_id === 0}
         <span class="text-sm text-gray-500">合并</span>
@@ -82,5 +108,38 @@
       <span class="font-semibold">样本数:</span>
       {single.count}
     </div>
+  </div>
+{/if}
+
+{#if bucket && bucketInfo}
+  <div class="p-2 bg-white rounded shadow">
+    <div>
+      <span class="font-semibold">{db.getItemName(bucket.fish_id)}</span>
+      <span class="text-sm text-gray-500"
+        >{getTugTypeName(bucket.tug_type)}</span
+      >
+      {#if bucket.bait_id === 0}
+        <span class="text-sm text-gray-500">合并</span>
+      {/if}
+    </div>
+    {#if bucket.bait_id !== 0}
+      <div>
+        <span class="font-semibold">鱼饵:</span>
+        <span>{db.getItemName(bucket.bait_id)}</span>
+        {#if bucket.is_chum}
+          <span class="text-sm text-blue-500">撒饵</span>
+        {/if}
+      </div>
+    {/if}
+    {#if bucketInfo}
+      <div>
+        <span class="font-semibold">区间:</span>
+        {bucketInfo.blockBegin.toFixed(1)}s - {bucketInfo.blockEnd.toFixed(1)}s
+      </div>
+      <div>
+        <span class="font-semibold">样本数:</span>
+        {bucketInfo.count}
+      </div>
+    {/if}
   </div>
 {/if}

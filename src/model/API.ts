@@ -55,6 +55,42 @@ export class API {
     }
     return await resp.json();
   }
+  
+  /**
+   * Get fishing duration distribution for a specific fishing spot
+   * @param spotID spot ID, required
+   * @param opt optional parameters for filtering the results
+   * @returns fishing duration distribution
+   */
+  public async getSpotStats(spotID: number, opt?: {
+    baitID?: number;
+    fishID?: number;
+    isChum?: boolean;
+    minCount?: number;
+  }): Promise<SpotStatsResponse> {
+    let query = `?spot_id=${spotID}`;
+    if (opt?.baitID) {
+      query += `&bait_id=${opt.baitID}`;
+    }
+    if (opt?.fishID) {
+      query += `&fish_id=${opt.fishID}`;
+    }
+    if (opt?.isChum !== undefined) {
+      query += `&is_chum=${opt.isChum}`;
+    }
+    if (opt?.minCount !== undefined) {
+      query += `&min_count=${opt.minCount}`;
+    }
+
+    const resp = await fetch(`${this.basePath}/spot/stats${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to get spot info: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
 
   generateHeader(data: Uint8Array): { [key: string]: string } {
     var now = Date.now();
@@ -77,7 +113,7 @@ export class API {
 
 export interface FishDurationResponse {
   spot_id: number;
-  updated_at: string;
+  updated_at: number;
   total: number;
   filtered: number;
   distributions: Array<FishDurationDistribution>;
@@ -108,4 +144,38 @@ export interface FishDurationDistribution {
     p95: number;
     p99: number;
   }
+}
+
+export interface DurationBucket {
+  bait_id: number;
+  fish_id: number;
+  is_chum: boolean;
+  tug_type: number;
+  buckets: Array<number>;
+  start_ms: number;
+  size_ms: number;
+}
+
+export interface FishProbabilityItem {
+  id: number;
+  bait: number;
+  tug: number;
+  rate: number;
+  count: number;
+  is_hidden: boolean;
+}
+
+export interface SpotStatsResponse {
+  spot_id: number;
+  updated_at: number;
+  duration: {
+    distributions: Array<FishDurationDistribution>;
+    merged: Array<FishDurationDistribution>;
+    buckets: Array<DurationBucket>;
+    total: number;
+    filtered: number;
+  };
+  probability: {
+    rates: Array<FishProbabilityItem>;
+  };
 }

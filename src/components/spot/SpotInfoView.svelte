@@ -7,8 +7,9 @@
   import { Tabs, TabItem } from "flowbite-svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
   import type {
+    DurationBucket,
     FishDurationDistribution,
-    FishDurationResponse,
+    SpotStatsResponse,
   } from "@/model/API";
   import SpotInfoSelfHistory from "./SpotInfoSelfHistory.svelte";
 
@@ -31,15 +32,15 @@
   });
 
   let loading = $state(false);
-  let durations: FishDurationResponse | null = $state(null);
+  let spotStats: SpotStatsResponse | null = $state(null);
   let merged: FishDurationDistribution[] = $derived.by(() => {
-    const d = new Array(...(durations?.merged ?? []));
+    const d = new Array(...(spotStats?.duration?.merged ?? []));
     d.sort((a, b) => b.fish_id - a.fish_id);
     return d;
   });
 
   let all: FishDurationDistribution[] = $derived.by(() => {
-    const d = new Array(...(durations?.distributions ?? []));
+    const d = new Array(...(spotStats?.duration?.distributions ?? []));
     d.sort((a, b) => b.fish_id - a.fish_id);
     return d;
   });
@@ -48,10 +49,12 @@
     Array.from(new Set(all.map((d) => d.bait_id))).sort((a, b) => b - a),
   );
 
+  let buckets : DurationBucket[] = $derived.by(() => spotStats?.duration?.buckets ?? []);
+
   async function loadFishingDuration(spot: number) {
     loading = true;
     try {
-      durations = await tracker.api.getFishingDuration(spot, {});
+      spotStats = await tracker.api.getSpotStats(spot, {});
     } catch (error) {
       console.error("Failed to load fishing duration:", error);
     } finally {
@@ -82,14 +85,14 @@
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByBait {tracker} {baits} durations={all} />
+      <SpotInfoByBait {tracker} {baits} durations={all} buckets={buckets} />
     {/if}
   </TabItem>
   <TabItem title="按渔获" key="by-fish">
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByFish {tracker} {fishes} durations={all} />
+      <SpotInfoByFish {tracker} {fishes} durations={all} buckets={buckets} />
     {/if}
   </TabItem>
   <TabItem title="我的记录" key="my-history">
