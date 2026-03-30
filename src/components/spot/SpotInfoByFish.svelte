@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Toggle } from "flowbite-svelte";
+  import { Heading, Toggle } from "flowbite-svelte";
   import { Tabs, TabItem } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
@@ -49,7 +49,7 @@
       filtered = mergeChumBuckets(filtered);
     }
     return downSampleBuckets(filtered, 500).sort(
-      (a, b) => b.fish_id - a.fish_id,
+      (a, b) => b.bait_id - a.bait_id,
     );
   }
 
@@ -77,7 +77,8 @@
         </div>
       {/snippet}
 
-      <div class="flex gap-4">
+      <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
+      <div class="flex gap-4 mt-2">
         <Toggle bind:checked={showHeatmap}>热力图</Toggle>
         <Toggle bind:checked={isFiltered}>过滤</Toggle>
         {#if isFiltered}

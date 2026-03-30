@@ -1,20 +1,27 @@
 <script lang="ts">
-  import { Tabs, TabItem, Toggle, P } from "flowbite-svelte";
+  import { Tabs, TabItem, Toggle, P, Heading } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
-  import type { DurationBucket, FishDurationDistribution } from "@/model/API";
+  import type {
+    DurationBucket,
+    FishDurationDistribution,
+    FishProbabilityItem,
+  } from "@/model/API";
   import HeatmapView from "./HeatmapView.svelte";
   import { downSampleBuckets, mergeChumBuckets } from "./data_helper";
+  import FishRateView from "./FishRateView.svelte";
 
   let {
     baits,
     tracker,
     durations,
     buckets,
+    rates,
   }: {
     baits: number[];
     durations: FishDurationDistribution[];
     buckets: DurationBucket[];
+    rates: FishProbabilityItem[];
     tracker: FishingTracker;
   } = $props();
 
@@ -58,6 +65,12 @@
       .filter(filter)
       .sort((a, b) => b.fish_id - a.fish_id);
   }
+
+  function getFishRates(baitID: number) {
+    return rates
+      .filter((d) => d.bait === baitID)
+      .sort((a, b) => b.id - a.id);
+  }
 </script>
 
 {#if baits.length === 0}
@@ -80,7 +93,9 @@
             {tracker.db.getItemName(baitID)}
           </div>
         {/snippet}
-        <div class="flex gap-4">
+        <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
+
+        <div class="flex gap-4 mt-2">
           <Toggle bind:checked={showHeatmap}>热力图</Toggle>
           <Toggle bind:checked={isFiltered}>过滤</Toggle>
           {#if isFiltered}
@@ -100,6 +115,13 @@
             db={tracker.db}
           />
         {/if}
+
+        <Heading tag="h2" class="relative text-2xl leading-tight">概率</Heading>
+        <FishRateView
+          title="fish"
+          rates={getFishRates(baitID)}
+          db={tracker.db}
+        />
       </TabItem>
     {/each}
   </Tabs>

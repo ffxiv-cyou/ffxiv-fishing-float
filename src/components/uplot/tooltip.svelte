@@ -1,15 +1,21 @@
 <script lang="ts">
-  import type { DurationBucket, FishDurationDistribution } from "@/model/API";
+  import type {
+    DurationBucket,
+    FishDurationDistribution,
+    FishProbabilityItem,
+  } from "@/model/API";
   import type { GameDatabase } from "@/model/GameDB";
   import type uPlot from "uplot";
 
   let {
     data,
     buckets,
+    rates,
     db,
   }: {
     data?: FishDurationDistribution[];
     buckets?: DurationBucket[];
+    rates?: FishProbabilityItem[];
     db: GameDatabase;
   } = $props();
 
@@ -62,6 +68,14 @@
     const blockEnd = blockBegin + bucket.size_ms / 1000;
 
     return { beginTime, endTime, blockIdx, count, blockBegin, blockEnd };
+  });
+
+  let rateInfo = $derived.by(() => {
+    if (!rates) return null;
+    if (index < 0 || index >= rates.length) {
+      return null;
+    }
+    return rates[index];
   });
 </script>
 
@@ -141,5 +155,28 @@
         {bucketInfo.count}
       </div>
     {/if}
+  </div>
+{/if}
+
+{#if rateInfo}
+  <div class="p-2 bg-white rounded shadow">
+    <div>
+      <span class="font-semibold">{db.getItemName(rateInfo.id)}</span>
+      <span class="text-sm text-gray-500">{getTugTypeName(rateInfo.tug)}</span>
+    </div>
+    {#if rateInfo.bait !== 0}
+      <div>
+        <span class="font-semibold">鱼饵:</span>
+        <span>{db.getItemName(rateInfo.bait)}</span>
+      </div>
+    {/if}
+    <div>
+      <span class="font-semibold">概率:</span>
+      {(rateInfo.rate * 100).toFixed(1)}%
+    </div>
+    <div>
+      <span class="font-semibold">样本数:</span>
+      {rateInfo.count}
+    </div>
   </div>
 {/if}
