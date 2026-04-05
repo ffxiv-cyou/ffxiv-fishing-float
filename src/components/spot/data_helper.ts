@@ -99,3 +99,31 @@ export function downSampleBuckets(
     };
   });
 }
+
+export function getColor(name: string, accent: string) {
+  const style = getComputedStyle(document.body);
+  return style.getPropertyValue(`--color-${name}-${accent}`).trim();
+}
+
+export function getColorArray(name: string[], accent: string) {
+  const style = getComputedStyle(document.body);
+  return name.map((n) =>
+    style.getPropertyValue(`--color-${n}-${accent}`).trim(),
+  );
+}
+
+export function getColorMatrix(name: string[], accent: string[]) {
+  const style = getComputedStyle(document.body);
+  const result: string[][] = [];
+  for (let i = 0; i < accent.length; i++) {
+    result.push([]);
+  }
+  for (let i = 0; i < name.length; i++) {
+    for (let j = 0; j < accent.length; j++) {
+      result[j][i] = style
+        .getPropertyValue(`--color-${name[i]}-${accent[j]}`)
+        .trim();
+    }
+  }
+  return result;
+}

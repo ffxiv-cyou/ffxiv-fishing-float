@@ -4,6 +4,7 @@
   import UPlot, { type AlignedData, type Options } from "../uPlot.svelte";
   import up from "uplot";
   import { TooltipPlugin } from "../uplot/tooltip";
+  import { getColor } from "./data_helper";
 
   let {
     rates,
@@ -29,18 +30,7 @@
     return Math.ceil(Math.max(...rates.map((d) => d.rate)) * 10) / 10;
   });
 
-  function getColorArray(name: string[], accent: string) {
-    const style = getComputedStyle(document.body);
-    return name.map((n) =>
-      style.getPropertyValue(`--color-${n}-${accent}`).trim(),
-    );
-  }
-
-  let colors = getColorArray(
-    ["gray", "teal", "rose", "amber"],
-    "300",
-  );
-
+  let color = getColor("secondary", "300");
   let tooltip = $derived.by(() => new TooltipPlugin({ db, rates }));
 
   function getTitle(index: number) {
@@ -130,7 +120,7 @@
         points: {
           show: false,
         },
-        fill: colors[0],
+        fill: color,
         paths: up.paths.bars!({
           disp: {
             // bar lows

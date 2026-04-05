@@ -1,9 +1,10 @@
 <script lang="ts">
   import type { FishDurationDistribution } from "@/model/API";
-  import type { GameDatabase, PlaceTree } from "@/model/GameDB";
+  import type { GameDatabase } from "@/model/GameDB";
   import UPlot, { type AlignedData, type Options } from "../uPlot.svelte";
   import { BoxesPlugin } from "../uplot/box";
   import { TooltipPlugin } from "../uplot/tooltip";
+  import { getColorMatrix } from "./data_helper";
 
   let {
     durations,
@@ -39,22 +40,6 @@
     if ((durations?.length ?? 0) === 0) return 60;
     return Math.max(...durations.map((d) => d.range.max)) / 1000;
   });
-
-  function getColorMatrix(name: string[], accent: string[], alpha = 0.5) {
-    const style = getComputedStyle(document.body);
-    const result: string[][] = [];
-    for (let i = 0; i < accent.length; i++) {
-      result.push([]);
-    }
-    for (let i = 0; i < name.length; i++) {
-      for (let j = 0; j < accent.length; j++) {
-        result[j][i] = style
-          .getPropertyValue(`--color-${name[i]}-${accent[j]}`)
-          .trim();
-      }
-    }
-    return result;
-  }
 
   let colors = getColorMatrix(
     ["gray", "teal", "rose", "amber"],

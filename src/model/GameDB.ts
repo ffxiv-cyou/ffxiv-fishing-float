@@ -5,6 +5,12 @@ export interface PlaceTree {
   id: number;
   children?: PlaceTree[];
   fish?: number[];
+  weathers?: WeatherRateItem[];
+}
+
+export interface WeatherRateItem {
+  id: number;
+  rate: number;
 }
 
 export class GameDatabase {
@@ -12,6 +18,7 @@ export class GameDatabase {
   itemNames: { [key: number]: string } = {};
   opcodes: { [key: string]: number } = {};
   placeTree: PlaceTree[] = [];
+  weatherNames: { [key: number]: string } = {};
 
   update: (() => void) | null = null;
   #subscribe;
@@ -34,6 +41,9 @@ export class GameDatabase {
 
     let placetree = await fetch(`/data/${version}/placetree.json`);
     this.placeTree = await placetree.json();
+
+    let weathers = await fetch(`/data/${version}/weather.json`);
+    this.weatherNames = await weathers.json();
 
     if (this.update) {
       this.update();
@@ -87,5 +97,24 @@ export class GameDatabase {
       }
     }
     return null;
+  }
+
+  getTerritoryByPlaceID(placeID: number): PlaceTree | null {
+    this.#subscribe();
+    for (const node of this.placeTree) {
+      for (const child of node.children ?? []) {
+        for (const spot of child.children ?? []) {
+          if (spot.id === placeID) {
+            return child;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  getWeatherName(weatherId: number): string {
+    this.#subscribe();
+    return this.weatherNames[weatherId] || "未知天气(" + weatherId + ")";
   }
 }

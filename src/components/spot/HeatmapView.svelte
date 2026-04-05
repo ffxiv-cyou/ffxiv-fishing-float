@@ -4,6 +4,7 @@
   import UPlot, { type AlignedData, type Options } from "../uPlot.svelte";
   import { TooltipPlugin } from "../uplot/tooltip";
   import { HeatmapPlugin } from "../uplot/heatmap";
+  import { getColorArray } from "./data_helper";
 
   let {
     buckets,
@@ -37,23 +38,13 @@
     );
   });
 
-  function getColorArray(name: string[], accent: string) {
-    const style = getComputedStyle(document.body);
-    return name.map((n) =>
-      style.getPropertyValue(`--color-${n}-${accent}`).trim(),
-    );
-  }
-
-  let colors = getColorArray(
-    ["gray", "teal", "rose", "amber"],
-    "300",
-  );
+  let colors = getColorArray(["gray", "teal", "rose", "amber"], "300");
 
   let tooltip = $derived.by(() => new TooltipPlugin({ buckets: buckets, db }));
   let heatmap = new HeatmapPlugin(0.5, {
     colors,
     gap: 2,
-    bodyWidthFactor: 0.9
+    bodyWidthFactor: 0.9,
   });
 
   function getTitle(index: number) {

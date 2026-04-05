@@ -55,7 +55,7 @@ export class API {
     }
     return await resp.json();
   }
-  
+
   /**
    * Get fishing duration distribution for a specific fishing spot
    * @param spotID spot ID, required
@@ -165,6 +165,42 @@ export interface FishProbabilityItem {
   is_hidden: boolean;
 }
 
+export interface FishHookoffRateItem {
+  id: number;
+  hookoff_rate: number;
+  confidence: number;
+  count: number;
+}
+
+export interface ETBucket {
+  bucket: number;
+  count: number;
+}
+
+export interface WeatherBucket {
+  prev_weather: number;
+  cur_weather: number;
+  count: number;
+}
+
+export interface FishCondition {
+  id: number;
+  weather: WeatherBucket[];
+  et: ETBucket[];
+  et_bucket_minutes: number;
+}
+
+export interface SpotSampleCount {
+  id: number;
+  count: number;
+}
+
+export interface SpotTugCount {
+  tug_type: number;
+  hookoff: number;
+  total: number;
+}
+
 export interface SpotStatsResponse {
   spot_id: number;
   updated_at: number;
@@ -178,4 +214,8 @@ export interface SpotStatsResponse {
   probability: {
     rates: Array<FishProbabilityItem>;
   };
+  hookoff_rates: Array<FishHookoffRateItem>;
+  conditions: Array<FishCondition>;
+  samples: Array<SpotSampleCount>;
+  tugs: Array<SpotTugCount>;
 }

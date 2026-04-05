@@ -49,7 +49,9 @@
     Array.from(new Set(all.map((d) => d.bait_id))).sort((a, b) => b - a),
   );
 
-  let buckets : DurationBucket[] = $derived.by(() => spotStats?.duration?.buckets ?? []);
+  let buckets: DurationBucket[] = $derived.by(
+    () => spotStats?.duration?.buckets ?? [],
+  );
   let rates = $derived.by(() => spotStats?.probability.rates ?? []);
 
   async function loadFishingDuration(spot: number) {
@@ -79,21 +81,28 @@
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoBasic {spot} {tracker} durations={merged} />
+      <SpotInfoBasic {spot} {tracker} stats={spotStats} durations={merged} />
     {/if}
   </TabItem>
   <TabItem title="按鱼饵" key="by-bait">
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByBait {tracker} {baits} durations={all} buckets={buckets} rates={rates} />
+      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} />
     {/if}
   </TabItem>
   <TabItem title="按渔获" key="by-fish">
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByFish {tracker} {fishes} durations={all} buckets={buckets} />
+      <SpotInfoByFish
+        {tracker}
+        {fishes}
+        {spotID}
+        durations={all}
+        {buckets}
+        conditions={spotStats?.conditions ?? []}
+      />
     {/if}
   </TabItem>
   <TabItem title="我的记录" key="my-history">

@@ -1,34 +1,92 @@
 <script lang="ts">
-  import { Heading, P, List, Listgroup, ListgroupItem } from "flowbite-svelte";
+  import {
+    Heading,
+    P,
+    Table,
+    TableHead,
+    TableHeadCell,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+  } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
-  import type { FishDurationDistribution } from "@/model/API";
+  import type {
+    FishDurationDistribution,
+    SpotStatsResponse,
+  } from "@/model/API";
   import type { PlaceTree } from "@/model/GameDB";
+  import Gauge from "./Gauge.svelte";
 
   let {
     spot,
     tracker,
     durations,
+    stats,
   }: {
     spot: PlaceTree | null;
+    stats: SpotStatsResponse | null;
     tracker: FishingTracker;
     durations: FishDurationDistribution[];
   } = $props();
+
+  let hookoffs = $derived.by(() => stats?.hookoff_rates ?? []);
+  let samples = $derived.by(() => stats?.samples ?? []);
+  let tugs = $derived.by(() => stats?.tugs ?? []);
+
+  function getHookoffTotal(fishID: number) {
+    const hookoff = hookoffs.find((h) => h.id === fishID);
+    const total = samples.find((s) => s.id === fishID)?.count ?? 0;
+    return hookoff ? hookoff.count - total : 0;
+  }
+
+  function tugColor(type: number) {
+    return ["gray", "teal", "rose", "amber"][Number(type)] ?? "gray";
+  }
 </script>
 
 <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
 <SpotFishView {durations} db={tracker.db} title="fish" />
 {#if spot?.fish?.length ?? 0 > 0}
-  <Heading tag="h2" class="relative text-2xl leading-tight">鱼类列表</Heading>
+  <Heading tag="h2" class="relative text-2xl leading-tight mb-4"
+    >鱼类列表</Heading
+  >
   <P>
-    <List>
-      <Listgroup>
+    <Table>
+      <TableHead>
+        <TableHeadCell>鱼</TableHeadCell>
+        <TableHeadCell>上钩数</TableHeadCell>
+        <TableHeadCell>脱钩数</TableHeadCell>
+        <TableHeadCell>脱钩率</TableHeadCell>
+      </TableHead>
+      <TableBody class="divide-y">
         {#each spot?.fish as fishID}
-          <ListgroupItem>
-            {tracker.db.getItemName(fishID)}
-          </ListgroupItem>
+          <TableBodyRow>
+            <TableBodyCell>{tracker.db.getItemName(fishID)}</TableBodyCell>
+            <TableBodyCell
+              >{samples.find((s) => s.id === fishID)?.count ?? 0}</TableBodyCell
+            >
+            <TableBodyCell>{getHookoffTotal(fishID)}</TableBodyCell>
+            <TableBodyCell
+              >{(
+                (hookoffs.find((h) => h.id === fishID)?.hookoff_rate ?? 0) * 100
+              ).toFixed(1)}%</TableBodyCell
+            >
+          </TableBodyRow>
         {/each}
-      </Listgroup>
-    </List>
+      </TableBody>
+    </Table>
   </P>
 {/if}
+
+<Heading tag="h2" class="relative text-2xl leading-tight my-4">脱钩统计</Heading
+>
+{#each tugs as tug}
+  <Gauge
+    value={tug.hookoff}
+    max={tug.total}
+    colorFront={`var(--color-${tugColor(tug.tug_type)}-500)`}
+    colorBack={`var(--color-${tugColor(tug.tug_type)}-200)`}
+    class="m-2 w-28 h-28"
+  />
+{/each}
