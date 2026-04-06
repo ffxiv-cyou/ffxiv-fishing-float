@@ -10,6 +10,7 @@
     "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
   },
   "dependencies": {
+    "@sentry/svelte": "^10.47.0",
     "cbor2": "^2.0.1",
     "idb": "^8.0.3",
     "overlay-toolkit": "^0.11.2",
