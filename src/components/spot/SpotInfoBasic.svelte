@@ -31,13 +31,20 @@
   } = $props();
 
   let hookoffs = $derived.by(() => stats?.hookoff_rates ?? []);
-  let samples = $derived.by(() => stats?.samples ?? []);
   let tugs = $derived.by(() => stats?.tugs ?? []);
 
-  function getHookoffTotal(fishID: number) {
+  function getHookoffData(fishID: number) {
     const hookoff = hookoffs.find((h) => h.id === fishID);
-    const total = samples.find((s) => s.id === fishID)?.count ?? 0;
-    return hookoff ? hookoff.count - total : 0;
+    if (!hookoff) return { caught: 0, hookoff: 0, rate: 0 };
+
+    const total = hookoff.count;
+    const hookoffCount = Math.round(total * hookoff.hookoff_rate);
+    const caughtCount = total - hookoffCount;
+    return {
+      caught: caughtCount,
+      hookoff: hookoffCount,
+      rate: hookoff.hookoff_rate,
+    };
   }
 
   function tugColor(type: number) {
@@ -61,17 +68,12 @@
       </TableHead>
       <TableBody class="divide-y">
         {#each spot?.fish as fishID}
+          {@const data = getHookoffData(fishID)}
           <TableBodyRow>
             <TableBodyCell>{tracker.db.getItemName(fishID)}</TableBodyCell>
-            <TableBodyCell
-              >{samples.find((s) => s.id === fishID)?.count ?? 0}</TableBodyCell
-            >
-            <TableBodyCell>{getHookoffTotal(fishID)}</TableBodyCell>
-            <TableBodyCell
-              >{(
-                (hookoffs.find((h) => h.id === fishID)?.hookoff_rate ?? 0) * 100
-              ).toFixed(1)}%</TableBodyCell
-            >
+            <TableBodyCell>{data.caught}</TableBodyCell>
+            <TableBodyCell>{data.hookoff}</TableBodyCell>
+            <TableBodyCell>{(data.rate * 100).toFixed(1)}%</TableBodyCell>
           </TableBodyRow>
         {/each}
       </TableBody>
