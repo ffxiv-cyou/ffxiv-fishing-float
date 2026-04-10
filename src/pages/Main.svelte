@@ -51,9 +51,9 @@
 
   function handleGameVersion(version: GameVersion) {
     message = undefined;
-    console.log(version);
+    console.log("game version", version);
 
-    let ver = version.version;
+    let ver = version?.version;
     if (!ver) {
       const values = Object.values(availableVersions);
       if (values.length > 0) {
