@@ -50,8 +50,14 @@
   });
 
   function handleGameVersion(version: GameVersion) {
-    message = undefined;
     console.log("game version", version);
+    
+    // handler not found, plugin is not working properly
+    if (!version) {
+      return;
+    }
+
+    message = undefined;
 
     let ver = version?.version;
     if (!ver) {
@@ -71,13 +77,15 @@
     availableVersions = versions;
   }
 
-  async function loadGameData(version: string) {
+  async function loadGameData(version: string, localOnly = false) {
     tracker
       .loadGameData(version)
       .then(() => {
         let opcodes = tracker.db.getOpcodes();
         logic.setOpcode(opcodes);
-        logic.init(overlayToolkit);
+        if (!localOnly) {
+          logic.init(overlayToolkit);
+        }
         logic.init(replay);
         console.log("Game data loaded for version:", version, opcodes);
       })
@@ -119,7 +127,7 @@
       <label for="file">导入数据包: </label>
       <select
         id="version-select"
-        onchange={(e) => loadGameData((e.target as HTMLSelectElement).value)}
+        onchange={(e) => loadGameData((e.target as HTMLSelectElement).value, true)}
       >
         {#each Object.entries(availableVersions) as [name, ver]}
           <option value={ver}>{name}</option>
