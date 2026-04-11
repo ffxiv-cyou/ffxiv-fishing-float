@@ -339,10 +339,10 @@ export class FFXIVIpcEventFinish extends IpcPacket {
 }
 
 export class FFXIVIpcGuessTargetAction extends IpcPacket {
-  unknown00: number;
-  unknown02: number;
   actionId: number;
+  unknown04: number;
   sequence: number;
+  unknown08: number;
   unknown0a: number;
   unknown0c: number;
   unknown0e: number;
@@ -354,10 +354,10 @@ export class FFXIVIpcGuessTargetAction extends IpcPacket {
   constructor(dw: DataView, offset: number = 0) {
     super(dw, offset);
     offset += IpcPacket.PacketSize();
-    this.unknown00 = dw.getUint16(offset + 0, true);
-    this.unknown02 = dw.getUint16(offset + 2, true);
-    this.actionId = dw.getUint32(offset + 4, true);
-    this.sequence = dw.getUint16(offset + 8, true);
+    this.actionId = dw.getUint32(offset + 0, true);
+    this.unknown04 = dw.getUint16(offset + 4, true);
+    this.sequence = dw.getUint16(offset + 6, true);
+    this.unknown08 = dw.getUint16(offset + 8, true);
     this.unknown0a = dw.getUint16(offset + 10, true);
     this.unknown0c = dw.getUint16(offset + 12, true);
     this.unknown0e = dw.getUint16(offset + 14, true);
