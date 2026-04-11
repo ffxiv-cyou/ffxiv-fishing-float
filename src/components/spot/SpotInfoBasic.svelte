@@ -35,20 +35,26 @@
 
   function getHookoffData(fishID: number) {
     const hookoff = hookoffs.find((h) => h.id === fishID);
-    if (!hookoff) return { caught: 0, hookoff: 0, rate: 0 };
+    if (!hookoff) return { caught: 0, hookoff: 0, rate: 0, confidence: 0 };
 
     const total = hookoff.count;
-    const hookoffCount = Math.round(total * hookoff.hookoff_rate);
-    const caughtCount = total - hookoffCount;
+    const hookoffCount = total - hookoff.caught;
     return {
-      caught: caughtCount,
+      caught: hookoff.caught,
       hookoff: hookoffCount,
       rate: hookoff.hookoff_rate,
+      confidence: hookoff.confidence,
     };
   }
 
   function tugColor(type: number) {
     return ["gray", "teal", "rose", "amber"][Number(type)] ?? "gray";
+  }
+
+  function classByConfidence(confidence: number) {
+    if (confidence <= 0.5) return "text-gray-400";
+    if (confidence <= 0.7) return "text-gray-600";
+    return "text-black";
   }
 </script>
 
@@ -65,6 +71,7 @@
         <TableHeadCell>上钩数</TableHeadCell>
         <TableHeadCell>脱钩数</TableHeadCell>
         <TableHeadCell>脱钩率</TableHeadCell>
+        <TableHeadCell>置信度</TableHeadCell>
       </TableHead>
       <TableBody class="divide-y">
         {#each spot?.fish as fishID}
@@ -72,8 +79,15 @@
           <TableBodyRow>
             <TableBodyCell>{tracker.db.getItemName(fishID)}</TableBodyCell>
             <TableBodyCell>{data.caught}</TableBodyCell>
-            <TableBodyCell>{data.hookoff}</TableBodyCell>
-            <TableBodyCell>{(data.rate * 100).toFixed(1)}%</TableBodyCell>
+            <TableBodyCell class={classByConfidence(data.confidence)}>
+              {data.hookoff}
+            </TableBodyCell>
+            <TableBodyCell class={classByConfidence(data.confidence)}>
+              {(data.rate * 100).toFixed(1)}%
+            </TableBodyCell>
+            <TableBodyCell class={classByConfidence(data.confidence)}>
+              {data.confidence.toFixed(2)}
+            </TableBodyCell>
           </TableBodyRow>
         {/each}
       </TableBody>

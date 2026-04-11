@@ -170,6 +170,7 @@ export interface FishHookoffRateItem {
   hookoff_rate: number;
   confidence: number;
   count: number;
+  caught: number;
 }
 
 export interface ETBucket {
