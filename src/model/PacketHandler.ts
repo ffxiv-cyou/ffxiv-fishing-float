@@ -342,6 +342,11 @@ export class PacketHandler {
                 this.tracker.setFishingZone(params[0]);
                 this.tracker.serverBegin(epoch);
                 break;
+            case 1115: // 将新钓场“???”记录到了钓鱼笔记中！
+                if (this.tracker.CurrentZone === 950) {
+                    this.tracker.setFishingZone(params[0]);
+                }
+                break;
             case 1111: // ???收回了鱼线。
             case 1112: // 陷入了无法战斗状态，钓鱼中断。
             case 1113: // 受到了敌人的攻击，钓鱼中断。
