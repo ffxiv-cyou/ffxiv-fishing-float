@@ -22,7 +22,7 @@
 
   function setSpot(id: number) {
     spotID = id;
-    navigate({ spot: spotID.toString(), bait: baitID.toString() });
+    navigate({ spot: spotID.toString(), bait: baitID > 0 ? baitID.toString() : "" });
   }
   function setBait(id: number) {
     baitID = id;

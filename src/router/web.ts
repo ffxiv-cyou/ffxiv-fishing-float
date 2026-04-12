@@ -5,6 +5,7 @@ import Main from "@/web/Main.svelte";
 import Privacy from "@/web/Privacy.svelte";
 import SpotInfo from "@/web/SpotInfo.svelte";
 import FAQ from "@/web/FAQ.svelte";
+import Methodology from "@/web/Methodology.svelte";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -31,6 +32,11 @@ export const routes: Array<RouteConfig> = [
     path: "/help/faq",
     name: "常见问题",
     component: FAQ
+  },
+  {
+    path: "/help/methodology",
+    name: "统计口径",
+    component: Methodology
   }
 ];
 
@@ -46,6 +52,10 @@ export const navTree: NavTree[] = [
   {
     name: "帮助",
     children: [
+      {
+        name: "统计口径",
+        path: "/help/methodology"
+      },
       {
         name: "常见问题",
         path: "/help/faq"

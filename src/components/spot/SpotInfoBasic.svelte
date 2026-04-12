@@ -69,7 +69,6 @@
       <TableHead>
         <TableHeadCell>鱼</TableHeadCell>
         <TableHeadCell>上钩数</TableHeadCell>
-        <TableHeadCell>脱钩数</TableHeadCell>
         <TableHeadCell>脱钩率</TableHeadCell>
         <TableHeadCell>置信度</TableHeadCell>
       </TableHead>
@@ -79,9 +78,6 @@
           <TableBodyRow>
             <TableBodyCell>{tracker.db.getItemName(fishID)}</TableBodyCell>
             <TableBodyCell>{data.caught}</TableBodyCell>
-            <TableBodyCell class={classByConfidence(data.confidence)}>
-              {data.hookoff}
-            </TableBodyCell>
             <TableBodyCell class={classByConfidence(data.confidence)}>
               {(data.rate * 100).toFixed(1)}%
             </TableBodyCell>

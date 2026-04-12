@@ -22,25 +22,6 @@
 
   let spot = $derived(zone?.children?.find((p) => p.id === spotID));
 
-  function setTerritory(id: number) {
-    territoryID = id;
-    zoneID = 0;
-    spotID = 0;
-    if (territoryID > 0 && !zone) {
-      const zoneID = territory?.children?.length ? territory.children[0].id : 0;
-      setZone(zoneID);
-    }
-  }
-
-  function setZone(id: number) {
-    zoneID = id;
-    spotID = 0;
-    if (zoneID > 0 && !spot) {
-      const spotID = zone?.children?.length ? zone.children[0].id : 0;
-      setSpot(spotID);
-    }
-  }
-
   let expanded = $state(true);
   function updateExpanded() {
     if (window.innerWidth < 1024) {
@@ -98,11 +79,11 @@
     ].join(" ")}
   >
     {#each tree as territory}
-      <AccordionItem classes={itemClasses}>
+      <AccordionItem classes={itemClasses} open={territory.id === territoryID}>
         {#snippet header()}{territory.name}{/snippet}
         <Accordion flush>
           {#each territory.children as zone}
-            <AccordionItem classes={subItemClasses}>
+            <AccordionItem classes={subItemClasses} open={zone.id === zoneID}>
               {#snippet header()}{zone.name}{/snippet}
               {#each zone.children as spot}
                 <button
@@ -122,7 +103,7 @@
     {/each}
   </Accordion>
   <button
-    class="w-4 bg-gray-50 dark:bg-gray-800"
+    class="w-4 bg-gray-50 dark:bg-gray-800 cursor-pointer"
     onclick={() => (expanded = !expanded)}
   >
     {#if expanded}

@@ -16,6 +16,7 @@
     Dropdown,
     DropdownItem,
   } from "flowbite-svelte";
+  import ChevronDownOutline from "../src/components/icon/ChevronDownOutline.svelte";
 
   let url = $state("");
   function handleHashChange() {
@@ -62,14 +63,22 @@
       <NavBrand href="#/">
         <span
           class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
-          >Fisher</span
+          >杆时统计</span
         >
       </NavBrand>
       <NavHamburger />
-      <NavUl>
+      <NavUl activeUrl={"#" + url}>
         {#each navTree as route}
-          <NavLi href={route.path ? "#" + route.path : undefined}>
+          <NavLi
+            href={route.path ? "#" + route.path : undefined}
+            class={route.children ? "cursor-pointer" : ""}
+          >
             {route.name}
+            {#if route.children}
+              <ChevronDownOutline
+                class="text-primary-800 inline h-5 w-5 dark:text-white"
+              />
+            {/if}
           </NavLi>
           {#if route.children}
             <Dropdown simple>
