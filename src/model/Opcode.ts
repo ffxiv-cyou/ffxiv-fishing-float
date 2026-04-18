@@ -58,6 +58,9 @@ export class FFXIVIpcPlayerSetup extends IpcPacket {
     useBait: number;
     currentJob: number;
 
+    // 原始数据，供后续解析使用
+    data: ArrayBufferLike;
+
     constructor(dw: DataView, offset: number = 0) {
         super(dw, offset);
         
@@ -66,6 +69,8 @@ export class FFXIVIpcPlayerSetup extends IpcPacket {
         this.charId = dw.getUint32(offset + 24, true);
         this.useBait = dw.getUint32(offset + 44, true);
         this.currentJob = dw.getUint8(offset + 134);
+
+        this.data = dw.buffer.slice(dw.byteOffset + offset);
     }
 }
 

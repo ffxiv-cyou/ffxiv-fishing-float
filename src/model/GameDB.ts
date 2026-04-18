@@ -13,12 +13,27 @@ export interface WeatherRateItem {
   rate: number;
 }
 
+interface PlayerSetupInfo {
+  fish_offset: number;
+}
+
+export interface FishingNoteInfo {
+  fishes: number[];
+  spear_fishes: number[];
+  spot_max_id: number;
+  spear_spot_max_id: number;
+}
+
 export class GameDatabase {
   placeNames: { [key: number]: string } = {};
   itemNames: { [key: number]: string } = {};
   opcodes: { [key: string]: number } = {};
   placeTree: PlaceTree[] = [];
   weatherNames: { [key: number]: string } = {};
+  fishingNoteInfo?: FishingNoteInfo;
+
+  versions: { [key: string]: string } = {};
+  playerSetupInfo?: PlayerSetupInfo;
 
   update: (() => void) | null = null;
   #subscribe;
@@ -45,14 +60,39 @@ export class GameDatabase {
     let weathers = await fetch(`/data/${version}/weather.json`);
     this.weatherNames = await weathers.json();
 
+    let fishingNote = await fetch(`/data/${version}/note.json`);
+    this.fishingNoteInfo = await fishingNote.json();
+
+    // 尝试根据内部版本号反查版本号
+    let versions = await this.getVersions();
+    let friendlyVersion = "";
+    for (const [key, value] of Object.entries(versions)) {
+      if (value === version) {
+        friendlyVersion = key;
+      }
+    }
+
+    // 根据大版本加载 PlayerSetup 包的信息。这个数据一般只会在大版本更新变化
+    let playerSetupInfo = await this.loadPlayerSetupInfo();
+    for (const [key, value] of Object.entries(playerSetupInfo)) {
+      if (friendlyVersion.startsWith(key)) {
+        this.playerSetupInfo = value;
+        break;
+      }
+    }
+
     if (this.update) {
       this.update();
     }
   }
 
   async getVersions(): Promise<{ [key: string]: string }> {
+    if (Object.keys(this.versions).length > 0) {
+      return this.versions;
+    }
     let versionsResp = await fetch(`/data/version.json`);
-    return await versionsResp.json();
+    this.versions = await versionsResp.json();
+    return this.versions;
   }
 
   async loadLatest(): Promise<void> {
@@ -61,6 +101,11 @@ export class GameDatabase {
     if (values.length > 0) {
       await this.load(values[0]);
     }
+  }
+
+  async loadPlayerSetupInfo(): Promise<{[key: string]: PlayerSetupInfo}> {
+    let resp = await fetch(`/data/player_setup.json`);
+    return await resp.json();
   }
 
   getZoneName(zoneId: number): string {
@@ -81,6 +126,16 @@ export class GameDatabase {
   getPlaceTree(): PlaceTree[] {
     this.#subscribe();
     return this.placeTree;
+  }
+
+  getPlayerSetupInfo(): PlayerSetupInfo | undefined {
+    this.#subscribe();
+    return this.playerSetupInfo;
+  }
+
+  getFishingNoteInfo(): FishingNoteInfo | undefined {
+    this.#subscribe();
+    return this.fishingNoteInfo;
   }
 
   getPlaceTreeByID(id: number, tree: PlaceTree[] = this.placeTree): PlaceTree | null {

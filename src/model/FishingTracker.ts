@@ -331,6 +331,63 @@ export class FishingTracker extends EventTarget {
         if (this.current)
             this.current.HiddenFish = fishID;
     }
+
+    public handlePlayerSetup(packet: ArrayBufferLike): void {
+        const info = this.db.getPlayerSetupInfo();
+        if (!info)
+            return;
+
+        const note = this.db.getFishingNoteInfo();
+        if (!note)
+            return;
+        
+        // 处理钓鱼笔记
+        const dw = new DataView(packet, info.fish_offset);
+
+        // 这里的结构是这样的
+        // 钓鱼笔记 mask
+        // 钓场 mask
+        // 叉鱼笔记 mask
+        // 叉鱼场所 mask
+        let offset = 0;
+        const fishIDs = bitMaskMapping(dw, note.fishes, offset);
+        offset = fishIDs.offset + maskToBytesLength(note.spot_max_id);
+        const spearFishIDs = bitMaskMapping(dw, note.spear_fishes, offset);
+        offset = spearFishIDs.offset + maskToBytesLength(note.spear_spot_max_id + 1); // 这破玩意从0开始计算的
+        
+        this.history.storage.SetFishingLog(fishIDs.data, spearFishIDs.data);
+        console.log("Player setup processed, fish log updated:", dw, fishIDs, spearFishIDs);
+    }
+}
+
+
+function maskToBytesLength(mask: number): number {
+    return Math.ceil(mask / 8);
+}
+
+function bitMaskMapping(dw: DataView, dataMap: number[], offset: number) : {
+    data: number[],
+    offset: number
+} {
+    const result: number[] = [];
+    const length = dataMap.length - 1; // 假设0-8一共9位，但是抓包看到只有1个字节，所以这里处理下
+    const dataLength = maskToBytesLength(length); 
+    for (let i = 0; i < dataLength; i++) {
+        const byte = dw.getUint8(offset + i);
+        for (let bit = 0; bit < 8; bit++) {
+            const index = i * 8 + bit;
+            if (index >= length) {
+                break;
+            }
+            if ((byte & (1 << bit)) !== 0) {
+                result.push(dataMap[index]);
+            }
+        }
+    }
+    return {
+        data: result,
+        offset: offset + dataLength
+    };
 }
 
 export interface FisherStats {

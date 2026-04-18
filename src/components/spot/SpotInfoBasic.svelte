@@ -17,6 +17,7 @@
   } from "@/model/API";
   import type { PlaceTree } from "@/model/GameDB";
   import Gauge from "./Gauge.svelte";
+  import CheckDouble from "../icon/CheckCircle.svelte";
 
   let {
     spot,
@@ -56,6 +57,10 @@
     if (confidence <= 0.7) return "text-gray-600";
     return "text-black";
   }
+
+  function isFishingLogged(fishID: number): boolean {
+    return tracker.history.storage.isFishingLogged(fishID, false);
+  }
 </script>
 
 <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
@@ -76,7 +81,13 @@
         {#each spot?.fish as fishID}
           {@const data = getHookoffData(fishID)}
           <TableBodyRow>
-            <TableBodyCell>{tracker.db.getItemName(fishID)}</TableBodyCell>
+            <TableBodyCell>
+              {tracker.db.getItemName(fishID)}
+              {#if isFishingLogged(fishID)}
+                <CheckDouble class="w-4 h-4 inline-block ml-1 text-green-900"
+                ></CheckDouble>
+              {/if}
+            </TableBodyCell>
             <TableBodyCell>{data.caught}</TableBodyCell>
             <TableBodyCell class={classByConfidence(data.confidence)}>
               {(data.rate * 100).toFixed(1)}%

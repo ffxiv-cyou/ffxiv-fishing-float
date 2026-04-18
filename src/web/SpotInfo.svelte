@@ -41,7 +41,7 @@
 
 <!--左右排列-->
 <div class="flex info-root">
-  <SpotList bind:spotID={() => spotID, setSpot} db={tracker.db} />
+  <SpotList bind:spotID={() => spotID, setSpot} db={tracker.db} storage={tracker.history.storage} />
   <div class="content-pane flex-1 p-4 overflow-y-auto">
     {#if spotID > 0}
       <SpotInfoView {spotID} bind:baitID={() => baitID, setBait} {tracker} />

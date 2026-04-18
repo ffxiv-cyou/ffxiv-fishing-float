@@ -43,6 +43,8 @@ export interface HistoryStatsItem {
 export class FishingStorage {
   histories: HistoryStorageBackend;
   inited: boolean = false;
+  fishes: number[] = [];
+  spear_fishes: number[] = [];
 
   #subscribe;
   update: (() => void) | null = null;
@@ -82,7 +84,75 @@ export class FishingStorage {
     } catch (e) {
       console.warn("IndexedDB is not available, using localStorage for fishing history.");
     }
+
+    this.readFishingLog();
   }
+
+  //#region Fishing Log
+  readFishingLog(): void {
+    const log = localStorage.getItem("fishingLog");
+    if (log) {
+      try {
+        const data = JSON.parse(log);
+        this.fishes = data.fishes || [];
+        this.spear_fishes = data.spear_fishes || [];
+      } catch (e) {
+        console.error("Failed to parse fishing log from localStorage:", e);
+      }
+    }
+  }
+
+  saveFishingLog(): void {
+    const data = {
+      fishes: this.fishes,
+      spear_fishes: this.spear_fishes,
+    }
+    localStorage.setItem("fishingLog", JSON.stringify(data));
+  }
+
+  public SetFishingLog(fishes: number[], spear_fishes: number[]): void {
+    this.fishes = fishes;
+    this.spear_fishes = spear_fishes;
+    this.onFishingLogChanged();
+  }
+
+  onFishingLogChanged() {
+    this.saveFishingLog();
+    this.update?.();
+  }
+
+  onFishCaught(fishID: number, isSpear: boolean): void {
+    if (isSpear) {
+      if (!this.spear_fishes.includes(fishID)) {
+        this.spear_fishes.push(fishID);
+        this.onFishingLogChanged();
+      }
+    } else {
+      if (!this.fishes.includes(fishID)) {
+        this.fishes.push(fishID);
+        this.onFishingLogChanged();
+      }
+    }
+  }
+
+  public getFishingLog(): { fishes: number[], spear_fishes: number[] } {
+    this.#subscribe();
+    return {
+      fishes: this.fishes,
+      spear_fishes: this.spear_fishes,
+    };
+  }
+
+  public isFishingLogged(fishID: number, isSpear: boolean): boolean {
+    this.#subscribe();
+    if (isSpear) {
+      return this.spear_fishes.includes(fishID);
+    } else {
+      return this.fishes.includes(fishID);
+    }
+  }
+
+  //#endregion
 
   public async updateHistory(session: FishingSession): Promise<void> {
     // 没上钩，不记录
@@ -108,6 +178,7 @@ export class FishingStorage {
     };
 
     await this.histories.addRaw(item);
+    this.onFishCaught(item.fish, false);
 
     // 空窗期刚结束的时候的时间是不准确的，忽略掉
     if (session.ElapsedTimeMs < session.LureRestMs + 300) {

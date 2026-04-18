@@ -146,6 +146,7 @@ export class PacketHandler {
         const playerSetup = new FFXIVIpcPlayerSetup(dw);
         this.tracker.setBait(playerSetup.useBait);
         this.tracker.changeJob(playerSetup.currentJob);
+        this.tracker.handlePlayerSetup(playerSetup.data);
     }
 
     private handlePlayerStats(dw: DataView, epoch: number): void {

@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { GameDatabase } from "@/model/GameDB";
+  import { GameDatabase, type PlaceTree } from "@/model/GameDB";
   import { AccordionItem, Accordion } from "flowbite-svelte";
   import ChevronLeftOutline from "../icon/ChevronLeftOutline.svelte";
   import ChevronRightOutline from "../icon/ChevronRightOutline.svelte";
+  import type { FishingStorage } from "@/model/HistoryStorage";
 
   let {
     spotID = $bindable(0),
     db,
+    storage,
   }: {
     spotID: number;
     db: GameDatabase;
+    storage?: FishingStorage;
   } = $props();
 
   let tree = $derived(db.getPlaceTree());
@@ -54,14 +57,45 @@
     }
   });
 
+  let commonBorder = "border-l-6 border-l-gray-200 dark:border-l-gray-700";
+
   let itemClasses = {
-    button: "px-4 py-2 ",
+    button: `pl-3 pr-4 py-2 ${commonBorder} group-first:rounded-none`,
     content: "p-0",
   };
   let subItemClasses = {
-    button: "pl-6 pr-4 py-2 bg-gray-50 dark:bg-gray-800",
+    button: `pl-5 pr-4 py-2 ${commonBorder} group-first:rounded-none bg-gray-50 dark:bg-gray-800`,
     content: "py-0",
   };
+
+  function getSpotClasses(spot: PlaceTree, isItem: boolean) {
+    let classes = isItem ? { ...itemClasses } : { ...subItemClasses };
+    const isFinished = isSpotFinish(spot);
+    if (isFinished) {
+      classes.button += " border-l-green-700";
+    }
+    return classes;
+  }
+
+  function isSpotFinish(tree: PlaceTree): boolean {
+    if (!storage) return false;
+
+    if (tree.children) {
+      for (const child of tree.children) {
+        if (!isSpotFinish(child)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    for (const fish of tree.fish ?? []) {
+      if (!storage.isFishingLogged(fish, false)) {
+        return false;
+      }
+    }
+    return true;
+  }
 
   updateExpanded();
 </script>
@@ -79,17 +113,25 @@
     ].join(" ")}
   >
     {#each tree as territory}
-      <AccordionItem classes={itemClasses} open={territory.id === territoryID}>
+      <AccordionItem
+        classes={getSpotClasses(territory, true)}
+        open={territory.id === territoryID}
+      >
         {#snippet header()}{territory.name}{/snippet}
         <Accordion flush>
           {#each territory.children as zone}
-            <AccordionItem classes={subItemClasses} open={zone.id === zoneID}>
+            <AccordionItem
+              classes={getSpotClasses(zone, false)}
+              open={zone.id === zoneID}
+            >
               {#snippet header()}{zone.name}{/snippet}
               {#each zone.children as spot}
                 <button
                   class={[
-                    "pl-8 py-1 w-full text-left hover:bg-gray-200 dark:hover:bg-gray-700",
+                    "pl-7 py-1 w-full text-left hover:bg-gray-200 dark:hover:bg-gray-700",
+                    commonBorder,
                     spot.id === spotID ? "bg-gray-300 dark:bg-gray-600" : "",
+                    isSpotFinish(spot) ? "border-l-green-700" : "",
                   ].join(" ")}
                   onclick={() => setSpot(spot.id)}
                 >
