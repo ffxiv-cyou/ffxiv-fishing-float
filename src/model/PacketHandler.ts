@@ -354,6 +354,7 @@ export class PacketHandler {
             case 1118: // 不经意间???不见了……
             case 1127: // 没有钓到任何东西……\n现在使用的鱼饵可能不太适合这片钓场。
             case 1129: // 没有钓到任何东西……
+            case 5584: // ???提起了钓竿。
                 this.tracker.resetCastState(epoch); // 状态中断，或者是没钓起来东西
                 break;
 

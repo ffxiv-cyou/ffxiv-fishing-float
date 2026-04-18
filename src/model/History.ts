@@ -10,6 +10,7 @@ export class FishingHistory {
   pendingSessions: FishingSession[] = [];
   storage: FishingStorage
   cfg: Config;
+  lastSessionTime: number = 0;
 
   #subscribe;
   update: (() => void) | null = null;
@@ -25,14 +26,22 @@ export class FishingHistory {
     this.storage = new FishingStorage();
   }
 
-  public addSession(session: FishingSession): void {
-    if (!session || session.TugType == null)
+  public addSession(session: FishingSession | undefined | null): void {
+    if (!session)
       return;
+
+    // deduplication, avoid adding the same session multiple times
+    if (this.lastSessionTime === session.startTime) {
+      return;
+    }
+    this.lastSessionTime = session.startTime;
 
     this.pendingSessions.push(session);
     this.triggerUpload();
 
-    this.storage.updateHistory(session);
+    if (session.TugType != null) {
+      this.storage.updateHistory(session);
+    }
   }
 
   //#region Local History Management

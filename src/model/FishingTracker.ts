@@ -259,13 +259,13 @@ export class FishingTracker extends EventTarget {
         this.current?.setResult(itemId, quantity, size, isHQ, isColl);
         console.log(`Caught`, this.current, epoch, Date.now());
         this.lastFish = itemId;
-        this.history.addSession(this.current!);
+        this.history.addSession(this.current);
         this.dispatchEvent(new Event("end"));
     }
 
     public setFishingFail(reason: FailReason, epoch: number) {
         this.current?.setFail(reason);
-        this.history.addSession(this.current!);
+        this.history.addSession(this.current);
         this.dispatchEvent(new Event("end"));
     }
 
@@ -303,6 +303,8 @@ export class FishingTracker extends EventTarget {
     public resetCastState(epoch: number): void {
         console.log("Cast finished at epoch:", epoch);
         this.current?.setFinish(epoch);
+        this.history.addSession(this.current);
+        this.dispatchEvent(new Event("end"));
     }
 
     private nextIdenticalFish: number = 0;

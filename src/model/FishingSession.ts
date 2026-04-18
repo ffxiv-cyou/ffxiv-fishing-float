@@ -23,6 +23,7 @@ export class FishingSession {
     private lureTarget: boolean = false; // 是否为目标
     private lureStacks: number = 0; // 层数
     private lureAt: number = 0; // 最后一次的时间
+    private lureTimes: number[] = []; // 使用诱饵的时间列表
 
     private identicalFish: number = 0; // 专一垂钓
     private slapFish: number = 0; // 拍击水面
@@ -109,6 +110,7 @@ export class FishingSession {
         this.lureType = type;
         this.lureStacks = stacks;
         this.lureAt = epoch;
+        this.lureTimes.push(epoch); // 一定是一层一层的叠上去
         this.onUpdate();
     }
 
@@ -294,6 +296,9 @@ export class FishingSession {
             data.push(this.lureAt - this.startTime);
         } else {
             data.push(0);
+        }
+        if (this.lureTimes) {
+            data.push(this.lureTimes.map(t => t - this.startTime));
         }
         return data;
     }
