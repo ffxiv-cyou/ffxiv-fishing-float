@@ -6,7 +6,7 @@
 <div class="p-4 max-w-3xl mx-auto">
   <Heading tag="h1" class="text-2xl">使用说明</Heading>
   <P
-    >欢迎！如果你想要上报数据，或者只是简单的使用这个悬浮窗插件，这里有一些说明。</P
+    >欢迎使用我们的服务！</P
   >
   <Heading tag="h2" class="text-xl">安装悬浮窗插件</Heading>
   <P>
@@ -20,12 +20,12 @@
       href="https://github.com/Lotlab/ffxiv-overlay-toolkit/releases"
       target="_blank"
       >访问此处下载 OverlayToolkit
-    </A>，并在 ACT 中加载此插件。加载完毕后，需要重启 ACT 才可使用。
+    </A>，并在 ACT 中加载此插件。加载完毕后，<strong>需要重启 ACT 才可使用。</strong>
   </P>
   <P>
     点击 ACT 中的 “插件” - “ngld悬浮窗插件” - “新建”（左下角）添加悬浮窗。
     在弹出的窗口中随意填写名称，预设选择自订，类型选择数据统计，点击确定添加一个新的悬浮窗。
-    然后在右侧的悬浮窗路径中，填写 https://fisher.ffxiv.cyou/
+    然后在右侧的悬浮窗路径中，填写 <span style="user-select: all;">https://fisher.ffxiv.cyou/</span>
     ，然后点击重载悬浮窗即可。
   </P>
   <Heading tag="h2" class="text-xl">常见问题</Heading>

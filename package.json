@@ -13,7 +13,7 @@
     "@sentry/svelte": "^10.47.0",
     "cbor2": "^2.0.1",
     "idb": "^8.0.3",
-    "overlay-toolkit": "^0.11.3",
+    "overlay-toolkit": "^0.12.0",
     "uplot": "^1.6.32"
   },
   "devDependencies": {
@@ -21,6 +21,7 @@
     "@tailwindcss/vite": "^4.2.1",
     "@tsconfig/svelte": "^5.0.5",
     "@types/node": "^24.6.0",
+    "@types/wicg-file-system-access": "^2023.10.7",
     "flowbite": "^4.0.1",
     "flowbite-svelte": "^1.31.0",
     "svelte": "^5.39.6",

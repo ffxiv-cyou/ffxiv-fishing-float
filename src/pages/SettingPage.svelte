@@ -111,7 +111,6 @@
 </script>
 
 <main>
-  <h1>设置</h1>
   <div class="setting-page">
     <h2>样式设置</h2>
     <div class="setting-item">
@@ -372,7 +371,7 @@
   </div>
 </main>
 
-<style>
+<style scoped>
   .setting-page {
     padding: 10px;
     max-width: 600px;

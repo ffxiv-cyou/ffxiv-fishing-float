@@ -6,6 +6,7 @@ import Privacy from "@/web/Privacy.svelte";
 import SpotInfo from "@/web/SpotInfo.svelte";
 import FAQ from "@/web/FAQ.svelte";
 import Methodology from "@/web/Methodology.svelte";
+import NoteExport from "@/web/NoteExport.svelte";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -37,6 +38,11 @@ export const routes: Array<RouteConfig> = [
     path: "/help/methodology",
     name: "统计口径",
     component: Methodology
+  },
+  {
+    path: "/export/:data",
+    name: "导出钓鱼笔记",
+    component: NoteExport,
   }
 ];
 

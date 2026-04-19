@@ -340,7 +340,7 @@ export class FishingTracker extends EventTarget {
         const note = this.db.getFishingNoteInfo();
         if (!note)
             return;
-        
+
         // 处理钓鱼笔记
         const dw = new DataView(packet, info.fish_offset);
 
@@ -354,9 +354,82 @@ export class FishingTracker extends EventTarget {
         offset = fishIDs.offset + maskToBytesLength(note.spot_max_id);
         const spearFishIDs = bitMaskMapping(dw, note.spear_fishes, offset);
         offset = spearFishIDs.offset + maskToBytesLength(note.spear_spot_max_id + 1); // 这破玩意从0开始计算的
-        
+
         this.history.storage.SetFishingLog(fishIDs.data, spearFishIDs.data);
         console.log("Player setup processed, fish log updated:", dw, fishIDs, spearFishIDs);
+    }
+
+    public getFishingLogShareUrl(): string {
+        const note = this.db.getFishingNoteInfo();
+        if (!note)
+            return "";
+
+        // 结构：
+        // [len of fish mask][fish mask][spear fish mask]
+
+        const logs = this.history.storage.getFishingLog();
+        const fishOffset = 1;
+        const spearFishOffset = fishOffset + maskToBytesLength(note.fishes.length - 1);
+        const totalLength = spearFishOffset + maskToBytesLength(note.spear_fishes.length - 1);
+        const buffer = new ArrayBuffer(totalLength);
+        const dw = new DataView(buffer);
+
+        dw.setUint8(0, spearFishOffset - fishOffset); // 第一部分的长度
+
+        for (let i = 0; i < logs.fishes.length; i++) {
+            const fishId = logs.fishes[i];
+            if (fishId === 0)
+                continue;
+            
+            const index = note.fishes.indexOf(fishId);
+            if (index >= 0) {
+                const byteIndex = Math.floor(index / 8) + fishOffset;
+                const bitIndex = index % 8;
+                dw.setUint8(byteIndex, dw.getUint8(byteIndex) | (1 << bitIndex));
+            }
+        }
+        for (let i = 0; i < logs.spear_fishes.length; i++) {
+            const fishId = logs.spear_fishes[i];
+            if (fishId === 0)
+                continue;
+
+            const index = note.spear_fishes.indexOf(fishId);
+            if (index >= 0) {
+                const byteIndex = Math.floor(index / 8) + spearFishOffset;
+                const bitIndex = index % 8;
+                dw.setUint8(byteIndex, dw.getUint8(byteIndex) | (1 << bitIndex));
+            }
+        }
+        // base64编码
+        return btoa(String.fromCharCode(...new Uint8Array(buffer))).replaceAll("/", "_").replaceAll("+", "-");
+    }
+
+    public getFishingLogShareData(encoded: string): { fishes: number[], spear_fishes: number[] } | null {
+        try {
+            const binary = atob(encoded.replaceAll("_", "/").replaceAll("-", "+"));
+            const buffer = new ArrayBuffer(binary.length);
+            const uint8Array = new Uint8Array(buffer);
+            for (let i = 0; i < binary.length; i++) {
+                uint8Array[i] = binary.charCodeAt(i);
+            }
+            const dw = new DataView(buffer);
+            const fishMaskLength = dw.getUint8(0);
+
+            const note = this.db.getFishingNoteInfo();
+            if (!note)
+                return null;
+
+            const fishIDs = bitMaskMapping(dw, note.fishes, 1);
+            const spearFishIDs = bitMaskMapping(dw, note.spear_fishes, fishMaskLength + 1);
+
+            return {
+                fishes: fishIDs.data,
+                spear_fishes: spearFishIDs.data,
+            }
+        } catch (e) {
+            console.error("Failed to decode fishing log share data:", e);
+            return null;
+        }
     }
 }
 
@@ -365,13 +438,13 @@ function maskToBytesLength(mask: number): number {
     return Math.ceil(mask / 8);
 }
 
-function bitMaskMapping(dw: DataView, dataMap: number[], offset: number) : {
+function bitMaskMapping(dw: DataView, dataMap: number[], offset: number): {
     data: number[],
     offset: number
 } {
     const result: number[] = [];
     const length = dataMap.length - 1; // 假设0-8一共9位，但是抓包看到只有1个字节，所以这里处理下
-    const dataLength = maskToBytesLength(length); 
+    const dataLength = maskToBytesLength(length);
     for (let i = 0; i < dataLength; i++) {
         const byte = dw.getUint8(offset + i);
         for (let bit = 0; bit < 8; bit++) {
