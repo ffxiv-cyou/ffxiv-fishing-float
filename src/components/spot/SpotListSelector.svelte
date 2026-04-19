@@ -81,15 +81,34 @@
     if (!storage) return false;
 
     if (tree.children) {
+      let completedCount = 0;
+      let validSpotCount = 0;
+
       for (const child of tree.children) {
-        if (!isSpotFinish(child)) {
-          return false;
+        const childResult = isSpotFinish(child);
+        const hasFishList = child.fish && child.fish.length > 0;
+
+        if (hasFishList) {
+          validSpotCount++;
+          if (childResult) {
+            completedCount++;
+          }
         }
       }
-      return true;
+
+      if (validSpotCount === 0) {
+        return false;
+      }
+
+      return completedCount === validSpotCount;
     }
 
-    for (const fish of tree.fish ?? []) {
+    const fishList = tree.fish;
+    if (!fishList || fishList.length === 0) {
+      return false;
+    }
+
+    for (const fish of fishList) {
       if (!storage.isFishingLogged(fish, false)) {
         return false;
       }
