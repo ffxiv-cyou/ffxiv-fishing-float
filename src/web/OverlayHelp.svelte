@@ -1,13 +1,18 @@
 <script lang="ts">
   import FeedbackLink from "@/components/FeedbackLink.svelte";
-  import { A, Heading, P } from "flowbite-svelte";
+  import {
+    A,
+    Heading,
+    P,
+    Accordion,
+    AccordionItem,
+    List,
+    Li,
+  } from "flowbite-svelte";
 </script>
 
 <div class="p-4 max-w-3xl mx-auto">
   <Heading tag="h1" class="text-2xl">使用说明</Heading>
-  <P
-    >欢迎使用我们的服务！</P
-  >
   <Heading tag="h2" class="text-xl">安装悬浮窗插件</Heading>
   <P>
     本悬浮窗插件依赖于
@@ -20,12 +25,35 @@
       href="https://github.com/Lotlab/ffxiv-overlay-toolkit/releases"
       target="_blank"
       >访问此处下载 OverlayToolkit
-    </A>，并在 ACT 中加载此插件。加载完毕后，<strong>需要重启 ACT 才可使用。</strong>
+    </A>（下载 OverlayToolkit.dll 文件即可），并在 ACT
+    中加载此插件。加载完毕后，<strong>需要重启 ACT 才可使用。</strong>
   </P>
+  <Accordion>
+    <AccordionItem>
+      {#snippet header()}如何加载此插件？{/snippet}
+      <img
+        src="/assets/overlay-toolkit-install.png"
+        alt="overlay-toolkit-install"
+        class="my-2 rounded"
+      />
+      <List tag="ol">
+        <Li>
+          点击ACT选项卡中的“插件列表”项目（对于
+          CafeACT，先点击“插件管理”，然后点击下方的“高级管理”）
+        </Li>
+        <Li
+          >点击“浏览”，选择你下载的插件文件，点击“打开”后，点击“添加/启用插件”</Li
+        >
+        <Li>重启 ACT</Li>
+      </List>
+    </AccordionItem>
+  </Accordion>
   <P>
     点击 ACT 中的 “插件” - “ngld悬浮窗插件” - “新建”（左下角）添加悬浮窗。
     在弹出的窗口中随意填写名称，预设选择自订，类型选择数据统计，点击确定添加一个新的悬浮窗。
-    然后在右侧的悬浮窗路径中，填写 <span style="user-select: all;">https://fisher.ffxiv.cyou/</span>
+    然后在右侧的悬浮窗路径中，填写 <span style="user-select: all;"
+      >https://fisher.ffxiv.cyou/</span
+    >
     ，然后点击重载悬浮窗即可。
   </P>
   <Heading tag="h2" class="text-xl">常见问题</Heading>
