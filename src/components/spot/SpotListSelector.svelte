@@ -77,35 +77,21 @@
     return classes;
   }
 
-  function isSpotFinish(tree: PlaceTree): boolean {
+  function isSpotFinish(tree: PlaceTree): boolean | undefined {
     if (!storage) return false;
 
     if (tree.children) {
-      let completedCount = 0;
-      let validSpotCount = 0;
-
       for (const child of tree.children) {
-        const childResult = isSpotFinish(child);
-        const hasFishList = child.fish && child.fish.length > 0;
-
-        if (hasFishList) {
-          validSpotCount++;
-          if (childResult) {
-            completedCount++;
-          }
+        if (isSpotFinish(child) === false) {
+          return false;
         }
       }
-
-      if (validSpotCount === 0) {
-        return false;
-      }
-
-      return completedCount === validSpotCount;
+      return true;
     }
 
     const fishList = tree.fish;
     if (!fishList || fishList.length === 0) {
-      return false;
+      return undefined;
     }
 
     for (const fish of fishList) {
