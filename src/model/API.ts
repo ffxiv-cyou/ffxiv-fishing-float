@@ -92,6 +92,31 @@ export class API {
     return await resp.json();
   }
 
+  public async getSiteStats(opt?: {
+    period?: string;
+    limit?: number;
+    groups?: string;
+  }): Promise<HomeStatsResponse> {
+    let query = "";
+    if (opt?.period) {
+      query += `?period=${opt.period}`;
+    }
+    if (opt?.limit) {
+      query += `${query ? "&" : "?"}limit=${opt.limit}`;
+    }
+    if (opt?.groups) {
+      query += `${query ? "&" : "?"}groups=${opt.groups}`;
+    }
+
+    const resp = await fetch(`${this.basePath}/stats${query}`, {
+      method: "GET",
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to get site stats: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
   generateHeader(data: Uint8Array): { [key: string]: string } {
     var now = Date.now();
     return {
@@ -219,4 +244,20 @@ export interface SpotStatsResponse {
   conditions: Array<FishCondition>;
   samples: Array<SpotSampleCount>;
   tugs: Array<SpotTugCount>;
+}
+
+export interface RecentCatchesItem {
+  spot_id?: number;
+  bait_id?: number;
+  fish_id?: number;
+  count: number;
+}
+
+export interface HomeStatsResponse {
+  summary: {
+    records: number;
+  },
+  recent_catches: {
+    [key: string]: RecentCatchesItem[];
+  };
 }
