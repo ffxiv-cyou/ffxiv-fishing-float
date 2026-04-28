@@ -4,6 +4,7 @@ export enum PacketType {
     UpdateHpMpTp,
     ActorControl,
     ActorControlSelf,
+    FishingResultMsg,
     ClientTrigger,
     EventStart,
     EventPlay,
@@ -489,5 +490,24 @@ export class FFXIVIpcStatusEffectList3 extends IpcPacket {
     for (let i = 0; i < 30; i++) {
       this.effect[i] = new StatusEffect(dw, offset + 0 + i * 12);
     }
+  }
+}
+
+export class FFXIVIpcFishingResultMsg extends IpcPacket {
+  itemId: number;
+  size: number;
+  quantity: number;
+  padding1: number;
+  unk1: number;
+  flags2: number;
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.itemId = dw.getUint32(offset + 0, true);
+    this.size = dw.getUint16(offset + 4, true);
+    this.quantity = dw.getUint16(offset + 6, true);
+    this.padding1 = dw.getUint16(offset + 8, true);
+    this.unk1 = dw.getUint16(offset + 10, true);
+    this.flags2 = dw.getUint32(offset + 12, true);
   }
 }

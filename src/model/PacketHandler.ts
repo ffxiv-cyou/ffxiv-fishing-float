@@ -1,5 +1,5 @@
 import type { Packet, PacketFilter } from "overlay-toolkit";
-import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType, StatusEffect } from "./Opcode";
+import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType, StatusEffect } from "./Opcode";
 import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
@@ -23,6 +23,7 @@ const Direction = {
     [PacketType.SystemLogMessage]: false,
     [PacketType.StatusEffectList]: false,
     [PacketType.StatusEffectList3]: false,
+    [PacketType.FishingResultMsg]: false,
 }
 
 export interface IPacketSource {
@@ -105,6 +106,9 @@ export class PacketHandler {
             case PacketType.ActorControlSelf:
                 this.handleActorControlSelf(dw, packet.epoch);
                 break;
+            case PacketType.FishingResultMsg:
+                this.handleFishingResult(dw, packet.epoch);
+                break;
             case PacketType.ClientTrigger:
                 this.handleClientTrigger(dw, packet.epoch);
                 break;
@@ -174,6 +178,14 @@ export class PacketHandler {
             default:
                 break;
         }
+    }
+
+    private handleFishingResult(dw: DataView, epoch: number): void {
+        const resultMsg = new FFXIVIpcFishingResultMsg(dw);
+        const isHQ = (resultMsg.flags2 & 0x10) > 0;
+        const isColl = ((resultMsg.quantity >> 8) & 0xFF) > 0;
+        const quantity = resultMsg.quantity & 0xFF;
+        this.tracker.setFishingResult(resultMsg.itemId, quantity, resultMsg.size, isHQ, isColl, epoch);
     }
 
     private handleActorControlSelf(dw: DataView, epoch: number): void {
