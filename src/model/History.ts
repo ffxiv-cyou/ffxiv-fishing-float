@@ -61,8 +61,11 @@ export class FishingHistory {
     this.nextUpload = setTimeout(() => this.uploadPendingSessions(), 60 * 1000);
   }
 
-  private uploadPendingSessions(): void {
+  uploadPendingSessions(): void {
     const sessionsToUpload = this.pendingSessions;
+    if (sessionsToUpload.length === 0) {
+      return;
+    }
 
     const data = sessionsToUpload.map((s) => s.serialize());
     const body = encode(data);

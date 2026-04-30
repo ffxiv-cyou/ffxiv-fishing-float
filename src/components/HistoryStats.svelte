@@ -49,7 +49,7 @@
         break;
     }
 
-    if (highlight && highlight.includes(item.fish)) {
+    if (highlight && highlight.includes(item.fish) && !downplay?.includes(item.fish)) {
       classes.push("active");
     }
     if (downplay && downplay.includes(item.fish)) {
@@ -70,6 +70,8 @@
         maxBiteTime: Math.max(item.maxBiteTime, lureTime!),
       });
     }
+    // 确保顺序不变
+    mod.sort((a, b) => a.fish - b.fish);
     return mod;
   });
 </script>

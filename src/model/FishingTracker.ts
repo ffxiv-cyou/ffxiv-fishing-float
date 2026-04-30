@@ -146,6 +146,9 @@ export class FishingTracker extends EventTarget {
             // 站起来之后状态需要清空
             this.current = null;
             this.updateSub();
+
+            // 立即上报数据，避免丢失
+            this.history.uploadPendingSessions();
         }
     }
 
