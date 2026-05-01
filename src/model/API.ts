@@ -134,6 +134,106 @@ export class API {
       console.log(`Time difference between server and client: ${timeDiff} ms`);
     }
   }
+
+  private getAdminHeaders(): HeadersInit {
+    const token = localStorage.getItem('admin_token');
+    return {
+      'Authorization': `Bearer ${token}`,
+    };
+  }
+
+  public async getAdminRecords(filter: AdminRecordFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    if (filter.spot) params.set('spot', filter.spot.toString());
+    if (filter.bait) params.set('bait', filter.bait.toString());
+    if (filter.fish) params.set('fish', filter.fish.toString());
+    if (filter.user) params.set('user', filter.user.toString());
+    if (filter.from) params.set('from', filter.from.toString());
+    if (filter.to) params.set('to', filter.to.toString());
+    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/records?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get admin records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async deleteRecords(ids: number[]): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/records?${params}`, {
+      method: 'DELETE',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to delete records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async getDeletedRecords(filter: AdminRecordFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    if (filter.spot) params.set('spot', filter.spot.toString());
+    if (filter.bait) params.set('bait', filter.bait.toString());
+    if (filter.fish) params.set('fish', filter.fish.toString());
+    if (filter.user) params.set('user', filter.user.toString());
+    if (filter.from) params.set('from', filter.from.toString());
+    if (filter.to) params.set('to', filter.to.toString());
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/records/deleted?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get deleted records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async restoreRecords(ids: number[]): Promise<RestoreRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/records/restore?${params}`, {
+      method: 'POST',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to restore records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
 }
 
 export interface FishDurationResponse {
@@ -260,4 +360,52 @@ export interface HomeStatsResponse {
   recent_catches: {
     [key: string]: RecentCatchesItem[];
   };
+}
+
+export interface AdminRecordFilter {
+  spot?: number;
+  bait?: number;
+  fish?: number;
+  user?: number;
+  from?: number;
+  to?: number;
+  dirty?: boolean;
+}
+
+export interface AdminFishingRecord {
+  id: number;
+  user_id: number;
+  is_dirty: boolean;
+  deleted_at?: number;
+  time: number;
+  spot_id: number;
+  bait_id: number;
+  duration: number;
+  fish_id?: number;
+  size?: number;
+  hq?: boolean;
+  quantity?: number;
+  eorzea_time: number;
+  weather: number;
+  prev_weather: number;
+  tug: number;
+  chum: boolean;
+  slap_id?: number;
+  identical_id?: number;
+  ambious_lure?: number;
+  modest_lure?: number;
+  flags: number;
+}
+
+export interface AdminRecordListResponse {
+  data: AdminFishingRecord[];
+  count: number;
+}
+
+export interface DeleteRecordsResponse {
+  deleted: number;
+}
+
+export interface RestoreRecordsResponse {
+  restored: number;
 }

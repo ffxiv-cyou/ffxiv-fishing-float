@@ -315,7 +315,7 @@ export interface FishingFail {
     reason: FailReason;
 }
 
-enum FishingFlags {
+export enum FishingFlags {
     StateChum = 1 << 0, // 撒饵
     StateFishEye = 1 << 1, // 鱼眼
     StateFisherIntuition = 1 << 2, // 鱼识
@@ -330,6 +330,7 @@ enum FishingFlags {
     StateTugLight = 1 << 9, // 咬钩I
     StateTugMedium = 2 << 9, // 咬钩II
     StateTugHeavy = 3 << 9, // 咬钩III
+    StateTugMask = 3 << 9, // 咬钩掩码
 
     // bit 11-13
     StateHook = 1 << 11, // 普通提钩
@@ -338,6 +339,7 @@ enum FishingFlags {
     StateHookDouble = 4 << 11, // 双重提钩
     StateHookTriple = 5 << 11, // 三重提钩
     StateHookStellar = 6 << 11, // 华丽提钩
+    StateHookMask = 7 << 11, // 提钩掩码
 
     // bit 14-15
     StateFishGet = 1 << 14, // 上钩

@@ -44,6 +44,13 @@
       return [false, {}];
     }
 
+    // If the last pattern part is not a parameter, require exact match
+    const lastPatternPart = patternParts[patternParts.length - 1];
+    const requiresExactMatch = !lastPatternPart.startsWith(":");
+    if (requiresExactMatch && urlParts.length !== patternParts.length) {
+      return [false, {}];
+    }
+
     let params: RouteParams = {};
     for (let i = 0; i < urlParts.length; i++) {
       if (patternParts[i].startsWith(":")) {

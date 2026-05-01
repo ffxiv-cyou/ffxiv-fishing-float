@@ -7,6 +7,9 @@ import SpotInfo from "@/web/SpotInfo.svelte";
 import FAQ from "@/web/FAQ.svelte";
 import Methodology from "@/web/Methodology.svelte";
 import NoteExport from "@/web/NoteExport.svelte";
+import AdminLogin from "@/web/admin/AdminLogin.svelte";
+import AdminRecords from "@/web/admin/AdminRecords.svelte";
+import AdminDeleted from "@/web/admin/AdminDeleted.svelte";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -43,6 +46,21 @@ export const routes: Array<RouteConfig> = [
     path: "/export/:data",
     name: "导出钓鱼笔记",
     component: NoteExport,
+  },
+  {
+    path: "/admin/login",
+    name: "管理员登录",
+    component: AdminLogin,
+  },
+  {
+    path: "/admin/deleted",
+    name: "已删除记录",
+    component: AdminDeleted,
+  },
+  {
+    path: "/admin",
+    name: "数据管理",
+    component: AdminRecords,
   }
 ];
 
