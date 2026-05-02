@@ -101,6 +101,7 @@
         {spotID}
         durations={all}
         {buckets}
+        samples={spotStats?.samples ?? []}
         conditions={spotStats?.conditions ?? []}
       />
     {/if}

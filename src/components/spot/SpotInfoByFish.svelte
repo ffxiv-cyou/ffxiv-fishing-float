@@ -7,6 +7,7 @@
     DurationBucket,
     FishCondition,
     FishDurationDistribution,
+    SpotSampleCount,
   } from "@/model/API";
   import { downSampleBuckets, mergeChumBuckets } from "./data_helper";
   import HeatmapView from "./HeatmapView.svelte";
@@ -19,6 +20,7 @@
     durations,
     buckets,
     conditions,
+    samples,
     spotID,
   }: {
     fishes: number[];
@@ -26,6 +28,7 @@
     tracker: FishingTracker;
     buckets: DurationBucket[];
     conditions: FishCondition[];
+    samples: SpotSampleCount[];
     spotID: number;
   } = $props();
 
@@ -73,6 +76,14 @@
   function getFishCondition(fishID: number) {
     return conditions?.find((c) => c.id === fishID);
   }
+
+  function getFishSample(fishID: number) {
+    return samples?.find((s) => s.id === fishID);
+  }
+
+  function fishSizeName(size: number) {
+    return (size / 10).toString();
+  }
 </script>
 
 <Tabs
@@ -90,7 +101,6 @@
           {tracker.db.getItemName(fishID)}
         </div>
       {/snippet}
-
       <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
       <div class="flex gap-4 mt-2">
         <Toggle bind:checked={showHeatmap}>热力图</Toggle>
@@ -133,6 +143,19 @@
             db={tracker.db}
           />
         {/if}
+      {/if}
+      {@const sample = getFishSample(fishID)}
+      {#if sample && sample.count > 0}
+        <Heading tag="h2" class="relative text-2xl leading-tight my-2"
+          >尺寸</Heading
+        >
+        <p>
+          {fishSizeName(sample.size_min)} ~
+          {fishSizeName(sample.size_max)} 星寸
+          <span class="text-gray-500 text-sm">
+            ({sample.count} 条记录)
+          </span>
+        </p>
       {/if}
     </TabItem>
   {/each}

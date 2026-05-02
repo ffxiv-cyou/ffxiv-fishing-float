@@ -319,6 +319,8 @@ export interface FishCondition {
 export interface SpotSampleCount {
   id: number;
   count: number;
+  size_min: number;
+  size_max: number;
 }
 
 export interface SpotTugCount {
