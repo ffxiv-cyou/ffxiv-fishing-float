@@ -118,6 +118,11 @@ export class GameDatabase {
     return this.itemNames[itemId] || "未知物品(" + itemId + ")";
   }
 
+  getItemNameRaw(itemId: number): string | undefined {
+    this.#subscribe();
+    return this.itemNames[itemId];
+  }
+
   getOpcodes(): { [key: string]: number } {
     this.#subscribe();
     return this.opcodes;

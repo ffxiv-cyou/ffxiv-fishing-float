@@ -5,7 +5,8 @@
     "target": "ES2022",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "types": ["svelte", "vite/client"],
+    "types": ["svelte", "vite/client", "pinyinlite"],
+    "typeRoots": ["./types", "./node_modules/@types", "./node_modules"],
     "noEmit": true,
     /**
      * Typecheck JS in `.svelte` and `.js` files by default.
@@ -16,6 +17,8 @@
     "allowJs": true,
     "checkJs": true,
     "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "moduleDetection": "force",
     "paths": {
       "@/*": ["./src/*"]

@@ -5,6 +5,9 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [svelte(), tailwindcss()],
+  ssr: {
+    noExternal: ['pinyinlite']
+  },
   build: {
     sourcemap: true,
     rolldownOptions: {
@@ -24,4 +27,13 @@ export default defineConfig({
       '@': '/src'
     }
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:9090',
+        changeOrigin: true,
+        secure: false,
+      },
+    }
+  }
 })

@@ -14,6 +14,7 @@
     "cbor2": "^2.0.1",
     "idb": "^8.0.3",
     "overlay-toolkit": "^0.12.0",
+    "pinyinlite": "^1.2.1",
     "uplot": "^1.6.32"
   },
   "devDependencies": {

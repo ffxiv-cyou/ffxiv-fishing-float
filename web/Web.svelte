@@ -17,6 +17,7 @@
     DropdownItem,
   } from "flowbite-svelte";
   import ChevronDownOutline from "../src/components/icon/ChevronDownOutline.svelte";
+  import SearchCombo from "../src/components/SearchCombo.svelte";
 
   let url = $state("");
   function handleHashChange() {
@@ -66,7 +67,12 @@
           >杆时统计</span
         >
       </NavBrand>
-      <NavHamburger />
+      <div class="flex md:order-0">
+        <div class="hidden md:block">
+          <SearchCombo db={tracker.db} />
+        </div>
+        <NavHamburger />
+      </div>
       <NavUl activeUrl={"#" + url}>
         {#each navTree as route}
           <NavLi
