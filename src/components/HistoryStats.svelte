@@ -71,8 +71,7 @@
       });
     }
     // 确保顺序不变
-    mod.sort((a, b) => a.fish - b.fish);
-    return mod;
+    return mod.sort((a, b) => a.fish - b.fish);
   });
 </script>
 

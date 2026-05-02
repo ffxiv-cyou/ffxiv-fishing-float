@@ -33,7 +33,12 @@
   });
 
   function routerMatch(url: string, pattern: string): [boolean, RouteParams] {
-    const urlParts = url.split("/").filter((part) => part.length > 0);
+    const query = url.split("?")[1] || "";
+    const urlWithoutQuery = url.split("?")[0];
+
+    const urlParts = urlWithoutQuery
+      .split("/")
+      .filter((part) => part.length > 0);
     const patternParts = pattern.split("/").filter((part) => part.length > 0);
 
     if (urlParts.length === 0 && patternParts.length === 0) {
@@ -51,6 +56,8 @@
       return [false, {}];
     }
 
+    const queryParams = new URLSearchParams(query);
+
     let params: RouteParams = {};
     for (let i = 0; i < urlParts.length; i++) {
       if (patternParts[i].startsWith(":")) {
@@ -60,6 +67,7 @@
         return [false, {}];
       }
     }
+    params = { ...params, ...Object.fromEntries(queryParams.entries()) };
 
     return [true, params];
   }
@@ -78,8 +86,18 @@
 
   function updateHash(params: RouteParams) {
     let newHash = path;
+    let query = new URLSearchParams();
     for (const [key, value] of Object.entries(params)) {
-      newHash = newHash.replace(`:${key}`, encodeURIComponent(value));
+      if (key === undefined || value === undefined) continue;
+      if (newHash.includes(`:${key}`)) {
+        newHash = newHash.replace(`:${key}`, encodeURIComponent(value));
+      } else {
+        query.set(key, value);
+      }
+    }
+    const queryString = query.toString();
+    if (queryString) {
+      newHash += `?${queryString}`;
     }
     location.hash = `#${newHash}`;
   }
@@ -93,11 +111,15 @@
       setTitle(title);
     }
   });
-
 </script>
 
 {#if matched}
   {#if PropComponent}
-    <PropComponent {...routeParams} {...rest} navigate={updateHash} setTitle={setTitle} />
+    <PropComponent
+      {...routeParams}
+      {...rest}
+      navigate={updateHash}
+      {setTitle}
+    />
   {/if}
 {/if}

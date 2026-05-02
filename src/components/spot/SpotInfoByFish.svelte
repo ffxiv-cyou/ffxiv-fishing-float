@@ -22,6 +22,7 @@
     conditions,
     samples,
     spotID,
+    fishID = $bindable(0),
   }: {
     fishes: number[];
     durations: FishDurationDistribution[];
@@ -30,6 +31,7 @@
     conditions: FishCondition[];
     samples: SpotSampleCount[];
     spotID: number;
+    fishID: number;
   } = $props();
 
   let isFiltered = $state(false);
@@ -84,6 +86,18 @@
   function fishSizeName(size: number) {
     return (size / 10).toString();
   }
+
+  let selectedTab = $state(fishID ? fishID.toString() : "");
+  $effect(() => {
+    const tabID = parseInt(selectedTab);
+    if (fishes.includes(tabID)) {
+      if (tabID !== fishID)
+        fishID = tabID;
+    } else {
+      selectedTab = fishes[0]?.toString() ?? "";
+    }
+  });
+
 </script>
 
 <Tabs
@@ -93,9 +107,10 @@
     content: "p-0",
   }}
   ulClass="flex flex-wrap"
+  bind:selected={selectedTab}
 >
   {#each fishes as fishID}
-    <TabItem>
+    <TabItem key={fishID.toString()}>
       {#snippet titleSlot()}
         <div>
           {tracker.db.getItemName(fishID)}

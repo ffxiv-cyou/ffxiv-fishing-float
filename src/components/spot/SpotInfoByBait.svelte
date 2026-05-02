@@ -17,12 +17,14 @@
     durations,
     buckets,
     rates,
+    baitID = $bindable(0),
   }: {
     baits: number[];
     durations: FishDurationDistribution[];
     buckets: DurationBucket[];
     rates: FishProbabilityItem[];
     tracker: FishingTracker;
+    baitID: number;
   } = $props();
 
   let isFiltered = $state(false);
@@ -67,10 +69,19 @@
   }
 
   function getFishRates(baitID: number) {
-    return rates
-      .filter((d) => d.bait === baitID)
-      .sort((a, b) => b.id - a.id);
+    return rates.filter((d) => d.bait === baitID).sort((a, b) => b.id - a.id);
   }
+
+  let selectedTab = $state(baitID ? baitID.toString() : "");
+  $effect(() => {
+    const tabID = parseInt(selectedTab);
+    if (baits.includes(tabID)) {
+      if (tabID !== baitID)
+        baitID = tabID;
+    } else {
+      selectedTab = baits[0]?.toString() ?? "";
+    }
+  });
 </script>
 
 {#if baits.length === 0}
@@ -85,9 +96,10 @@
       content: "p-0",
     }}
     ulClass="flex flex-wrap"
+    bind:selected={selectedTab}
   >
     {#each baits as baitID}
-      <TabItem>
+      <TabItem key={baitID.toString()}>
         {#snippet titleSlot()}
           <div>
             {tracker.db.getItemName(baitID)}

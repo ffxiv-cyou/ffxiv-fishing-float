@@ -15,11 +15,15 @@
 
   let {
     spotID = $bindable(0),
+    myBaitID = $bindable(0),
     baitID = $bindable(0),
+    fishID = $bindable(0),
     tracker,
   }: {
     spotID: number;
+    myBaitID: number;
     baitID: number;
+    fishID: number;
     tracker: FishingTracker;
   } = $props();
 
@@ -73,10 +77,36 @@
     );
   });
 
-  let selectedTab = baitID > 0 ? "my-history" : "basic";
+  let selectedTab = "";
+  function getSelectedTab() {
+    if (selectedTab)
+      return selectedTab;
+    if (myBaitID > 0) {
+      return "my-history";
+    } else if (fishID > 0) {
+      return "by-fish";
+    } else if (baitID > 0) {
+      return "by-bait";
+    } else {
+      return "basic";
+    }
+  }
+
+  function setSelectedTab(tab: string) {
+    if (tab !== "my-history" && myBaitID > 0) {
+      myBaitID = 0;
+    }
+    if (tab !== "by-fish" && fishID > 0) {
+      fishID = 0;
+    }
+    if (tab !== "by-bait" && baitID > 0) {
+      baitID = 0;
+    }
+    selectedTab = tab;
+  }
 </script>
 
-<Tabs tabStyle="underline" selected={selectedTab}>
+<Tabs tabStyle="underline" bind:selected={getSelectedTab, setSelectedTab}>
   <TabItem title="基本信息" key="basic">
     {#if loading}
       <Skeleton />
@@ -88,7 +118,7 @@
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} />
+      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} bind:baitID={baitID} />
     {/if}
   </TabItem>
   <TabItem title="按渔获" key="by-fish">
@@ -103,11 +133,12 @@
         {buckets}
         samples={spotStats?.samples ?? []}
         conditions={spotStats?.conditions ?? []}
+        bind:fishID={fishID}
       />
     {/if}
   </TabItem>
   <TabItem title="我的记录" key="my-history">
-    <SpotInfoSelfHistory {tracker} {spotID} bind:baitID />
+    <SpotInfoSelfHistory {tracker} {spotID} bind:baitID={myBaitID} />
   </TabItem>
 </Tabs>
 

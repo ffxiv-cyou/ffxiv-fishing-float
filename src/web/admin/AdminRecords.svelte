@@ -57,6 +57,7 @@
       try {
         await api.deleteRecords(deleteConfirm.ids);
         await tableRef.loadRecords();
+        selectedIds = [];
       } catch (e: any) {
         error = e.message || "删除失败";
       }
