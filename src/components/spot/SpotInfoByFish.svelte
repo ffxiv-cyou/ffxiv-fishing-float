@@ -98,6 +98,10 @@
     }
   });
 
+  let hasWeather = $derived.by(() => {
+    return (tracker.db.getTerritoryByPlaceID(spotID)?.weathers?.length ?? 0) > 1;
+  });
+
 </script>
 
 <Tabs
@@ -148,7 +152,7 @@
             db={tracker.db}
           />
         {/if}
-        {#if getFishCondition(fishID)?.weather}
+        {#if getFishCondition(fishID)?.weather && hasWeather}
           <Heading tag="h2" class="relative text-2xl leading-tight my-2">
             天气
           </Heading>
