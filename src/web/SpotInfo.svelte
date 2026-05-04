@@ -91,7 +91,7 @@
     {:else}
       <div class="h-16 flex flex-row items-center justify-center">
         <div class="flex-1">
-          请在左侧选择钓场 bait_id {bait_id} fish_id {fish_id}
+          请在左侧选择钓场
         </div>
       </div>
     {/if}
