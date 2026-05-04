@@ -194,6 +194,37 @@
         >禁用按钮设置入口后，你可能需要抛竿后才能再次进入设置页面</span
       >
     </div>
+    <div class="setting-item">
+      <span class="setting-name">双维过低提示</span>
+      <input
+        type="checkbox"
+        id="show-stats-low"
+        bind:checked={config.StatsThresoldEnabled}
+      />
+      <label for="show-stats-low">启用</label>
+      <span class="setting-desc"
+        >启用后，当获得/鉴别过低时会在界面上显示提示。用于食物提醒。</span
+      >
+    </div>
+    {#if config.StatsThresoldEnabled}
+      <div class="setting-item">
+        <span class="setting-name">双维阈值</span>
+        <label for="gathering-thresold">获得力</label>
+        <input
+          type="number"
+          min="0"
+          id="gathering-thresold"
+          bind:value={config.GatheringThresold}
+        />
+        <label for="perception-thresold">鉴别力</label>
+        <input
+          type="number"
+          min="0"
+          id="perception-thresold"
+          bind:value={config.PerceptionThresold}
+        />
+      </div>
+    {/if}
     <h2>历史统计</h2>
     <div class="setting-item">
       <span class="setting-name">上报数据</span>
@@ -345,7 +376,12 @@
       <button onclick={() => config.reset()}>重置设置</button>
       <button
         onclick={() => {
-          if (confirm("确定要重置所有历史记录吗？重置之后无法恢复。\n你可以在历史页面单独删除指定的记录。")) history.clear();
+          if (
+            confirm(
+              "确定要重置所有历史记录吗？重置之后无法恢复。\n你可以在历史页面单独删除指定的记录。",
+            )
+          )
+            history.clear();
         }}>重置历史记录</button
       >
     </div>
@@ -404,6 +440,15 @@
   .test-sound-buttons {
     display: inline-flex;
     gap: 10px;
+  }
+  input[type="number"] {
+    width: 80px;
+    appearance: none;
+    border: 1px solid #ccc;
+    padding: 5px 1px 5px 10px;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-right: 5px;
   }
 
   input[type="color"] {

@@ -1,4 +1,5 @@
 import { createSubscriber } from 'svelte/reactivity';
+import type { FisherStats } from './FishingTracker';
 
 export class Config {
   #subscribe;
@@ -35,6 +36,18 @@ export class Config {
   /** 音量大小 (0-100) */
   volume: number = 100;
 
+  /** 三维阈值 */
+  statsThresold: FisherStats = {
+    gathering: 0,
+    perception: 0,
+    gp: 0
+  };
+
+  /**
+   * 启用三维阈值提醒功能
+   */
+  statsThresoldEnabled: boolean = false;
+
   constructor() {
     this.#subscribe = createSubscriber((update) => {
       this.update = update;
@@ -65,6 +78,8 @@ export class Config {
     this.uploadHistory = obj.uploadHistory !== undefined ? obj.uploadHistory : true;
     this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a'];
     this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
+    this.statsThresold = obj.statsThresold || { gathering: 0, perception: 0, gp: 0 };
+    this.statsThresoldEnabled = obj.statsThresoldEnabled !== undefined ? obj.statsThresoldEnabled : false;
   }
 
   reset() {
@@ -267,6 +282,34 @@ export class Config {
   }
   set HistoryHeavyColor(value: string) {
     this.historyColors[2] = value;
+    this.save();
+  }
+
+  /** 三维阈值 */
+  get GatheringThresold() {
+    this.#subscribe();
+    return this.statsThresold.gathering;
+  }
+  set GatheringThresold(value: number) {
+    this.statsThresold.gathering = value;
+    this.save();
+  }
+  get PerceptionThresold() {
+    this.#subscribe();
+    return this.statsThresold.perception;
+  }
+  set PerceptionThresold(value: number) {
+    this.statsThresold.perception = value;
+    this.save();
+  }
+  
+  /** 启用三维阈值提醒功能 */
+  get StatsThresoldEnabled() {
+    this.#subscribe();
+    return this.statsThresoldEnabled;
+  }
+  set StatsThresoldEnabled(value: boolean) {
+    this.statsThresoldEnabled = value;
     this.save();
   }
 }

@@ -110,7 +110,7 @@
     window.open(hash, "_blank", "width=1000,height=600");
   }
 
-  let showHistory = $derived(tracker.CurrentZone > 0);
+  let showHistory = $derived(tracker.CurrentZone > 0 && tracker.IsInFishingEvent);
 
   function openSettingPage() {
     window.open("/#/setting", "Settings", "width=800,height=700");
@@ -119,6 +119,24 @@
   function openNoteExportPage() {
     window.open("/web/#/export/", "NoteExport", "width=800,height=400");
   }
+
+  let statsIsLow = $derived.by(() => {
+    if (!tracker.config.StatsThresoldEnabled || !tracker.IsInFishingEvent) 
+      return false;
+    return (
+      (tracker.config.GatheringThresold > 0 &&
+        tracker.gathering > 0 &&
+        tracker.gathering < tracker.config.GatheringThresold) ||
+      (tracker.config.PerceptionThresold > 0 &&
+        tracker.perception > 0 &&
+        tracker.perception < tracker.config.PerceptionThresold)
+    );
+  });
+
+  $effect(() => {
+    console.log(tracker.config.GatheringThresold, tracker.config.PerceptionThresold, tracker.gathering, tracker.perception, statsIsLow);
+  });
+
 </script>
 
 <div class="debug-tool">
@@ -155,27 +173,39 @@
 </div>
 <Notice {message} />
 <div class="control-bar">
-  {#if showConfig || tracker.config.ShowSettingBtn}
-    <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
-    {#if showHistory}
-      <button class="round-btn history-btn" onclick={openHistory}>↗</button>
+  <div class="left">
+    {#if showConfig || tracker.config.ShowSettingBtn}
+      <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
+      {#if showHistory}
+        <button class="round-btn history-btn" onclick={openHistory}>↗</button>
+      {/if}
     {/if}
-  {/if}
-  {#if showConfig}
-    <button
-      class="xiv-text blue"
-      aria-label="open window"
-      onclick={openSettingPage}>设置 &raquo; </button
-    >
-    <button class="xiv-text blue" aria-label="open window" onclick={openHistory}
-      >记录 &raquo; </button
-    >
-    <button
-      class="xiv-text blue"
-      aria-label="open window"
-      onclick={openNoteExportPage}>导出笔记 &raquo; </button
-    >
-  {/if}
+    {#if showConfig}
+      <button
+        class="xiv-text blue"
+        aria-label="open window"
+        onclick={openSettingPage}
+        >设置 &raquo;
+      </button>
+      <button
+        class="xiv-text blue"
+        aria-label="open window"
+        onclick={openHistory}
+        >记录 &raquo;
+      </button>
+      <button
+        class="xiv-text blue"
+        aria-label="open window"
+        onclick={openNoteExportPage}
+        >导出笔记 &raquo;
+      </button>
+    {/if}
+  </div>
+  <div class="right">
+    {#if statsIsLow}
+      <span class="xiv-text red">双维低</span>
+    {/if}
+  </div>
 </div>
 <Timer {tracker} onclick={toggleConfig} />
 
@@ -202,7 +232,12 @@
     text-align: left;
     display: flex;
     font-size: 13px;
-    gap: 5px;
+    justify-content: space-between;
+
+    & div {
+      display: flex;
+      gap: 5px;
+    }
   }
 
   .link-buttons {
@@ -223,5 +258,4 @@
   .link-buttons a.primary {
     background-color: #eb4f27;
   }
-
 </style>

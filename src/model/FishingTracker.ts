@@ -19,6 +19,7 @@ export class FishingTracker extends EventTarget {
         gp: 0,
     };
     private currentZone: number = 0;
+    private isInFishingEvent: boolean = false;
 
     private current: FishingSession | null = null;
 
@@ -82,10 +83,32 @@ export class FishingTracker extends EventTarget {
 
     public setCurrentGP(gp: number) {
         this.fisherStats.gp = gp;
+        this.updateSub();
     }
 
     public setPlayerStats(gathering: number, perception: number, gp: number) {
         this.fisherStats = { gathering, perception, gp };
+        this.updateSub();
+    }
+
+    public get gathering(): number {
+        this.#subscribe();
+        return this.fisherStats.gathering;
+    }
+
+    public get perception(): number {
+        this.#subscribe();
+        return this.fisherStats.perception;
+    }
+
+    public get GP(): number {
+        this.#subscribe();
+        return this.fisherStats.gp;
+    }
+
+    public get IsInFishingEvent(): boolean {
+        this.#subscribe();
+        return this.isInFishingEvent;
     }
 
     public setFishingZone(zoneId: number) {
@@ -135,6 +158,7 @@ export class FishingTracker extends EventTarget {
 
     public setFishingEvent(isFishing: boolean, epoch: number) {
         console.log(`Fishing event set to: ${isFishing}`);
+        this.isInFishingEvent = isFishing;
         if (isFishing) {
             this.dispatchEvent(new Event("start"));
         } else {
@@ -145,11 +169,12 @@ export class FishingTracker extends EventTarget {
 
             // 站起来之后状态需要清空
             this.current = null;
-            this.updateSub();
 
             // 立即上报数据，避免丢失
             this.history.uploadPendingSessions();
         }
+
+        this.updateSub();
     }
 
     buffs: Map<number, BuffState> = new Map<number, BuffState>();
