@@ -341,6 +341,9 @@ export class PacketHandler {
     }
 
     private handleGuessDoAction(dw: DataView, epoch: number): void {
+        if (dw.byteLength !== FFXIVIpcGuessTargetAction.PacketSize()) {
+            console.warn("Invalid GuessDoAction packet size: ", dw.byteLength);
+        }
         const guessTargetAction = new FFXIVIpcGuessTargetAction(dw);
         console.log("Guess Target Action Packet:", guessTargetAction);
     }

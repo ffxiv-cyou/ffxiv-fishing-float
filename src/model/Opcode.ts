@@ -372,6 +372,10 @@ export class FFXIVIpcGuessTargetAction extends IpcPacket {
     this.param1 = dw.getUint32(offset + 24, true);
     this.unknown1c = dw.getUint32(offset + 28, true);
   }
+
+  static PacketSize(): number {
+    return IpcPacket.PacketSize() + 32;
+  }
 }
 
 export class FFXIVIpcSystemLogMessage extends IpcPacket {
