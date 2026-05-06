@@ -132,11 +132,6 @@
         tracker.perception < tracker.config.PerceptionThresold)
     );
   });
-
-  $effect(() => {
-    console.log(tracker.config.GatheringThresold, tracker.config.PerceptionThresold, tracker.gathering, tracker.perception, statsIsLow);
-  });
-
 </script>
 
 <div class="debug-tool">
