@@ -1,0 +1,17 @@
+{
+  "PlayerSetup": 470,
+  "PlayerStats": 251,
+  "UpdateHpMpTp": 648,
+  "ActorControl": 835,
+  "ActorControlSelf": 526,
+  "ClientTrigger": 658,
+  "EventStart": 844,
+  "EventPlay": 271,
+  "EventPlay4": 612,
+  "EventFinish": 935,
+  "GuessDoAction": 306,
+  "SystemLogMessage": 319,
+  "StatusEffectList": 101,
+  "StatusEffectList3": 585,
+  "FishingResultMsg": 178
+}
