@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { Heading, Toggle } from "flowbite-svelte";
+  import {
+    Heading,
+    Table,
+    TableBody,
+    TableBodyCell,
+    TableBodyRow,
+    TableHead,
+    TableHeadCell,
+    Toggle,
+  } from "flowbite-svelte";
   import { Tabs, TabItem } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
@@ -7,6 +16,7 @@
     DurationBucket,
     FishCondition,
     FishDurationDistribution,
+    FishLureTriggerCount,
     SpotSampleCount,
   } from "@/model/API";
   import { downSampleBuckets, mergeChumBuckets } from "./data_helper";
@@ -21,6 +31,7 @@
     buckets,
     conditions,
     samples,
+    lureTriggers,
     spotID,
     fishID = $bindable(0),
   }: {
@@ -30,6 +41,7 @@
     buckets: DurationBucket[];
     conditions: FishCondition[];
     samples: SpotSampleCount[];
+    lureTriggers: FishLureTriggerCount[];
     spotID: number;
     fishID: number;
   } = $props();
@@ -91,17 +103,17 @@
   $effect(() => {
     const tabID = parseInt(selectedTab);
     if (fishes.includes(tabID)) {
-      if (tabID !== fishID)
-        fishID = tabID;
+      if (tabID !== fishID) fishID = tabID;
     } else {
       selectedTab = fishes[0]?.toString() ?? "";
     }
   });
 
   let hasWeather = $derived.by(() => {
-    return (tracker.db.getTerritoryByPlaceID(spotID)?.weathers?.length ?? 0) > 1;
+    return (
+      (tracker.db.getTerritoryByPlaceID(spotID)?.weathers?.length ?? 0) > 1
+    );
   });
-
 </script>
 
 <Tabs
@@ -175,6 +187,36 @@
             ({sample.count} 条记录)
           </span>
         </p>
+      {/if}
+      {@const lureTrigger = lureTriggers.filter((l) => l.fish_id === fishID).sort((a, b) => a.bait_id - b.bait_id)}
+      {#if lureTrigger.length > 0}
+        <Heading tag="h2" class="relative text-2xl leading-tight my-2"
+          >诱饵</Heading
+        >
+        <Table class="w-100">
+          <TableHead>
+            <TableHeadCell>鱼饵</TableHeadCell>
+            <TableHeadCell>触发次数</TableHeadCell>
+            <TableHeadCell>总记录数</TableHeadCell>
+            <TableHeadCell>触发率</TableHeadCell>
+          </TableHead>
+          <TableBody>
+            {#each lureTrigger as l}
+              <TableBodyRow>
+                <TableBodyCell
+                  >{tracker.db.getItemName(l.bait_id)}</TableBodyCell
+                >
+                <TableBodyCell>{l.trigger_count}</TableBodyCell>
+                <TableBodyCell>{l.total_count}</TableBodyCell>
+                <TableBodyCell
+                  >{((l.trigger_count / l.total_count) * 100).toFixed(
+                    2,
+                  )}%</TableBodyCell
+                >
+              </TableBodyRow>
+            {/each}
+          </TableBody>
+        </Table>
       {/if}
     </TabItem>
   {/each}

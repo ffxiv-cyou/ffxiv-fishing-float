@@ -329,6 +329,15 @@ export interface SpotTugCount {
   total: number;
 }
 
+export interface FishLureTriggerCount {
+  fish_id: number;
+  bait_id: number;
+  lure_type: number;
+  min_lure_level: number;
+  trigger_count: number;
+  total_count: number;
+}
+
 export interface SpotStatsResponse {
   spot_id: number;
   updated_at: number;
@@ -346,6 +355,7 @@ export interface SpotStatsResponse {
   conditions: Array<FishCondition>;
   samples: Array<SpotSampleCount>;
   tugs: Array<SpotTugCount>;
+  lure_trigger: Array<FishLureTriggerCount>;
 }
 
 export interface RecentCatchesItem {

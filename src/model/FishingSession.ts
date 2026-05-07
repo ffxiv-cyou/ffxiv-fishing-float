@@ -98,6 +98,10 @@ export class FishingSession {
     }
 
     set HiddenFish(fishID: number) {
+        // 防止时序问题把这个数据给刷掉
+        if (this.hiddenFish !== 0 && fishID === 0)
+            return;
+
         this.hiddenFish = fishID;
         this.onUpdate();
     }

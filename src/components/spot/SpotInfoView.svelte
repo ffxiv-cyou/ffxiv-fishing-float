@@ -133,6 +133,7 @@
         {buckets}
         samples={spotStats?.samples ?? []}
         conditions={spotStats?.conditions ?? []}
+        lureTriggers={spotStats?.lure_trigger ?? []}
         bind:fishID={fishID}
       />
     {/if}
