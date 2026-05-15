@@ -10,4 +10,19 @@
   });
 </script>
 
+<div class="control-bar">
+  <span class="xiv-text blue">请调整窗口位置与大小</span>
+  <span class="xiv-text blue">锁定后开始使用</span>
+</div>
 <TimerPreview {config} {db} />
+
+<style>
+  .control-bar {
+    margin-top: -20px;
+    height: 20px;
+    text-align: left;
+    font-size: 15px;
+    text-align: center;
+    user-select: none;
+  }
+</style>
