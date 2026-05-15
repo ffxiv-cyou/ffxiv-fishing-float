@@ -1,5 +1,6 @@
 import Main from "@/pages/Main.svelte";
 import SettingPage from "@/pages/SettingPage.svelte";
+import Preview from "@/pages/Preview.svelte";
 
 import type { RouteConfig } from "./define";
 
@@ -14,4 +15,9 @@ export const routes: Array<RouteConfig> = [
     name: "设置",
     component: SettingPage
   },
+  {
+    path: "/preview",
+    name: "预览",
+    component: Preview
+  }
 ];

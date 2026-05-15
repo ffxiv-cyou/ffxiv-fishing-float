@@ -132,6 +132,17 @@
         tracker.perception < tracker.config.PerceptionThresold)
     );
   });
+
+  let desktopVariant = !!((window as any).OverlayPluginApi?.desktopApp);
+  let showSettingBtn = $derived(
+    (tracker.config.ShowSettingBtn && !desktopVariant) || showConfig,
+  );
+
+  (window as any).FishingFloat = {
+    openHistory,
+    openSettingPage,
+    openNoteExportPage,
+  };
 </script>
 
 <div class="debug-tool">
@@ -169,7 +180,10 @@
 <Notice {message} />
 <div class="control-bar">
   <div class="left">
-    {#if showConfig || tracker.config.ShowSettingBtn}
+    {#if desktopVariant}
+      <div class="round-hint"></div>
+    {/if}
+    {#if showSettingBtn}
       <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
       {#if showHistory}
         <button class="round-btn history-btn" onclick={openHistory}>↗</button>
@@ -207,6 +221,15 @@
 <style>
   :global([data-prod="true"]) .debug-tool {
     display: none;
+  }
+
+  .round-hint {
+    display: block;
+    border: none;
+    border-radius: 50%;
+    background-color: #80808020;
+    width: 7px;
+    height: 7px;
   }
 
   .round-btn {
