@@ -385,6 +385,7 @@ export class PacketHandler {
 
             case 1121: // ???开始利用上钩的???尝试以小钓大。
                 const fishID3 = params[0];
+                this.tracker.serverBegin(epoch);
                 break;
 
             case 3522: // 将???挂到了钓钩上。 (set swimbait)

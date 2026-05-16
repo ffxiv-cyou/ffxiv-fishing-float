@@ -39,7 +39,7 @@ export class FishingSession {
     update: (() => void) | null = null;
 
     constructor(epoch: number, baitId: number, stats: FisherStats) {
-        this.startTime = epoch;
+        this.startTime = 0;
         this.baitId = baitId;
         this.startLocalTime = Date.now();
         this.fisherStats = stats;
@@ -58,6 +58,10 @@ export class FishingSession {
         this.endTime = epoch;
         this.tugType = tugType;
         this.endLocalTime = Date.now();
+
+        if (this.startTime === 0) {
+            console.warn("Received tug without start time, using local time", tugType, epoch);
+        }
 
         this.onUpdate();
     }
@@ -157,11 +161,21 @@ export class FishingSession {
         this.onUpdate();
     }
 
+    get elapsedTime(): number {
+        this.#subscribe();
+        if (this.endTime && this.startTime) {
+            return this.endTime - this.startTime;
+        }
+        let endLocalTime = this.endLocalTime ?? Date.now();
+        return endLocalTime - this.startLocalTime;
+    }
+
     // 当前经过的时间
     get ElapsedTimeMs(): number {
         this.#subscribe();
 
-        if (this.endTime) {
+        // 如果没有使用 server cast 来设置开始时间，那么就用本地时间来计算
+        if (this.endTime && this.startTime) {
             return this.endTime - this.startTime;
         }
 
@@ -280,7 +294,7 @@ export class FishingSession {
         data.push(this.startTime);
         data.push(this.zone);
         data.push(this.baitId);
-        data.push(this.endTime - this.startTime);
+        data.push(this.elapsedTime);
         data.push(this.flags);
 
         if (this.FishResult) {
