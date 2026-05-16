@@ -301,7 +301,7 @@ export class FishingTracker extends EventTarget {
     }
 
     public cast(epoch: number, bait: number = 0): void {
-        console.log("Casting with bait:", bait, this.CurrentBait);
+        console.log("Casting with bait:", bait, this.CurrentBait, epoch);
         if (bait === 0)
             bait = this.CurrentBait;
 
@@ -324,6 +324,7 @@ export class FishingTracker extends EventTarget {
     }
 
     public tug(type: TugType, epoch: number): void {
+        console.log("Tug detected:", type, epoch);
         this.current?.tug(type, epoch);
         this.dispatchEvent(new CustomEvent<TugType>("tug", { detail: type }));
     }
