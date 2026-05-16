@@ -7,6 +7,10 @@ export enum ActorControlType {
     StatusEffectGain = 0x14,
     StatusEffectLose = 0x15,
 
+    DirectorInit = 0x64,
+    DirectorClear = 0x65,
+    DirectorUpdate = 0x6D,
+
     FishingMsg = 0x140,
 
     FishingTotalFishCaught = 0x142,

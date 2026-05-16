@@ -13,5 +13,6 @@
   "SystemLogMessage": 319,
   "StatusEffectList": 101,
   "StatusEffectList3": 585,
-  "FishingResultMsg": 178
+  "FishingResultMsg": 178,
+  "WeatherChange": 955
 }

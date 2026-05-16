@@ -20,6 +20,8 @@ export class FishingTracker extends EventTarget {
     };
     private currentZone: number = 0;
     private isInFishingEvent: boolean = false;
+    private oceanFishingInstance: number = 0;
+    private oceanFishinPhases: OceanFishingPhase[] = [];
 
     private current: FishingSession | null = null;
 
@@ -361,6 +363,73 @@ export class FishingTracker extends EventTarget {
             this.current.HiddenFish = fishID;
     }
 
+    public setWeather(weatherId: number, delay: number, epoch: number): void {
+        if (!this.oceanFishingInstance) {
+            console.log("Weather change detected but not in ocean fishing instance, ignoring. WeatherId:", weatherId);
+            return;
+        }
+
+        // 幻海流
+        if (weatherId === 145) {
+            let duration = 120000; // 默认持续2分钟
+            const lastPhase = this.currentOceanFishingPhase;
+            if (!lastPhase || lastPhase.spectralAt === 0) {
+                duration = 180000; // 如果之前没有幻海流，持续3分钟
+            } else {
+                const remainT = lastPhase.duration - (lastPhase.spectralAt - lastPhase.beginAt);
+                const compansate = lastPhase.spectralDuration - (remainT - 30000);
+                if (compansate > 0) {
+                    duration += compansate; // 如果上一个幻海流被强制结束，补偿时间
+                }
+            }
+            // 最多3分钟
+            if (duration > 180000)
+                duration = 180000;
+
+            this.currentOceanFishingPhase!.spectralAt = Date.now() + delay * 1000;
+            this.currentOceanFishingPhase!.spectralDuration = duration;
+            this.updateSub();
+        }
+    }
+
+    public setOceanFishing(instanceId: number): void {
+        this.oceanFishingInstance = instanceId;
+        console.log("Ocean fishing instance set to:", instanceId);
+        if (instanceId === 0) {
+            this.oceanFishinPhases = [];
+        }
+    }
+
+    public newOceanFishingPhase(instanceId: number, durationSec: number, epoch: number): void {
+        console.log("New ocean fishing phase detected, duration:", durationSec);
+
+        if (this.oceanFishingInstance === 0) {
+            this.oceanFishingInstance = instanceId;
+            console.log("Ocean fishing instance set to:", instanceId);
+        }
+
+        this.oceanFishinPhases.push({
+            beginAt: Date.now(),
+            duration: durationSec * 1000,
+            spectralAt: 0,
+            spectralDuration: 0
+        });
+    }
+
+    public get currentOceanFishingPhase(): OceanFishingPhase | null {
+        this.#subscribe();
+        if (!this.oceanFishinPhases || this.oceanFishinPhases.length === 0)
+            return null;
+        return this.oceanFishinPhases[this.oceanFishinPhases.length - 1];
+    }
+
+    get lastOceanFishingPhase(): OceanFishingPhase | null {
+        this.#subscribe();
+        if (!this.oceanFishinPhases || this.oceanFishinPhases.length <= 1)
+            return null;
+        return this.oceanFishinPhases[this.oceanFishinPhases.length - 2];
+    }
+
     public handlePlayerSetup(packet: ArrayBufferLike): void {
         const info = this.db.getPlayerSetupInfo();
         if (!info)
@@ -409,7 +478,7 @@ export class FishingTracker extends EventTarget {
             const fishId = logs.fishes[i];
             if (fishId === 0)
                 continue;
-            
+
             const index = note.fishes.indexOf(fishId);
             if (index >= 0) {
                 const byteIndex = Math.floor(index / 8) + fishOffset;
@@ -504,3 +573,9 @@ export interface BuffState {
     duration: number;
 }
 
+export interface OceanFishingPhase {
+    beginAt: number;
+    duration: number;
+    spectralAt: number;
+    spectralDuration: number;
+}

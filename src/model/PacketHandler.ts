@@ -1,5 +1,5 @@
 import type { Packet, PacketFilter } from "overlay-toolkit";
-import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, PacketSegment, PacketType, StatusEffect } from "./Opcode";
+import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, FFXIVIpcWeatherChange, PacketSegment, PacketType, StatusEffect } from "./Opcode";
 import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
@@ -24,6 +24,7 @@ const Direction = {
     [PacketType.StatusEffectList]: false,
     [PacketType.StatusEffectList3]: false,
     [PacketType.FishingResultMsg]: false,
+    [PacketType.WeatherChange]: false,
 }
 
 export interface IPacketSource {
@@ -136,6 +137,9 @@ export class PacketHandler {
             case PacketType.StatusEffectList3:
                 this.handleStatusEffectList3(dw, packet.epoch);
                 break;
+            case PacketType.WeatherChange:
+                this.handleWeatherChange(dw, packet.epoch);
+                break;
             default:
                 console.warn(`Unhandled packet type: ${pktType}`);
         }
@@ -213,6 +217,15 @@ export class PacketHandler {
                 break;
             case ActorControlType.LogMsg:
                 this.handleLogMessage(actorControlSelf.param1, [actorControlSelf.param2, actorControlSelf.param3, actorControlSelf.param4], epoch);
+                break;
+            case ActorControlType.DirectorInit:
+                this.handleDirectorInit(actorControlSelf, epoch);
+                break;
+            case ActorControlType.DirectorClear:
+                this.handleDirectorClear(actorControlSelf, epoch);
+                break;
+            case ActorControlType.DirectorUpdate:
+                this.handleDirectorUpdate(actorControlSelf, epoch);
                 break;
             default:
                 break;
@@ -447,6 +460,52 @@ export class PacketHandler {
             }
         }), epoch);
     }
+
+    private isDirectorOceanFishing(param1: number): boolean {
+        if ((param1 >>> 16) !== 0x8003) {
+            return false;
+        }
+
+        const instance = param1 & 0xFFFF;
+        const ocean = instance >= 63000 && instance <= 63099;
+        return ocean;
+    }
+
+    private handleWeatherChange(dw: DataView, epoch: number): void {
+        const weather = new FFXIVIpcWeatherChange(dw);
+        this.tracker.setWeather(weather.weatherId, weather.delay, epoch);
+    }
+
+    private handleDirectorInit(data: FFXIVIpcActorControlSelf, epoch: number): void {
+        if (!this.isDirectorOceanFishing(data.param1))
+            return;
+
+        const instance = data.param1 & 0xFFFF;
+        this.tracker.setOceanFishing(instance);
+    }
+    
+    private handleDirectorClear(data: FFXIVIpcActorControlSelf, epoch: number): void {
+        if (!this.isDirectorOceanFishing(data.param1))
+            return;
+
+        this.tracker.setOceanFishing(0);
+    }
+
+    private handleDirectorUpdate(data: FFXIVIpcActorControlSelf, epoch: number): void {
+        if (!this.isDirectorOceanFishing(data.param1))
+            return;
+
+        const instance = data.param1 & 0xFFFF;
+        const type = data.param2;
+        switch (type) {
+            case 6:
+                const phaseDuration = data.param3;
+                const endAt = data.param4;
+                this.tracker.newOceanFishingPhase(instance, phaseDuration, epoch);
+                break;
+        }
+    }
+
     //#endregion
 }
 

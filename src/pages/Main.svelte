@@ -5,6 +5,7 @@
   import overlayToolkit, { type GameVersion } from "overlay-toolkit";
   import { PcapReplay } from "@/model/dev/replay";
   import Notice, { type Message } from "@/pages/Notice.svelte";
+  import SpectralTimer from "@/components/SpectralTimer.svelte";
 
   let tracker = $state(new FishingTracker());
   let logic = new PacketHandler(tracker);
@@ -110,7 +111,9 @@
     window.open(hash, "_blank", "width=1000,height=600");
   }
 
-  let showHistory = $derived(tracker.CurrentZone > 0 && tracker.IsInFishingEvent);
+  let showHistory = $derived(
+    tracker.CurrentZone > 0 && tracker.IsInFishingEvent,
+  );
 
   function openSettingPage() {
     window.open("/#/setting", "Settings", "width=800,height=700");
@@ -121,7 +124,7 @@
   }
 
   let statsIsLow = $derived.by(() => {
-    if (!tracker.config.StatsThresoldEnabled || !tracker.IsInFishingEvent) 
+    if (!tracker.config.StatsThresoldEnabled || !tracker.IsInFishingEvent)
       return false;
     return (
       (tracker.config.GatheringThresold > 0 &&
@@ -133,7 +136,7 @@
     );
   });
 
-  let desktopVariant = !!((window as any).OverlayPluginApi?.desktopApp);
+  let desktopVariant = !!(window as any).OverlayPluginApi?.desktopApp;
   let showSettingBtn = $derived(
     (tracker.config.ShowSettingBtn && !desktopVariant) || showConfig,
   );
@@ -160,9 +163,11 @@
       <label for="file">导入数据包: </label>
       <select
         id="version-select"
+        value="unset"
         onchange={(e) =>
           loadGameData((e.target as HTMLSelectElement).value, true)}
       >
+        <option value="unset" disabled selected>选择版本</option>
         {#each Object.entries(availableVersions) as [name, ver]}
           <option value={ver}>{name}</option>
         {/each}
@@ -178,8 +183,8 @@
   </details>
 </div>
 <Notice {message} />
-<div class="control-bar">
-  <div class="left">
+<SpectralTimer {tracker}>
+  {#snippet childrenLeft()}
     {#if desktopVariant}
       <div class="round-hint"></div>
     {/if}
@@ -209,13 +214,13 @@
         >导出笔记 &raquo;
       </button>
     {/if}
-  </div>
-  <div class="right">
+  {/snippet}
+  {#snippet childrenRight()}
     {#if statsIsLow}
       <span class="xiv-text red">双维低</span>
     {/if}
-  </div>
-</div>
+  {/snippet}
+</SpectralTimer>
 <Timer {tracker} onclick={toggleConfig} />
 
 <style>
@@ -242,20 +247,6 @@
     font-size: 11px;
     margin: 0;
     padding: 0;
-  }
-
-  .control-bar {
-    margin-top: -20px;
-    height: 20px;
-    text-align: left;
-    display: flex;
-    font-size: 13px;
-    justify-content: space-between;
-
-    & div {
-      display: flex;
-      gap: 5px;
-    }
   }
 
   .link-buttons {

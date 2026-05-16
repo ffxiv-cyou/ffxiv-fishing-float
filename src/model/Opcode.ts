@@ -14,6 +14,7 @@ export enum PacketType {
     StatusEffectList,
     StatusEffectList3,
     GuessDoAction,
+    WeatherChange
 };
 
 export class PacketSegment {
@@ -513,5 +514,21 @@ export class FFXIVIpcFishingResultMsg extends IpcPacket {
     this.padding1 = dw.getUint16(offset + 8, true);
     this.unk1 = dw.getUint16(offset + 10, true);
     this.flags2 = dw.getUint32(offset + 12, true);
+  }
+}
+
+export class FFXIVIpcWeatherChange extends IpcPacket {
+  weatherId: number;
+  flag: number;
+  padding: number;
+  delay: number;
+
+  constructor(dw: DataView, offset: number = 0) {
+    super(dw, offset);
+    offset += IpcPacket.PacketSize();
+    this.weatherId = dw.getUint8(offset + 0);
+    this.flag = dw.getUint8(offset + 1);
+    this.padding = dw.getUint16(offset + 2, true);
+    this.delay = dw.getFloat32(offset + 4, true);
   }
 }
