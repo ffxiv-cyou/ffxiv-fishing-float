@@ -41,7 +41,7 @@
     }
     const endAt = Math.min(
       phase.spectralAt + phase.spectralDuration,
-      phase.beginAt + phase.duration,
+      phase.beginAt + phase.duration - 30000, // 30s
     );
     const remain = endAt - Date.now();
     remainTime = remain > 0 ? remain : 0;
@@ -105,6 +105,10 @@
     background-color: #7f0f9b80;
     z-index: -1;
     border-radius: 10px;
+  }
+
+  [data-style="default"] .bkg-bar {
+    display: none;
   }
 
   [data-style="minimal"] .spectral-hint {

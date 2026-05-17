@@ -18,6 +18,7 @@
   >
   <Button href="#/info">查看统计数据</Button>
   <Button href="#/help/overlay" color="secondary">安装悬浮窗</Button>
+  <Button href="#/help/app" color="secondary">桌面版</Button>
   <Hr />
   <P class="text-center my-4 text-xl">看看大家最近在钓什么鱼</P>
   <P class="text-center my-2 text-sm text-gray-500"

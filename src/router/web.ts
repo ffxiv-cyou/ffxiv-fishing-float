@@ -1,7 +1,8 @@
-import Help from "@/web/OverlayHelp.svelte";
 import type { NavTree, RouteConfig } from "./define";
 
 import Main from "@/web/Main.svelte";
+import Help from "@/web/OverlayHelp.svelte";
+import AppHelp from "@/web/AppHelp.svelte";
 import Privacy from "@/web/Privacy.svelte";
 import SpotInfo from "@/web/SpotInfo.svelte";
 import FAQ from "@/web/FAQ.svelte";
@@ -31,6 +32,11 @@ export const routes: Array<RouteConfig> = [
     path: "/help/overlay",
     name: "使用说明",
     component: Help
+  },
+  {
+    path: "/help/app",
+    name: "桌面版使用说明",
+    component: AppHelp
   },
   {
     path: "/help/faq",
@@ -87,6 +93,10 @@ export const navTree: NavTree[] = [
       {
         name: "安装悬浮窗",
         path: "/help/overlay"
+      },
+      {
+        name: "安装桌面版",
+        path: "/help/app"
       },
       {
         name: "隐私政策",

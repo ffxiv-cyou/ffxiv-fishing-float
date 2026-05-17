@@ -136,9 +136,8 @@
     );
   });
 
-  let desktopVariant = !!(window as any).OverlayPluginApi?.desktopApp;
   let showSettingBtn = $derived(
-    (tracker.config.ShowSettingBtn && !desktopVariant) || showConfig,
+    (tracker.config.ShowSettingBtn) || showConfig,
   );
 
   (window as any).FishingFloat = {
@@ -185,9 +184,7 @@
 <Notice {message} />
 <SpectralTimer {tracker}>
   {#snippet childrenLeft()}
-    {#if desktopVariant}
-      <div class="round-hint"></div>
-    {/if}
+    <div class="round-hint"></div>
     {#if showSettingBtn}
       <button class="round-btn setting-btn" onclick={toggleConfig}>⚙</button>
       {#if showHistory}
@@ -228,11 +225,11 @@
     display: none;
   }
 
-  .round-hint {
+  :global([data-desktop="true"]) .round-hint {
     display: block;
     border: none;
     border-radius: 50%;
-    background-color: #80808020;
+    background-color: #80808040;
     width: 7px;
     height: 7px;
   }
@@ -247,6 +244,10 @@
     font-size: 11px;
     margin: 0;
     padding: 0;
+  }
+
+  :global([data-desktop="true"]) .round-btn {
+    display: none;
   }
 
   .link-buttons {

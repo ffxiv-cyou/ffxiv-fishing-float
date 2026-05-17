@@ -46,21 +46,9 @@
   function getItemName(bait_id: number) {
     return tracker.db.getItemName(bait_id);
   }
-  function getFishSpot(fish_id: number) {
-    const tree = tracker.db.getPlaceTree();
-    for (const territory of tree) {
-      for (const zone of territory.children ?? []) {
-        for (const spot of zone.children ?? []) {
-          if ((spot.fish ?? []).some((f) => f === fish_id)) {
-            return spot.id;
-          }
-        }
-      }
-    }
-    return "";
-  }
 
   loadData();
+  setInterval(loadData, 10 * 60 * 1000); // 10 minutes
 </script>
 
 <div class="p-4 m-auto">

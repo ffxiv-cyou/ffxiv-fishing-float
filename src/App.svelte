@@ -4,11 +4,14 @@
   import Page from "./components/page.svelte";
 
   let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
+  let desktopMode = $state(!!(window as any).OverlayPluginApi?.desktopApp);
+
   $effect(() => {
     if (prodMode) return;
 
     const interval = setInterval(() => {
       prodMode = overlayToolkit.IsOverlayPluginCEF();
+      desktopMode = !!(window as any).OverlayPluginApi?.desktopApp;
     }, 1000);
 
     return () => clearInterval(interval);
@@ -26,7 +29,7 @@
   handleHashChange();
 </script>
 
-<main data-prod={prodMode}>
+<main data-prod={prodMode} data-desktop={desktopMode}>
   {#each routes as route}
     <Page
       path={route.path}
