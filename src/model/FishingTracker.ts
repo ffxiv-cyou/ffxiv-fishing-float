@@ -402,14 +402,23 @@ export class FishingTracker extends EventTarget {
 
     public newOceanFishingPhase(instanceId: number, durationSec: number, epoch: number): void {
         console.log("New ocean fishing phase detected, duration:", durationSec);
-
         if (this.oceanFishingInstance === 0) {
             this.oceanFishingInstance = instanceId;
             console.log("Ocean fishing instance set to:", instanceId);
         }
+        const now = Date.now();
+
+        // 这个数据包会发两次，一次开始放动画，一次正式开始计时。这里在第二次开始计时的时候重新设置时间。
+        if (this.oceanFishinPhases.length > 0) {
+            const lastPhase = this.oceanFishinPhases[this.oceanFishinPhases.length - 1];
+            if (lastPhase.beginAt + lastPhase.duration < now) {
+                lastPhase.beginAt = now;
+                return;
+            }
+        }
 
         this.oceanFishinPhases.push({
-            beginAt: Date.now(),
+            beginAt: now,
             duration: durationSec * 1000,
             spectralAt: 0,
             spectralDuration: 0
