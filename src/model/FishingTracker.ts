@@ -373,9 +373,9 @@ export class FishingTracker extends EventTarget {
         if (weatherId === 145) {
             let duration = 120000; // 默认持续2分钟
             const lastPhase = this.currentOceanFishingPhase;
-            if (!lastPhase || lastPhase.spectralAt === 0) {
+            if (lastPhase && lastPhase.spectralAt === 0) {
                 duration = 180000; // 如果之前没有幻海流，持续3分钟
-            } else {
+            } else if (lastPhase) {
                 const remainT = lastPhase.duration - (lastPhase.spectralAt - lastPhase.beginAt);
                 const compansate = lastPhase.spectralDuration - (remainT - 30000);
                 if (compansate > 0) {
