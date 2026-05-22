@@ -88,8 +88,7 @@
 
   export function loadRecords() {
     isLoading = true;
-    if (response)
-      response.data = []; // clear current data to show loading state
+    if (response) response.data = []; // clear current data to show loading state
 
     onLoad(filters, currentPage, limit)
       .then((res) => {
@@ -192,7 +191,7 @@
 </script>
 
 <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-4 mb-4">
+  <div class="flex gap-4 mb-4">
     <div>
       <Label for="spot">钓场 ID</Label>
       <SpotSelector
@@ -229,6 +228,24 @@
       />
     </div>
     <div>
+      <Label for="timeFrom">杆时下限</Label>
+      <Input
+        id="timeFrom"
+        type="number"
+        bind:value={filters.duration_from}
+        placeholder="下限(ms)"
+      />
+    </div>
+    <div>
+      <Label for="timeTo">杆时上限</Label>
+      <Input
+        id="timeTo"
+        type="number"
+        bind:value={filters.duration_to}
+        placeholder="上限(ms)"
+      />
+    </div>
+    <div class="w-60">
       <Label for="dateFrom">开始时间</Label>
       <Input
         id="dateFrom"
@@ -238,7 +255,7 @@
         }
       />
     </div>
-    <div>
+    <div class="w-60">
       <Label for="dateTo">结束时间</Label>
       <Input
         id="dateTo"
@@ -248,7 +265,7 @@
         }
       />
     </div>
-    <div>
+    <div class="w-48">
       <Label class="invisible">操作</Label>
       <Button onclick={applyFilters}>查询</Button>
       <Button color="alternative" onclick={resetFilters}>重置</Button>
@@ -314,7 +331,18 @@
           <TableBodyCell>
             <Badge color={result.color}>{result.text}</Badge>
           </TableBodyCell>
-          <TableBodyCell>{formatDuration(record.duration)}</TableBodyCell>
+          <TableBodyCell>
+            {formatDuration(record.duration)}
+            {#if record.lure_at}
+              <Badge
+                color={record.lure_at + 5500 > record.duration
+                  ? "red"
+                  : "green"}
+                class="mr-1"
+                >{((record.duration - record.lure_at) / 1000).toFixed(1)}</Badge
+              >
+            {/if}
+          </TableBodyCell>
           <TableBodyCell>{record.chum ? "是" : "-"}</TableBodyCell>
           <TableBodyCell>{getSlapName(record.slap_id)}</TableBodyCell>
           <TableBodyCell>{getTugType(record.flags)}</TableBodyCell>

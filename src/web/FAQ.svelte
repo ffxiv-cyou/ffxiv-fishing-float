@@ -1,6 +1,6 @@
 <script lang="ts">
   import FeedbackLink from "@/components/FeedbackLink.svelte";
-  import { Heading, P } from "flowbite-svelte";
+  import { Heading, Li, List, P } from "flowbite-svelte";
 </script>
 
 <div class="p-4 max-w-3xl mx-auto">
@@ -21,6 +21,17 @@
   <P>
     杆时聚合需要更多的数据才会更准确。只有当特定的鱼钓上超过10条时，才会在杆时分布中显示该鱼的数据。
   </P>
+  <Heading tag="h3" class="text-lg">为什么统计数据的数量似乎对不上？</Heading>
+  <P>
+    为了最大化利用统计数据，不同类型的统计数据口径可能会不一致。
+  </P>
+  <List tag="ul">
+    <Li>尺寸数据：统计所有钓上来的鱼；</Li>
+    <Li>杆时数据：排除掉在雄心/谦逊技能空窗期立刻结束后钓上来的鱼；</Li>
+    <Li>咬钩率：根据杆种和杆时推测对应的咬钩的鱼，除以抛竿次数得到的结果；</Li>
+    <Li>脱钩率：根据杆种和杆时推测对应的咬钩的鱼，用脱钩次数除以咬钩次数得到结果（不含获得力不足导致的脱钩）；</Li>
+    <Li>脱钩次数：按杆种统计脱钩和咬钩次数（含获得力不足导致的脱钩）；</Li>
+  </List>
   <Heading tag="h3" class="text-lg"
     >我觉得某个鱼的数据有问题，该怎么办？</Heading
   >

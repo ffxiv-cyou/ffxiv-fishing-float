@@ -151,6 +151,8 @@ export class API {
     if (filter.user) params.set('user', filter.user.toString());
     if (filter.from) params.set('from', filter.from.toString());
     if (filter.to) params.set('to', filter.to.toString());
+    if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
+    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString()); 
     if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
     params.set('page', page.toString());
     params.set('limit', limit.toString());
@@ -381,6 +383,8 @@ export interface AdminRecordFilter {
   user?: number;
   from?: number;
   to?: number;
+  duration_from?: number;
+  duration_to?: number;
   dirty?: boolean;
 }
 
@@ -404,6 +408,8 @@ export interface AdminFishingRecord {
   chum: boolean;
   slap_id?: number;
   identical_id?: number;
+  lure_at?: number;
+  lure_ats?: number[];
   ambious_lure?: number;
   modest_lure?: number;
   flags: number;
