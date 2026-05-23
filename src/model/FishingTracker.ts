@@ -411,7 +411,7 @@ export class FishingTracker extends EventTarget {
         // 这个数据包会发两次，一次开始放动画，一次正式开始计时。这里在第二次开始计时的时候重新设置时间。
         if (this.oceanFishinPhases.length > 0) {
             const lastPhase = this.oceanFishinPhases[this.oceanFishinPhases.length - 1];
-            if (lastPhase.beginAt + lastPhase.duration < now) {
+            if (lastPhase.beginAt + lastPhase.duration > now) {
                 lastPhase.beginAt = now;
                 return;
             }
