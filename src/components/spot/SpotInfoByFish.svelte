@@ -164,7 +164,7 @@
             db={tracker.db}
           />
         {/if}
-        {#if getFishCondition(fishID)?.weather && hasWeather}
+        {#if (getFishCondition(fishID)?.weather ?? []).length > 0 && hasWeather}
           <Heading tag="h2" class="relative text-2xl leading-tight my-2">
             天气
           </Heading>
