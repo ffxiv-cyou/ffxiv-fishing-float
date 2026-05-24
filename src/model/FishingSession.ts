@@ -31,6 +31,7 @@ export class FishingSession {
 
     private tugType: TugType | null = null;
     private hookType: HookType | null = null;
+    private patienceHookResult: PatienceHookResult | null = null;
 
     private result: FishingResult | FishingFail | null = null;
     fisherStats: FisherStats;
@@ -98,6 +99,16 @@ export class FishingSession {
                 this.endLocalTime = Date.now();
             }
         }
+        this.onUpdate();
+    }
+
+    /**
+     * 设置精准/强力提钩的结果 
+     * @param isPrecision 精准提钩为true，强力提钩为false
+     * @param success 正确使用技能
+     */
+    public setPatienceResult(isPrecision: boolean, success: boolean): void {
+        this.patienceHookResult = { isPrecision, success };
         this.onUpdate();
     }
 
@@ -266,6 +277,11 @@ export class FishingSession {
         if (this.patients === 2) flags |= FishingFlags.StatePatienceII;
         if (this.identicalFish !== 0) flags |= FishingFlags.StateIdenticalFish;
         if (this.slapFish !== 0) flags |= FishingFlags.StateSurfaceSlap;
+        if (this.patienceHookResult !== null) {
+            flags |= FishingFlags.StateHasPatienceResult;
+            if (this.patienceHookResult.isPrecision) flags |= FishingFlags.StatePatiencePrecision;
+            if (this.patienceHookResult.success) flags |= FishingFlags.StatePatienceSuccess;
+        }
         if (this.tugType !== null) {
             flags |= ((this.tugType + 1) << 9);
         }
@@ -333,6 +349,11 @@ export interface FishingFail {
     reason: FailReason;
 }
 
+export interface PatienceHookResult {
+    isPrecision: boolean;
+    success: boolean;
+}
+
 export enum FishingFlags {
     StateChum = 1 << 0, // 撒饵
     StateFishEye = 1 << 1, // 鱼眼
@@ -374,4 +395,8 @@ export enum FishingFlags {
 
     StateLureTarget = 1 << 19, // 当前可以钓到特定鱼
     StateLureHidden = 1 << 20, // 当前可以钓到隐藏鱼
+
+    StateHasPatienceResult = 1 << 21, // 包含精准/强力提钩结果
+    StatePatiencePrecision = 1 << 22, // 使用了精准提钩
+    StatePatienceSuccess = 1 << 23, // 结果为成功
 }

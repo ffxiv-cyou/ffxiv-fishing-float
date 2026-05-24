@@ -331,6 +331,11 @@ export class FishingTracker extends EventTarget {
         this.dispatchEvent(new CustomEvent<TugType>("tug", { detail: type }));
     }
 
+    public setPatienceHookResult(isPrecision: boolean, success: boolean) {
+        console.log("Patience hook result:", success);
+        this.current?.setPatienceResult(isPrecision, success);
+    }
+
     public resetCastState(epoch: number): void {
         console.log("Cast finished at epoch:", epoch);
         this.current?.setFinish(epoch);

@@ -349,6 +349,26 @@ export class PacketHandler {
                 case EventPlayParamType.FishingTugHeavy:
                     this.tracker.tug(TugType.Heavy, epoch);
                     break;
+                case EventPlayParamType.FishingStrongHooking:
+                case EventPlayParamType.FishingChairStrongHooking:
+                case EventPlayParamType.FishingChairStrongHookingBig:
+                    this.tracker.setPatienceHookResult(false, true);
+                    break;
+                case EventPlayParamType.FishingPrecisionHooking:
+                case EventPlayParamType.FishingChairPrecisionHooking:
+                case EventPlayParamType.FishingChairPrecisionHookingBig:
+                    this.tracker.setPatienceHookResult(true, true);
+                    break;
+                case EventPlayParamType.FishingStrongHookingNoVFX:
+                case EventPlayParamType.FishingChairStrongHookingNoVFX:
+                case EventPlayParamType.FishingChairStrongHookingBigNoVFX:
+                    this.tracker.setPatienceHookResult(false, false);
+                    break;
+                case EventPlayParamType.FishingPrecisionHookingNoVFX:
+                case EventPlayParamType.FishingChairPrecisionHookingNoVFX:
+                case EventPlayParamType.FishingChairPrecisionHookingBigNoVFX:
+                    this.tracker.setPatienceHookResult(true, false);
+                    break;
             }
         }
     }
