@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/svelte";
 import { openDB, type IDBPDatabase, type DBSchema, type IDBPObjectStore, type IDBPTransaction } from 'idb';
 import type { HistoryItem, HistoryStatsItem, HistoryStorageBackend } from './HistoryStorage';
 import { TugType } from './InnerEnums';
@@ -97,7 +98,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
         allRecords.forEach((record) => {
           record.chumNum = record.chum ? 1 : 0; // 修正 Index 错误
           console.log("Migrated record to historyV2:", record);
-          newStore.add(record);
+          newStore.put(record);
         });
       });
 
@@ -135,7 +136,19 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
       ...item,
       chumNum: HistoryIndexedDBBackend.boolToNum(item.chum)
     };
-    await logStore.add(logItem);
+    try {
+      await logStore.add(logItem);
+    } catch (e) {
+      if (e instanceof DOMException && e.name === "ConstraintError") {
+        Sentry.captureMessage("addRaw key conflict in historyLog", {
+          level: "warning",
+          extra: { item },
+        });
+        await logStore.put(logItem);
+      } else {
+        throw e;
+      }
+    }
     await logTx.done;
   }
 

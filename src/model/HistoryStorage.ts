@@ -161,6 +161,9 @@ export class FishingStorage {
     }
 
     const biteTime = session.ElapsedTimeMs / 1000;
+    if (session.startTime === 0) {
+      console.error("session.startTime is 0", session);
+    }
     const item = {
       zone: session.Zone,
       bait: session.baitId,
