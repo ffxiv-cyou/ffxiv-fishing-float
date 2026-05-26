@@ -1,3 +1,4 @@
+import '@oddbird/popover-polyfill'
 import { mount } from 'svelte'
 import App from './Web.svelte'
 
