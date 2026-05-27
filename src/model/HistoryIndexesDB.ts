@@ -136,18 +136,15 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
       ...item,
       chumNum: HistoryIndexedDBBackend.boolToNum(item.chum)
     };
-    try {
+    const oldData = await logStore.get([logItem.date]);
+    if (oldData) {
+      Sentry.captureMessage("addRaw key conflict in historyLog", {
+        level: "warning",
+        extra: { old: oldData, new: logItem },
+      });
+      await logStore.put(logItem);
+    } else {
       await logStore.add(logItem);
-    } catch (e) {
-      if (e instanceof DOMException && e.name === "ConstraintError") {
-        Sentry.captureMessage("addRaw key conflict in historyLog", {
-          level: "warning",
-          extra: { item },
-        });
-        await logStore.put(logItem);
-      } else {
-        throw e;
-      }
     }
     await logTx.done;
   }
