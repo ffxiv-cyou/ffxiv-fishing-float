@@ -307,6 +307,14 @@ export class FishingTracker extends EventTarget {
         if (bait === 0)
             bait = this.CurrentBait;
 
+        if (this.current) {
+            const now = Date.now();
+            if (now - this.current.startLocalTime < 1000) {
+                console.warn("multicast detected", this.current, epoch, now);
+                return;
+            }
+        }
+
         this.current = new FishingSession(epoch, bait, this.fisherStats);
         this.current.Zone = this.currentZone;
 
