@@ -128,6 +128,10 @@ export class FishingTracker extends EventTarget {
 
     public setBait(baitId: number) {
         this.bait = baitId;
+        if (this.useWksBait) {
+            console.log(`Bait set to: ${baitId}, reset wks bait status`);
+            this.useWksBait = false;
+        }
         this.updateSub();
     }
 
@@ -154,6 +158,7 @@ export class FishingTracker extends EventTarget {
             console.log("Player is now a Fisher.");
         } else {
             this.stopRecording();
+            this.useWksBait = false;
             console.log(`Player changed to a different job: ${classJobId}`);
         }
     }
@@ -399,8 +404,20 @@ export class FishingTracker extends EventTarget {
             if (duration > 180000)
                 duration = 180000;
 
-            this.currentOceanFishingPhase!.spectralAt = Date.now() + delay * 1000;
-            this.currentOceanFishingPhase!.spectralDuration = duration;
+            let phase = this.currentOceanFishingPhase;
+            if (!phase) {
+                // 如果不存在，说明用户可能是中途打开的软件，此时应该新建一个阶段
+                phase = {
+                    beginAt: Date.now(),
+                    duration: 300000,
+                    spectralAt: 0,
+                    spectralDuration: 0
+                };
+                this.oceanFishinPhases.push(phase);
+                console.log("New ocean fishing phase created for spectral");
+            }
+            phase.spectralAt = Date.now() + delay * 1000;
+            phase.spectralDuration = duration;
             this.updateSub();
         }
     }
