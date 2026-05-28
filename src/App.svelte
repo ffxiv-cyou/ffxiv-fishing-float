@@ -2,19 +2,38 @@
   import overlayToolkit from "overlay-toolkit";
   import { routes } from "@/router/index";
   import Page from "./components/page.svelte";
+  import * as Sentry from "@sentry/svelte";
 
-  let prodMode = $state(overlayToolkit.IsOverlayPluginCEF());
-  let desktopMode = $state(!!(window as any).OverlayPluginApi?.desktopApp);
+  let prodMode = $state(false);
+  let desktopMode = $state(false);
+
+  function reloadEnvMode() {
+    prodMode = overlayToolkit.IsOverlayPluginCEF();
+    desktopMode = !!(window as any).OverlayPluginApi?.desktopApp;
+
+    if (prodMode) {
+      const overlayUuid = (window as any).OverlayPluginApi?.overlayUuid;
+      const overlayName = (window as any).OverlayPluginApi?.overlayName;
+      Sentry.setContext("overlay_env", { 
+        uuid: overlayUuid, 
+        name: overlayName, 
+        desktop: desktopMode 
+      });
+    }
+  }
+
+  reloadEnvMode();
 
   $effect(() => {
-    if (prodMode) return;
+    if (prodMode) 
+      return;
 
     const interval = setInterval(() => {
-      prodMode = overlayToolkit.IsOverlayPluginCEF();
-      desktopMode = !!(window as any).OverlayPluginApi?.desktopApp;
+      reloadEnvMode();
+      if (prodMode) {
+        clearInterval(interval);
+      }
     }, 1000);
-
-    return () => clearInterval(interval);
   });
 
   // Loaded, remove loading hint
