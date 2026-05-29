@@ -8,12 +8,14 @@ Sentry.init({
 });
 
 const instanceID = nanoid();
-Sentry.setExtra("instance_id", instanceID);
-Sentry.setExtra("start_time", Date.now());
+Sentry.setContext("start_time", { unix: Date.now(), iso: new Date().toISOString() });
 
 let deviceID = localStorage.getItem("fishing_float_did");
 if (!deviceID) {
     deviceID = nanoid();
     localStorage.setItem("fishing_float_did", deviceID);
 }
-Sentry.setExtra("device_id", deviceID);
+Sentry.setContext("id", {
+    deviceID,
+    instanceID,
+});

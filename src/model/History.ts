@@ -1,4 +1,5 @@
 import { encode } from "cbor2";
+import * as Sentry from "@sentry/svelte";
 import type { API } from "./API";
 import type { FishingSession } from "./FishingSession";
 import { createSubscriber } from "svelte/reactivity";
@@ -35,6 +36,13 @@ export class FishingHistory {
       return;
     }
     this.lastSessionTime = session.startTime;
+
+    if (session.isIncomplete) {
+      Sentry.captureMessage("incomplete fishing data", {
+        level: "warning",
+        extra: session.diagnosticSnapshot,
+      });
+    }
 
     this.pendingSessions.push(session);
     this.triggerUpload();

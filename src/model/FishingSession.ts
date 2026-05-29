@@ -220,6 +220,26 @@ export class FishingSession {
         return this.FailReason !== FailReason.Interrputed;
     }
 
+    get isIncomplete(): boolean {
+        return this.startTime === 0 || this.zone === 0 || this.baitId === 0 || this.elapsedTime === 0;
+    }
+
+    get diagnosticSnapshot(): Record<string, any> {
+        return {
+            startTime: this.startTime,
+            endTime: this.endTime,
+            startLocalTime: this.startLocalTime,
+            endLocalTime: this.endLocalTime,
+            zone: this.zone,
+            baitId: this.baitId,
+            elapsedTime: this.elapsedTime,
+            tugType: this.tugType,
+            hookType: this.hookType,
+            hasResult: this.FishResult !== null,
+            failReason: this.FailReason,
+        };
+    }
+
     get FishResult(): FishingResult | null {
         this.#subscribe();
 
