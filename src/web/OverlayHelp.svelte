@@ -8,11 +8,15 @@
     AccordionItem,
     List,
     Li,
+    Alert,
   } from "flowbite-svelte";
 </script>
 
 <div class="p-4 max-w-3xl mx-auto">
   <Heading tag="h1" class="text-2xl">使用说明</Heading>
+  <Alert color="secondary">
+    不想使用/没有安装ACT？可以使用<A href="#/help/app">桌面版</A>，功能与悬浮窗版本没有区别
+  </Alert>
   <Heading tag="h2" class="text-xl">安装悬浮窗插件</Heading>
   <P>
     本悬浮窗插件依赖于

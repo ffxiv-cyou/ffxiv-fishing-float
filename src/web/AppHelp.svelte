@@ -16,7 +16,7 @@
 <div class="p-4 max-w-3xl mx-auto">
   <Heading tag="h1" class="text-2xl">使用说明</Heading>
   <Alert>
-    桌面版仅提供给不想使用 ACT 的用户，其功能与悬浮窗版本没有区别。<br />
+    桌面版仅提供给不想使用 ACT 的用户，其功能与<A href="#/help/overlay">悬浮窗版</A>没有区别。<br />
     建议使用悬浮窗版本以获得更好的体验。
   </Alert>
   <Heading tag="h2" class="text-xl">下载桌面版</Heading>
