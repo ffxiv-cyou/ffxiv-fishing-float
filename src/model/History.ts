@@ -65,6 +65,7 @@ export class FishingHistory {
 
   //#region Data Upload
   nextUpload: number | null = null;
+  retryCount: number = 0;
   private triggerUpload(): void {
     if (!this.cfg.UploadHistory || this.pendingSessions.length === 0 || this.nextUpload !== null) {
       return;
@@ -83,12 +84,21 @@ export class FishingHistory {
     const data = sessionsToUpload.map((s) => s.serialize());
     const body = encode(data);
 
-    this.api.uploadFishingData(body).then(() => {
+    this.api.uploadFishingData(body).then((resp) => {
+      if (!resp.ok) {
+        console.error("Failed to upload fishing data, server responded with status", resp.status);
+        this.retryCount++;
+        this.nextUpload = setTimeout(() => this.uploadPendingSessions(), Math.min(10 * 60 * 1000, this.retryCount * 30000));
+        return;
+      }
+
       this.pendingSessions.splice(0, sessionsToUpload.length);
       this.nextUpload = null;
+      this.retryCount = 0;
     }).catch((err) => {
       console.error("Failed to upload fishing data:", err);
-      this.nextUpload = null;
+      this.retryCount++;
+      this.nextUpload = setTimeout(() => this.uploadPendingSessions(), Math.min(10 * 60 * 1000, this.retryCount * 30000));
     });
   }
   //#endregion
