@@ -46,6 +46,7 @@ export class FishingHistory {
       Sentry.captureMessage("incomplete fishing data", {
         level: "warning",
         extra: session.diagnosticSnapshot,
+        fingerprint: session.incompleteReason,
       });
     }
 

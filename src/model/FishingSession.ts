@@ -224,6 +224,15 @@ export class FishingSession {
         return this.startTime === 0 || this.zone === 0 || this.baitId === 0 || this.elapsedTime === 0;
     }
 
+    get incompleteReason(): string[] {
+        const reasons: string[] = [];
+        if (this.startTime === 0) reasons.push('missing_start_time');
+        if (this.zone === 0) reasons.push('missing_zone');
+        if (this.baitId === 0) reasons.push('missing_bait');
+        if (this.elapsedTime === 0) reasons.push('missing_elapsed');
+        return reasons;
+    }
+
     get diagnosticSnapshot(): Record<string, any> {
         return {
             startTime: this.startTime,
