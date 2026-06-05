@@ -55,6 +55,11 @@ export class FishingSession {
         this.startLocalTime = Date.now();
     }
 
+    public clientSetBait(baitId: number): void {
+        this.baitId = baitId;
+        this.onUpdate();
+    }
+
     public tug(tugType: TugType, epoch: number): void {
         this.endTime = epoch;
         this.tugType = tugType;

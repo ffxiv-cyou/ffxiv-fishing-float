@@ -122,10 +122,6 @@ export class FishingTracker extends EventTarget {
         this.updateSub();
     }
 
-    public serverBegin(epoch: number) {
-        this.current?.serverCast(epoch);
-    }
-
     public setBait(baitId: number) {
         this.bait = baitId;
         if (this.useWksBait) {
@@ -159,7 +155,9 @@ export class FishingTracker extends EventTarget {
         } else {
             this.stopRecording();
             this.useWksBait = false;
+            this.current = null;
             console.log(`Player changed to a different job: ${classJobId}`);
+            this.updateSub();
         }
     }
 
@@ -316,20 +314,53 @@ export class FishingTracker extends EventTarget {
             const now = Date.now();
             if (now - this.current.startLocalTime < 1000) {
                 console.warn("multicast detected", this.current, epoch, now);
+                if (this.current.baitId !== bait) {
+                    console.warn("Update bait for current session:", this.current.baitId, bait);
+                    this.current.clientSetBait(bait);
+                }
                 return;
             }
         }
 
-        this.current = new FishingSession(epoch, bait, this.fisherStats);
-        this.current.Zone = this.currentZone;
+        this.current = this.newSession(epoch, bait);
+        this.dispatchEvent(new Event("begin"));
+        this.updateSub();
+    }
+
+    newSession(epoch: number, bait: number): FishingSession {
+        const session = new FishingSession(epoch, bait, this.fisherStats);
+        session.Zone = this.currentZone;
 
         if (this.nextIdenticalFish) {
-            this.current.IdenticalFish = this.nextIdenticalFish;
+            session.IdenticalFish = this.nextIdenticalFish;
         } else if (this.nextSlapFish) {
-            this.current.SlapFish = this.nextSlapFish;
+            session.SlapFish = this.nextSlapFish;
         }
 
-        this.syncBuffState(this.current);
+        this.syncBuffState(session);
+        return session;
+    }
+
+    public serverBegin(epoch: number) {
+        // 玛德，居然还有可能先收到服务器的cast包……
+        if (this.current !== null) {
+            // 正常的服务器抛竿
+            if (this.current.startTime === 0) {
+                this.current.serverCast(epoch);
+                return;
+            }
+
+            // 一般来说抛竿有2.5秒的后摇，不可能在2.5秒内再次抛竿的。
+            const now = Date.now();
+            if (this.current.startLocalTime > now - 2500) {
+                console.warn("multicast detected on server cast", this.current, epoch, now);
+                return;
+            }
+        }
+
+        // 这种情况就属于服务器先有数据了，先创建一个再说
+        this.current = this.newSession(epoch, this.CurrentBait);
+        this.current.serverCast(epoch);
         this.dispatchEvent(new Event("begin"));
         this.updateSub();
     }
