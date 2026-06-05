@@ -407,6 +407,9 @@ export class PacketHandler {
             case 1129: // 没有钓到任何东西……
             case 3516: // 这里的鱼现在警惕性很高，看来还是换个地点比较好。
             case 5584: // ???提起了钓竿。
+            case 10759: // 当前没有能在该探索场景使用的钓饵。
+            case 10760: // 目前该钓场无法进行垂钓。
+            case 10942: // 该任务需要使用技能“收藏品采集”。
                 this.tracker.resetCastState(epoch); // 状态中断，或者是没钓起来东西
                 break;
 
