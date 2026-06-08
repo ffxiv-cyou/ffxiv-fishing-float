@@ -31,16 +31,16 @@ export class FishingHistory {
     if (!session)
       return;
 
-    // don't record sessions shorter than 0.5s (e.g. invalid cast rejected by game)
-    if (session.elapsedTime > 0 && session.elapsedTime < 500) {
-      return;
-    }
-
     // deduplication, avoid adding the same session multiple times
-    if (this.lastSessionTime === session.startTime) {
+    if (this.lastSessionTime === session.startLocalTime) {
       return;
     }
-    this.lastSessionTime = session.startTime;
+    this.lastSessionTime = session.startLocalTime;
+
+    // don't record sessions shorter than 1s (e.g. invalid cast rejected by game)
+    if (session.elapsedTime > 0 && session.elapsedTime < 1000) {
+      return;
+    }
 
     if (session.isIncomplete) {
       Sentry.captureMessage("incomplete fishing data", {

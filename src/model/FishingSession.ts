@@ -99,7 +99,7 @@ export class FishingSession {
         // 防止调用顺序导致结果被覆盖
         if (this.result === null) {
             this.result = { reason: FailReason.Interrputed };
-            if (this.endTime === 0) {
+            if (this.endTime === 0 && this.endLocalTime === null) {
                 this.endTime = epoch;
                 this.endLocalTime = Date.now();
             }
