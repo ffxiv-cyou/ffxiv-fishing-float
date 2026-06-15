@@ -132,8 +132,8 @@
         const precastSec = precastLookup(stat.bait) / 1000;
         if (stat.chum) {
           // was chum, now not chum
-          minBiteTime = (minBiteTime - precastSec) * 2;
-          maxBiteTime = (maxBiteTime - precastSec) * 2;
+          minBiteTime = minBiteTime * 2 - precastSec;
+          maxBiteTime = maxBiteTime * 2 - precastSec;
         } else {
           // was not chum, now chum
           minBiteTime = minBiteTime / 2 + precastSec;

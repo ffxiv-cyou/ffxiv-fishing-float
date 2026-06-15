@@ -38,7 +38,7 @@ export function createPrecastLookup(fishIdSet: Set<number>): PrecastLookup {
 }
 
 export function chumTimeToNormal(time: number, precast: number) {
-  return (time - precast) * 2;
+  return time * 2 - precast;
 }
 
 export function mergeChumBuckets(
