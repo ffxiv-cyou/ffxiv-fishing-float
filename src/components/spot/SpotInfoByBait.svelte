@@ -8,7 +8,7 @@
     FishProbabilityItem,
   } from "@/model/API";
   import HeatmapView from "./HeatmapView.svelte";
-  import { downSampleBuckets, mergeChumBuckets } from "./data_helper";
+  import { downSampleBuckets, mergeChumBuckets, createPrecastLookup } from "./data_helper";
   import FishRateView from "./FishRateView.svelte";
 
   let {
@@ -54,7 +54,9 @@
       (b) => b.bait_id === baitID && filterBucket(b),
     );
     if (!isFiltered) {
-      filtered = mergeChumBuckets(filtered);
+      const fishIdSet = new Set(buckets.map(b => b.fish_id));
+      const precastLookup = createPrecastLookup(fishIdSet);
+      filtered = mergeChumBuckets(filtered, precastLookup);
     }
     return downSampleBuckets(filtered, 500).sort(
       (a, b) => b.fish_id - a.fish_id,

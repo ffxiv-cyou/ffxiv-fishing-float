@@ -1,17 +1,57 @@
 import type { DurationBucket } from "@/model/API";
+import baitTimeData from "@/data/bait_time.json";
 
-export function chumTimeToNormal(time: number) {
-  // 将撒饵的时间点映射到对应的非撒饵桶位置
-  return (time - 1000) * 2;
+export interface BaitTimeEntry {
+  duration: number;
+  mooch?: boolean;
+  fallback?: boolean;
+  baits?: number[];
 }
 
-export function mergeChumBuckets(buckets: DurationBucket[]): DurationBucket[] {
+export type PrecastLookup = (baitId: number) => number;
+
+export function createPrecastLookup(fishIdSet: Set<number>): PrecastLookup {
+  const explicitMap = new Map<number, number>();
+  let fallback = 1500;
+  let moochDuration: number | undefined;
+
+  for (const entry of baitTimeData) {
+    if (entry.fallback) {
+      fallback = entry.duration;
+      continue;
+    }
+    if (entry.mooch) {
+      moochDuration = entry.duration;
+    }
+    if (entry.baits) {
+      for (const baitId of entry.baits) {
+        explicitMap.set(baitId, entry.duration);
+      }
+    }
+  }
+
+  return (baitId: number) => {
+    if (explicitMap.has(baitId)) return explicitMap.get(baitId)!;
+    if (moochDuration !== undefined && fishIdSet.has(baitId)) return moochDuration;
+    return fallback;
+  };
+}
+
+export function chumTimeToNormal(time: number, precast: number) {
+  return (time - precast) * 2;
+}
+
+export function mergeChumBuckets(
+  buckets: DurationBucket[],
+  precastLookup: PrecastLookup,
+): DurationBucket[] {
   const mergedMap: Record<number, DurationBucket> = {};
   buckets.forEach((b) => {
     const buk = { ...b, buckets: [...b.buckets] };
     if (b.is_chum) {
-      const beginTime = chumTimeToNormal(b.start_ms);
-      const endTime = chumTimeToNormal(b.start_ms + b.size_ms * b.buckets.length);
+      const precast = precastLookup(b.bait_id);
+      const beginTime = chumTimeToNormal(b.start_ms, precast);
+      const endTime = chumTimeToNormal(b.start_ms + b.size_ms * b.buckets.length, precast);
 
       buk.start_ms = beginTime;
       buk.buckets = new Array(
@@ -23,7 +63,7 @@ export function mergeChumBuckets(buckets: DurationBucket[]): DurationBucket[] {
       for (let i = 0; i < b.buckets.length; i++) {
         const time = b.start_ms + b.size_ms * i;
         const count = b.buckets[i];
-        const mappedTime = chumTimeToNormal(time);
+        const mappedTime = chumTimeToNormal(time, precast);
         const mappedIndex = Math.floor((mappedTime - beginTime) / b.size_ms);
         if (mappedIndex < 0) continue; // 映射到负数索引的桶，直接丢弃
         buk.buckets[mappedIndex] = count;

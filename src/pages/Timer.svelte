@@ -5,6 +5,7 @@
   import type { HistoryStatsItem } from "../model/HistoryStorage";
   import { LureType, TugType } from "../model/InnerEnums";
   import type { FishDurationResponse } from "@/model/API";
+  import { createPrecastLookup } from "@/components/spot/data_helper";
 
   let {
     tracker,
@@ -119,22 +120,24 @@
    * 合并撒饵/非撒饵的记录
    * @param stats
    * @param chum
+   * @param precastLookup
    */
-  function mergeStats(stats: HistoryStatsItem[], chum: boolean) {
+  function mergeStats(stats: HistoryStatsItem[], chum: boolean, precastLookup: (baitId: number) => number) {
     let merged = [];
     for (let stat of stats) {
       let minBiteTime = stat.minBiteTime;
       let maxBiteTime = stat.maxBiteTime;
 
       if (chum !== stat.chum) {
+        const precastSec = precastLookup(stat.bait) / 1000;
         if (stat.chum) {
           // was chum, now not chum
-          minBiteTime = (minBiteTime - 1) * 2;
-          maxBiteTime = (maxBiteTime - 1) * 2;
+          minBiteTime = (minBiteTime - precastSec) * 2;
+          maxBiteTime = (maxBiteTime - precastSec) * 2;
         } else {
           // was not chum, now chum
-          minBiteTime = minBiteTime / 2 + 1;
-          maxBiteTime = maxBiteTime / 2 + 1;
+          minBiteTime = minBiteTime / 2 + precastSec;
+          maxBiteTime = maxBiteTime / 2 + precastSec;
         }
       }
 
@@ -172,7 +175,7 @@
         if (cancelled) {
           return;
         }
-        localHistory = mergeStats(stats, chumState);
+        localHistory = mergeStats(stats, chumState, createPrecastLookup(new Set(stats.map(s => s.fish))));
       })
       .catch((err) => {
         if (!cancelled) {
@@ -238,7 +241,7 @@
       maxBiteTime: d.range.effective_max / 1000,
       chum: d.is_chum,
     }));
-    let remoteHistory = mergeStats(converted, chum);
+    let remoteHistory = mergeStats(converted, chum, createPrecastLookup(new Set(converted.map(s => s.fish))));
 
     // 合并本地和在线数据
     let merged = localHistory.map((item) => ({ ...item }));
