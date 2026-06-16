@@ -136,8 +136,8 @@
           maxBiteTime = maxBiteTime * 2 - precastSec;
         } else {
           // was not chum, now chum
-          minBiteTime = minBiteTime / 2 + precastSec;
-          maxBiteTime = maxBiteTime / 2 + precastSec;
+          minBiteTime = (minBiteTime + precastSec) / 2;
+          maxBiteTime = (maxBiteTime + precastSec) / 2;
         }
       }
 
