@@ -1,14 +1,30 @@
 <script lang="ts">
-  import { Tabs, TabItem, Toggle, P, Heading } from "flowbite-svelte";
+  import {
+    Tabs,
+    TabItem,
+    Toggle,
+    Heading,
+    Table,
+    TableHead,
+    TableHeadCell,
+    TableBody,
+    TableBodyRow,
+    TableBodyCell,
+  } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
   import type {
     DurationBucket,
     FishDurationDistribution,
     FishProbabilityItem,
+    LureTugStatItem,
   } from "@/model/API";
   import HeatmapView from "./HeatmapView.svelte";
-  import { downSampleBuckets, mergeChumBuckets, createPrecastLookup } from "./data_helper";
+  import {
+    downSampleBuckets,
+    mergeChumBuckets,
+    createPrecastLookup,
+  } from "./data_helper";
   import FishRateView from "./FishRateView.svelte";
 
   let {
@@ -17,12 +33,14 @@
     durations,
     buckets,
     rates,
+    lure_tugs,
     baitID = $bindable(0),
   }: {
     baits: number[];
     durations: FishDurationDistribution[];
     buckets: DurationBucket[];
     rates: FishProbabilityItem[];
+    lure_tugs: LureTugStatItem[];
     tracker: FishingTracker;
     baitID: number;
   } = $props();
@@ -54,7 +72,7 @@
       (b) => b.bait_id === baitID && filterBucket(b),
     );
     if (!isFiltered) {
-      const fishIdSet = new Set(buckets.map(b => b.fish_id));
+      const fishIdSet = new Set(buckets.map((b) => b.fish_id));
       const precastLookup = createPrecastLookup(fishIdSet);
       filtered = mergeChumBuckets(filtered, precastLookup);
     }
@@ -70,6 +88,35 @@
       .sort((a, b) => b.fish_id - a.fish_id);
   }
 
+  function getBaitLureTugs(baitID: number) {
+    return lure_tugs
+      .filter((d) => d.bait_id === baitID && d.total > 10)
+      .sort((a, b) => a.lure_state - b.lure_state);
+  }
+
+  function getLureLabel(type: number) {
+    switch (type) {
+      case 0:
+        return "无";
+      case 1:
+        return "雄心I";
+      case 2:
+        return "雄心II";
+      case 3:
+        return "雄心III";
+      case 4:
+        return "谦逊I";
+      case 5:
+        return "谦逊II";
+      case 6:
+        return "谦逊III";
+    }
+  }
+
+  function getPercent(num: number, total: number) {
+    return ((num / total) * 100).toFixed(1) + "%";
+  }
+
   function getFishRates(baitID: number) {
     return rates.filter((d) => d.bait === baitID).sort((a, b) => b.id - a.id);
   }
@@ -78,8 +125,7 @@
   $effect(() => {
     const tabID = parseInt(selectedTab);
     if (baits.includes(tabID)) {
-      if (tabID !== baitID)
-        baitID = tabID;
+      if (tabID !== baitID) baitID = tabID;
     } else {
       selectedTab = baits[0]?.toString() ?? "";
     }
@@ -136,6 +182,40 @@
           rates={getFishRates(baitID)}
           db={tracker.db}
         />
+
+        <Heading tag="h2" class="relative text-2xl leading-tight">杆型</Heading>
+        <Table>
+          <TableHead>
+            <TableHeadCell>状态</TableHeadCell>
+            <TableHeadCell>轻杆</TableHeadCell>
+            <TableHeadCell>中杆</TableHeadCell>
+            <TableHeadCell>重杆</TableHeadCell>
+            <TableHeadCell>样本</TableHeadCell>
+          </TableHead>
+          <TableBody>
+            {#each getBaitLureTugs(baitID) as item}
+              <TableBodyRow>
+                <TableBodyCell>{getLureLabel(item.lure_state)}</TableBodyCell>
+                <TableBodyCell
+                  >{getPercent(item.tug_light, item.total)}<span
+                    class="text-xs text-gray-400">({item.tug_light})</span
+                  ></TableBodyCell
+                >
+                <TableBodyCell
+                  >{getPercent(item.tug_medium, item.total)}<span
+                    class="text-xs text-gray-400">({item.tug_medium})</span
+                  ></TableBodyCell
+                >
+                <TableBodyCell
+                  >{getPercent(item.tug_heavy, item.total)}<span
+                    class="text-xs text-gray-400">({item.tug_heavy})</span
+                  ></TableBodyCell
+                >
+                <TableBodyCell>{item.total}</TableBodyCell>
+              </TableBodyRow>
+            {/each}
+          </TableBody>
+        </Table>
       </TabItem>
     {/each}
   </Tabs>

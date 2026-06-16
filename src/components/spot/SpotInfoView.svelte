@@ -57,6 +57,7 @@
     () => spotStats?.duration?.buckets ?? [],
   );
   let rates = $derived.by(() => spotStats?.probability.rates ?? []);
+  let lure_tugs = $derived.by(() => spotStats?.lure_tug ?? []);
 
   async function loadFishingDuration(spot: number) {
     loading = true;
@@ -118,7 +119,7 @@
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} bind:baitID={baitID} />
+      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} {lure_tugs} bind:baitID={baitID} />
     {/if}
   </TabItem>
   <TabItem title="按渔获" key="by-fish">
