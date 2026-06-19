@@ -6,11 +6,23 @@ export interface PlaceTree {
   children?: PlaceTree[];
   fish?: number[];
   weathers?: WeatherRateItem[];
+  wks?: WKSInfo[];
 }
 
 export interface WeatherRateItem {
   id: number;
   rate: number;
+}
+
+export interface ItemCount {
+  item: number;
+  count: number;
+}
+
+export interface WKSInfo {
+  id: number;
+  name: string;
+  baits: ItemCount[];
 }
 
 interface PlayerSetupInfo {
@@ -103,7 +115,7 @@ export class GameDatabase {
     }
   }
 
-  async loadPlayerSetupInfo(): Promise<{[key: string]: PlayerSetupInfo}> {
+  async loadPlayerSetupInfo(): Promise<{ [key: string]: PlayerSetupInfo }> {
     let resp = await fetch(`/data/player_setup.json`);
     return await resp.json();
   }

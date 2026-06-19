@@ -62,7 +62,7 @@
     if (!d) return "";
     switch (title) {
       case "fish":
-        return db.getItemName(d.fish_id);
+        return db.getItemName(d.fish_id) + (d.is_chum ? "*" : "");
       case "bait":
         return db.getItemName(d.bait_id) + (d.is_chum ? "*" : "");
     }

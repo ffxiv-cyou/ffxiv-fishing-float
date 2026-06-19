@@ -41,3 +41,12 @@ body {
   margin: 0;
   overflow: hidden;
 }
+
+@font-face {
+  src: url("/assets/FFXIV_Lodestone_SSF.woff") format("woff");
+  font-family: "ffxiv";
+}
+
+.xiv-font {
+  font-family: "ffxiv", var(--font-sans);
+}

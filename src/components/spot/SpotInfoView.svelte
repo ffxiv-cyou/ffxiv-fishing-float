@@ -2,6 +2,7 @@
   import SpotInfoByFish from "./SpotInfoByFish.svelte";
   import SpotInfoByBait from "./SpotInfoByBait.svelte";
   import SpotInfoBasic from "./SpotInfoBasic.svelte";
+  import SpotInfoWKS from "./SpotInfoWKS.svelte";
 
   import { P, Skeleton, Toggle } from "flowbite-svelte";
   import { Tabs, TabItem } from "flowbite-svelte";
@@ -80,8 +81,7 @@
 
   let selectedTab = "";
   function getSelectedTab() {
-    if (selectedTab)
-      return selectedTab;
+    if (selectedTab) return selectedTab;
     if (myBaitID > 0) {
       return "my-history";
     } else if (fishID > 0) {
@@ -105,6 +105,14 @@
     }
     selectedTab = tab;
   }
+
+  let wksInfos = $derived(spot?.wks);
+  let isWks = $derived(wksInfos !== undefined);
+
+  $effect(() => {
+    if (!isWks && selectedTab === "by-mission")
+      setSelectedTab("basic");
+  });
 </script>
 
 <Tabs tabStyle="underline" bind:selected={getSelectedTab, setSelectedTab}>
@@ -115,11 +123,28 @@
       <SpotInfoBasic {spot} {tracker} stats={spotStats} durations={merged} />
     {/if}
   </TabItem>
+  {#if isWks}
+    <TabItem title="按任务" key="by-mission">
+      {#if loading}
+        <Skeleton />
+      {:else}
+        <SpotInfoWKS {spot} {tracker} stats={spotStats} durations={merged} />
+      {/if}
+    </TabItem>
+  {/if}
   <TabItem title="按鱼饵" key="by-bait">
     {#if loading}
       <Skeleton />
     {:else}
-      <SpotInfoByBait {tracker} {baits} durations={all} {buckets} {rates} {lure_tugs} bind:baitID={baitID} />
+      <SpotInfoByBait
+        {tracker}
+        {baits}
+        durations={all}
+        {buckets}
+        {rates}
+        {lure_tugs}
+        bind:baitID
+      />
     {/if}
   </TabItem>
   <TabItem title="按渔获" key="by-fish">
@@ -135,7 +160,7 @@
         samples={spotStats?.samples ?? []}
         conditions={spotStats?.conditions ?? []}
         lureTriggers={spotStats?.lure_trigger ?? []}
-        bind:fishID={fishID}
+        bind:fishID
       />
     {/if}
   </TabItem>
