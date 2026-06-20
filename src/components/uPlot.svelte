@@ -62,7 +62,7 @@
       return;
     }
     if (!chart) {
-      chart = new uPlot(options, data, target || div);
+      chart = new uPlot(mixedOptions, data, target || div);
       onCreate?.(chart);
     }
   }
@@ -75,7 +75,13 @@
     destroy();
   });
 
+  let width = $derived.by(() => div?.offsetWidth ?? 0);
+
   let prevOptions = { ...options };
+  let mixedOptions = $derived({
+    ...options,
+    width: options.width ? options.width : width,
+  })
 
   $effect(() => {
     if (options) {
@@ -86,8 +92,8 @@
         create();
       } else if (state === "update" && chart) {
         chart.setSize({
-          width: options.width,
-          height: options.height,
+          width: mixedOptions.width,
+          height: mixedOptions.height,
         });
       }
     }

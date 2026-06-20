@@ -34,7 +34,7 @@
   }
 
   let options: Options = $derived({
-    width: 800,
+    width: 0,
     height: 200,
     cursor: {
       drag: {

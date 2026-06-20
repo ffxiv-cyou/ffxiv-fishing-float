@@ -69,7 +69,7 @@
   }
 
   let options: Options = $derived({
-    width: 800,
+    width: 0,
     height: (durations?.length ?? 0) * 30 + 65,
     cursor: {
       drag: {
