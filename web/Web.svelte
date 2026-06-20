@@ -60,7 +60,7 @@
 
 <ThemeProvider {theme}>
   <main class="web-layout">
-    <Navbar fluid={true}>
+    <Navbar class="layout-nav" fluid={true}>
       <NavBrand href="#/">
         <span
           class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
@@ -116,14 +116,28 @@
 <style>
   .web-layout {
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    width: 100%;
+    position: fixed;
+
+    --nav-height: 70px;
+  }
+  @media (width < 80rem) {
+    .web-layout {
+      --nav-height: 54px;
+    }
+  }
+  @media (width < 48rem) {
+    .web-layout {
+      --nav-height: 40px;
+    }
+  }
+
+  :global(.layout-nav) {
+    height: var(--nav-height);
   }
 
   .web-content {
-    flex: 1;
-    min-height: 0;
     overflow: auto;
+    height: calc(100vh - var(--nav-height));
   }
 </style>
