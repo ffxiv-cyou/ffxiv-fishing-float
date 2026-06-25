@@ -11,7 +11,8 @@ export class FishingHistory {
   pendingSessions: FishingSession[] = [];
   storage: FishingStorage
   cfg: Config;
-  lastSessionTime: number = 0;
+  lastSessionLocalTime: number = 0;
+  lastSessionStartTime: number = 0;
 
   #subscribe;
   update: (() => void) | null = null;
@@ -32,10 +33,14 @@ export class FishingHistory {
       return;
 
     // deduplication, avoid adding the same session multiple times
-    if (this.lastSessionTime === session.startLocalTime) {
+    if (this.lastSessionLocalTime === session.startLocalTime) {
       return;
     }
-    this.lastSessionTime = session.startLocalTime;
+    if (session.startTime !== 0 && this.lastSessionStartTime === session.startTime) {
+      return;
+    }
+    this.lastSessionLocalTime = session.startLocalTime;
+    this.lastSessionStartTime = session.startTime;
 
     // don't record sessions shorter than 1s (e.g. invalid cast rejected by game)
     if (session.elapsedTime > 0 && session.elapsedTime < 1000) {
