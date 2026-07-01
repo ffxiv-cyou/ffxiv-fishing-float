@@ -133,6 +133,18 @@
         />
       </div>
     {/if}
+    <div class="setting-item">
+      <span class="setting-name">最小杆时长度</span>
+      <input
+        type="number"
+        min="0"
+        id="min-duration"
+        bind:value={config.MinDuration}
+      />
+      <span class="setting-desc"
+        >设置后，杆时和历史记录的最右侧时间（最大杆时）将不会小于设定值</span
+      >
+    </div>
     <h2>鱼识进度</h2>
     <div class="setting-item">
       <span class="setting-name">显示鱼识进度</span>
@@ -403,7 +415,7 @@
 
     background-color: #000000c0;
     width: 400px;
-    height: 260px;
+    height: 300px;
     padding: 10px 20px;
     overflow: hidden;
   }

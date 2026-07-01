@@ -3,6 +3,7 @@
   import Timer from "../components/Timer.svelte";
   import type { Config } from "../model/Config";
   import type { GameDatabase } from "../model/GameDB";
+  import { IntuitionCounter } from "../model/IntuitionCounter";
 
   let { config, db }: { config: Config; db: GameDatabase } = $props();
   const demoData = [
@@ -97,11 +98,20 @@
       count: 10,
     },
   ];
+
+  let counter = new IntuitionCounter();
+  counter.setFilter([
+    {item: 4962, count: 2},
+    {item: 4963, count: 3},
+  ])
+  counter.addFish(4962, 1);
+  counter.addFish(4963, 1);
 </script>
 
 <Timer
   {config}
   {db}
+  intuition={counter}
   zone={426}
   bait={29717}
   chum={false}
@@ -109,7 +119,7 @@
   result={null}
   now={12.3}
   lureRest={14.5}
-  total={30.0}
+  total={Math.max(32.0, config.MinDuration)}
   highlight={[]}
   downplay={[4942, 4963]}
   historyStats={demoData}
