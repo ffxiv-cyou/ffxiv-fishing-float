@@ -1,11 +1,12 @@
 import { createSubscriber } from "svelte/reactivity";
 import { API } from "./API";
-import { ClassJobID, BuffID } from "./CommonEnums";
+import { ClassJobID, BuffID, FishingSpotName } from "./CommonEnums";
 import { Config } from "./Config";
 import { FishingSession } from "./FishingSession";
 import { GameDatabase } from "./GameDB";
 import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
+import { IntuitionCounter } from "./IntuitionCounter";
 
 export class FishingTracker extends EventTarget {
     private bait: number = 0;
@@ -29,6 +30,7 @@ export class FishingTracker extends EventTarget {
     api: API;
     config: Config;
     db: GameDatabase;
+    intuition: IntuitionCounter;
 
     #subscribe;
     update: (() => void) | null = null;
@@ -44,6 +46,7 @@ export class FishingTracker extends EventTarget {
         this.config = new Config();
         this.history = new FishingHistory(this.api, this.config);
         this.db = new GameDatabase();
+        this.intuition = new IntuitionCounter();
     }
 
     private updateSub() {
@@ -113,12 +116,14 @@ export class FishingTracker extends EventTarget {
         return this.isInFishingEvent;
     }
 
-    public setFishingZone(zoneId: number) {
+    public setFishingSpot(spotId: number) {
         // Zone extract from log message, may late than cast action
-        this.currentZone = zoneId;
+        const oldSpot = this.currentZone;
+        this.currentZone = spotId;
         if (this.current) {
-            this.current.Zone = zoneId;
+            this.current.Zone = spotId;
         }
+        this.onSpotChange(oldSpot, spotId);
         this.updateSub();
     }
 
@@ -140,6 +145,12 @@ export class FishingTracker extends EventTarget {
     public setUsingWksBait(use: boolean) {
         this.useWksBait = use;
         console.log(`Using WKS Bait set to: ${use}`);
+
+        // 防止宇宙探索同时做一个任务导致计数器不对
+        if (!use) {
+            this.intuition.reset();
+        }
+
         this.updateSub();
     }
 
@@ -241,6 +252,25 @@ export class FishingTracker extends EventTarget {
         this.updateSub();
     }
 
+    onZoneChange(oldZone: number, newZone: number) {
+        if (oldZone !== newZone && oldZone !== 0) {
+            this.intuition.reset();
+        }
+    }
+
+    onSpotChange(oldSpot: number, newSpot: number) {
+        if (oldSpot !== newSpot && (oldSpot !== 0 && oldSpot !== FishingSpotName.UnrecordedSpot)) {
+            this.intuition.reset();
+        }
+
+        this.updateIntuitionFilter(newSpot);
+    }
+
+    public updateIntuitionFilter(spot: number, fishes: number[] = []) {
+        const intuitions = this.db.getSpotIntuition(spot, fishes);
+        this.intuition.setFilter(intuitions);
+    }
+
     onBuffGain(buff: BuffState, epoch: number) {
         console.log(`Buff gained: ${buff} (${BuffID[buff.buffId]})`);
         switch (buff.buffId) {
@@ -249,6 +279,9 @@ export class FishingTracker extends EventTarget {
                 break;
             case BuffID.ModestLure:
                 this.current?.setLure(LureType.Modest, buff.stacks, epoch);
+                break;
+            case BuffID.FishersIntuition:
+                this.intuition.setIntuitionTriggered();
                 break;
         }
     }
@@ -260,6 +293,9 @@ export class FishingTracker extends EventTarget {
                 break;
             case BuffID.SurfaceSlap:
                 this.setSlapFishID(0);
+                break;
+            case BuffID.FishersIntuition:
+                this.intuition.reset();
                 break;
         }
     }
@@ -290,6 +326,7 @@ export class FishingTracker extends EventTarget {
 
     public setFishingResult(itemId: number, quantity: number, size: number, isHQ: boolean, isColl: boolean, epoch: number) {
         this.current?.setResult(itemId, quantity, size, isHQ, isColl);
+        this.intuition.addFish(itemId, quantity);
         console.log(`Caught`, this.current, epoch, Date.now());
         this.lastFish = itemId;
         this.history.addSession(this.current);

@@ -25,6 +25,10 @@ export class Config {
   mergeChumTime: boolean = true;
   /** 雄心/谦逊空窗期处理: 'off'-关闭, 'label'-显示标记, 'tweak'-调整历史显示 */
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
+  /** 鱼识计数器位置: 'off'-关闭, 'right'-右侧, 'bottom'-底部 */
+  intuitionCounter: 'off' | 'right' | 'bottom' = 'off';
+  /** 最小杆时 */
+  minDuration: number = 0;
 
   /** 极简模式颜色: [抛竿, 轻杆, 中杆, 重杆] */
   minimalColors: string[] = [];
@@ -80,6 +84,8 @@ export class Config {
     this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
     this.statsThresold = obj.statsThresold || { gathering: 0, perception: 0, gp: 0 };
     this.statsThresoldEnabled = obj.statsThresoldEnabled !== undefined ? obj.statsThresoldEnabled : false;
+    this.intuitionCounter = obj.intuitionCounter !== undefined ? obj.intuitionCounter : 'off';
+    this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
   }
 
   reset() {
@@ -310,6 +316,26 @@ export class Config {
   }
   set StatsThresoldEnabled(value: boolean) {
     this.statsThresoldEnabled = value;
+    this.save();
+  }
+
+  /** 鱼识计数器位置 */
+  get IntuitionCounter() {
+    this.#subscribe();
+    return this.intuitionCounter;
+  }
+  set IntuitionCounter(value: 'off' | 'right' | 'bottom') {
+    this.intuitionCounter = value;
+    this.save();
+  }
+
+  /** 最小杆时，防止在短杆时的钓场导致显示不够线性 */
+  get MinDuration() {
+    this.#subscribe();
+    return this.minDuration;
+  }
+  set MinDuration(value: number) {
+    this.minDuration = value;
     this.save();
   }
 }

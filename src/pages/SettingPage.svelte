@@ -133,6 +133,34 @@
         />
       </div>
     {/if}
+    <h2>鱼识进度</h2>
+    <div class="setting-item">
+      <span class="setting-name">显示鱼识进度</span>
+      <input
+        type="radio"
+        name="intuition-counter"
+        value="off"
+        id="intuition-counter-off"
+        bind:group={config.IntuitionCounter}
+      />
+      <label for="intuition-counter-off">关闭</label>
+      <input
+        type="radio"
+        name="intuition-counter"
+        value="right"
+        id="intuition-counter-right"
+        bind:group={config.IntuitionCounter}
+      />
+      <label for="intuition-counter-right">右侧</label>
+      <input
+        type="radio"
+        name="intuition-counter"
+        value="bottom"
+        id="intuition-counter-bottom"
+        bind:group={config.IntuitionCounter}
+      />
+      <label for="intuition-counter-bottom">底部</label>
+    </div>
     <h2>历史统计</h2>
     <div class="setting-item">
       <span class="setting-name">上报数据</span>

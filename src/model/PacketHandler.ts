@@ -1,6 +1,6 @@
 import type { Packet, PacketFilter } from "overlay-toolkit";
 import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, FFXIVIpcWeatherChange, PacketSegment, PacketType, StatusEffect } from "./Opcode";
-import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType } from "./CommonEnums";
+import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType, FishingSpotName } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
 
@@ -388,12 +388,12 @@ export class PacketHandler {
     private handleLogMessage(id: number, params: number[], epoch: number): void {
         switch (id) {
             case 1110: // ???在???甩出了鱼线开始钓鱼
-                this.tracker.setFishingZone(params[0]);
+                this.tracker.setFishingSpot(params[0]);
                 this.tracker.serverBegin(epoch);
                 break;
             case 1115: // 将新钓场“???”记录到了钓鱼笔记中！
-                if (this.tracker.CurrentZone === 950) {
-                    this.tracker.setFishingZone(params[0]);
+                if (this.tracker.CurrentZone === FishingSpotName.UnrecordedSpot) {
+                    this.tracker.setFishingSpot(params[0]);
                 }
                 break;
             case 1111: // ???收回了鱼线。

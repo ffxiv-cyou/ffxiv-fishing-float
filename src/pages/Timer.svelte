@@ -60,7 +60,7 @@
         maxTime = item.maxBiteTime;
       }
     }
-    return Math.max(Math.ceil(maxTime / 2) * 2, (now ?? 0) + 5);
+    return Math.max(Math.ceil(maxTime / 2) * 2, tracker.config.MinDuration, (now ?? 0) + 5);
   }); // in seconds
 
   function updateSession() {
@@ -200,17 +200,21 @@
       return;
     }
 
+    onlineHistory = undefined;
     tracker.api
       .getFishingDuration(zone, {})
       .then((response) => {
         if (!cancelled) {
           onlineHistory = response;
+
+          // 部分情况下一个钓场可能有多个鱼识（宇宙探索），这里重新做一次 filter
+          let fishesForBait = response.distributions.filter((d) => d.bait_id === bait).map((d) => d.fish_id);
+          tracker.updateIntuitionFilter(zone, fishesForBait);
         }
       })
       .catch((err) => {
         if (!cancelled) {
           console.error("Failed to load online fishing history:", err);
-          onlineHistory = undefined;
         }
       });
 
@@ -270,6 +274,7 @@
   <Timer
     db={tracker.db}
     config={tracker.config}
+    intuition={tracker.intuition}
     {onclick}
     {zone}
     {bait}

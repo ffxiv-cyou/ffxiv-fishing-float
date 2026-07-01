@@ -1,4 +1,4 @@
-export enum ActorControlType {
+export const enum ActorControlType {
     SetStatus = 0x02,
     /**
      * param1 = ClassJob ID
@@ -35,17 +35,21 @@ export enum ActorControlType {
     WKSFishingBait = 3501,
 };
 
-export enum ClassJobID {
+export const enum ClassJobID {
     Fisher = 18,
 };
 
-export enum EventID {
+export const enum EventID {
     Fishing = 0x150001, // 1376257, Fishing
 };
 
-export enum ClientTriggerType {
+export const enum ClientTriggerType {
     Fishing = 0x2BD, // 701, Fishing
 };
+
+export const enum FishingSpotName {
+    UnrecordedSpot = 950, // 未知钓场
+}
 
 export enum FishingActionType {
     Cast = 0, // 抛竿
@@ -79,7 +83,7 @@ export enum FishingActionType {
     StellarHookset = 28, // 华丽提钩, used in cosmic exploration
 };
 
-export enum EventPlayParamType {
+export const enum EventPlayParamType {
     // Idle
     FishingIdle = 0x10F, // 271, fishing/idle
 

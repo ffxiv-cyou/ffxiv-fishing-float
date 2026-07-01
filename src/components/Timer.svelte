@@ -5,10 +5,13 @@
   import type { HistoryStatsItem } from "../model/HistoryStorage";
   import type { TugType } from "../model/InnerEnums";
   import HistoryStats from "./HistoryStats.svelte";
+  import IntuitionCounter from "./IntuitionCounter.svelte";
+  import type { IntuitionCounter as Counter } from "../model/IntuitionCounter";
 
   let {
     db,
     config,
+    intuition,
     now,
     total,
     highlight,
@@ -24,6 +27,7 @@
   }: {
     db: GameDatabase;
     config: Config;
+    intuition: Counter;
     zone: number;
     bait: number;
     chum: boolean;
@@ -71,42 +75,49 @@
   });
 </script>
 
-<div class="timer" {style} data-lure-window={config.lureEmptyWindowHandling}>
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="info"
-    data-style={config.Theme}
-    data-tug={tug}
-    ondblclick={divClickHandler}
-  >
-    <div class="left xiv-text blue">
-      <span class="zone" data-show={config.ShowZone}>{zoneName}</span>
-      <span class="bait" data-show={config.ShowBait}>{baitName}{#if chum}*{/if}</span>
+<div class="timer" data-counter-style={config.IntuitionCounter}>
+  <div class="timer-body" {style} data-lure-window={config.lureEmptyWindowHandling}>
+    <!-- svelte-ignore a11y_click_events_have_key_events -->
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+      class="info"
+      data-style={config.Theme}
+      data-tug={tug}
+      ondblclick={divClickHandler}
+    >
+      <div class="left xiv-text blue">
+        <span class="zone" data-show={config.ShowZone}>{zoneName}</span>
+        <span class="bait" data-show={config.ShowBait}
+          >{baitName}{#if chum}*{/if}</span
+        >
+      </div>
+      <div class="middle xiv-text green" data-show={config.ShowCatch}>
+        {#if result}
+          <span class="result-name">{resultName}</span>
+          <span class="result-count">{result.quantity}</span>
+        {/if}
+      </div>
+      <div class={["right", "xiv-text", tugColor(tug)]}>
+        {#if tug !== undefined}
+          <span class="tug">{tugType(tug)}</span>
+        {/if}
+        <span class="time">{(now ?? 0).toFixed(1)}s</span>
+      </div>
     </div>
-    <div class="middle xiv-text green" data-show={config.ShowCatch}>
-      {#if result}
-        <span class="result-name">{resultName}</span>
-        <span class="result-count">{result.quantity}</span>
-      {/if}
-    </div>
-    <div class={["right", "xiv-text", tugColor(tug)]}>
-      {#if tug !== undefined}
-        <span class="tug">{tugType(tug)}</span>
-      {/if}
-      <span class="time">{(now ?? 0).toFixed(1)}s</span>
-    </div>
+    {#if config.ShowHistory}
+      <HistoryStats
+        {db}
+        stats={historyStats}
+        {highlight}
+        {downplay}
+        {total}
+        lureTime={lureRest}
+        tweakByLure={config.LureEmptyWindowHandling === "tweak"}
+      />
+    {/if}
   </div>
-  {#if config.ShowHistory}
-    <HistoryStats
-      {db}
-      stats={historyStats}
-      {highlight}
-      {downplay}
-      {total}
-      lureTime={lureRest}
-      tweakByLure={config.LureEmptyWindowHandling === "tweak"}
-    />
+  {#if config.IntuitionCounter !== 'off'}
+    <IntuitionCounter {db} {config} {intuition}/>
   {/if}
 </div>
 
@@ -119,6 +130,19 @@
 
   .timer [data-show="false"] {
     display: none;
+  }
+
+  .timer {
+    display: flex;
+    gap: 5px;
+  }
+
+  [data-counter-style="bottom"].timer  {
+    flex-direction: column;
+  }
+
+  .timer-body {
+    flex: 1;
   }
 
   .info {

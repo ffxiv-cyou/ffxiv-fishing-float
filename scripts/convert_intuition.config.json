@@ -1,0 +1,7 @@
+{
+  "version": "2026.06.18.0000.0000",
+  "csv": "src/data/fish_intuition.csv",
+  "itemJson": "public/data/2026.06.18.0000.0000/item.json",
+  "placenameJson": "public/data/2026.06.18.0000.0000/placename.json",
+  "output": "public/data/intuition.json"
+}
