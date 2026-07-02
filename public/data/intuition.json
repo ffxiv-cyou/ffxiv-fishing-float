@@ -532,7 +532,11 @@
     "spot_id": 5076,
     "fishes": [
       {
-        "item": 43735,
+        "item": 43796,
+        "count": 3
+      },
+      {
+        "item": 43798,
         "count": 3
       }
     ]
@@ -542,11 +546,7 @@
     "spot_id": 5056,
     "fishes": [
       {
-        "item": 43796,
-        "count": 3
-      },
-      {
-        "item": 43798,
+        "item": 43735,
         "count": 3
       }
     ]
