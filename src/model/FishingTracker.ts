@@ -268,6 +268,7 @@ export class FishingTracker extends EventTarget {
 
     public updateIntuitionFilter(spot: number, fishes: number[] = []) {
         const intuitions = this.db.getSpotIntuition(spot, fishes);
+        console.log("update intuition filter", spot, fishes, intuitions);
         this.intuition.setFilter(intuitions);
     }
 

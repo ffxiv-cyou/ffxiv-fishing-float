@@ -173,6 +173,18 @@
       />
       <label for="intuition-counter-bottom">底部</label>
     </div>
+    <div class="setting-item">
+      <span class="setting-name">未知鱼识</span>
+      <input
+        type="checkbox"
+        id="show-unknown-intuition"
+        bind:checked={config.UploadHistory}
+      />
+      <label for="show-unknown-intuition">显示</label>
+      <span class="setting-desc"
+        >开荒用。启用后，若当前钓场有鱼识但条件未知，则会显示当前所有已经钓上来的鱼。</span
+      >
+    </div>
     <h2>历史统计</h2>
     <div class="setting-item">
       <span class="setting-name">上报数据</span>

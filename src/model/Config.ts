@@ -27,6 +27,8 @@ export class Config {
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
   /** 鱼识计数器位置: 'off'-关闭, 'right'-右侧, 'bottom'-底部 */
   intuitionCounter: 'off' | 'right' | 'bottom' = 'off';
+  /** 显示当前未知的鱼识信息 */
+  showUnknownIntuition: boolean = false;
   /** 最小杆时 */
   minDuration: number = 0;
 
@@ -85,6 +87,7 @@ export class Config {
     this.statsThresold = obj.statsThresold || { gathering: 0, perception: 0, gp: 0 };
     this.statsThresoldEnabled = obj.statsThresoldEnabled !== undefined ? obj.statsThresoldEnabled : false;
     this.intuitionCounter = obj.intuitionCounter !== undefined ? obj.intuitionCounter : 'off';
+    this.showUnknownIntuition = obj.showUnknownIntuition !== undefined ? obj.showUnknownIntuition : (obj.intuitionCounter !== 'off');
     this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
   }
 
@@ -326,6 +329,16 @@ export class Config {
   }
   set IntuitionCounter(value: 'off' | 'right' | 'bottom') {
     this.intuitionCounter = value;
+    this.save();
+  }
+
+  /** 显示当前未知的鱼识 */
+  get ShowUnknownIntuition() {
+    this.#subscribe()
+    return this.showUnknownIntuition;
+  }
+  set ShowUnknownIntuition(value: boolean) {
+    this.showUnknownIntuition = value;
     this.save();
   }
 

@@ -70,6 +70,11 @@ export class IntuitionCounter {
         return this.count;
     }
 
+    get ConditionKnown() {
+        this.#subscribe();
+        return (this.filter?.length ?? 0) > 0;
+    }
+
     tryUpdate() {
         if (this.update) {
             this.update();

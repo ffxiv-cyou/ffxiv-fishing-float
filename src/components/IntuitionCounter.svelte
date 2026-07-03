@@ -12,16 +12,30 @@
     config: Config;
     intuition: IntuitionCounter;
   } = $props();
+
+  let show = $derived.by(() => {
+    // 不显示未知鱼识状态
+    if (!config.ShowUnknownIntuition && !intuition.ConditionKnown) {
+      return false;
+    }
+    return intuition.Count.length > 0;
+  });
+
+  function formatThresold(value: number) {
+    if (value > 0) return value.toString();
+    return "?";
+  }
+
 </script>
 
-{#if intuition.Count.length > 0}
+{#if show}
   <div class="intuition-counter" data-counter-style={config.IntuitionCounter}>
     <div class="padding"></div>
     <ul>
       {#each intuition.Count as item}
         <li class="xiv-text blue">
           {db.getItemName(item.item)}
-          {item.Count}/{item.Thresold}
+          {item.Count}/{formatThresold(item.Thresold)}
         </li>
       {/each}
     </ul>
