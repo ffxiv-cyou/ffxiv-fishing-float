@@ -134,7 +134,7 @@
       </div>
     {/if}
     <div class="setting-item">
-      <span class="setting-name">最小杆时长度</span>
+      <span class="setting-name">最小竿时长度</span>
       <input
         type="number"
         min="0"
@@ -142,7 +142,7 @@
         bind:value={config.MinDuration}
       />
       <span class="setting-desc"
-        >设置后，杆时和历史记录的最右侧时间（最大杆时）将不会小于设定值</span
+        >设置后，竿时和历史记录的最右侧时间（最大竿时）将不会小于设定值</span
       >
     </div>
     <h2>鱼识进度</h2>

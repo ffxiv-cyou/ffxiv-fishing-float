@@ -63,7 +63,7 @@
   }
 </script>
 
-<Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
+<Heading tag="h2" class="relative text-2xl leading-tight">竿时</Heading>
 <SpotFishView {durations} db={tracker.db} title="fish" />
 {#if spot?.fish?.length ?? 0 > 0}
   <Heading tag="h2" class="relative text-2xl leading-tight mb-4"

@@ -228,7 +228,7 @@
       />
     </div>
     <div>
-      <Label for="timeFrom">杆时下限</Label>
+      <Label for="timeFrom">竿时下限</Label>
       <Input
         id="timeFrom"
         type="number"
@@ -237,7 +237,7 @@
       />
     </div>
     <div>
-      <Label for="timeTo">杆时上限</Label>
+      <Label for="timeTo">竿时上限</Label>
       <Input
         id="timeTo"
         type="number"
@@ -292,7 +292,7 @@
       <TableHeadCell>鱼饵</TableHeadCell>
       <TableHeadCell>渔获</TableHeadCell>
       <TableHeadCell>结果</TableHeadCell>
-      <TableHeadCell>杆时</TableHeadCell>
+      <TableHeadCell>竿时</TableHeadCell>
       <TableHeadCell>撒饵</TableHeadCell>
       <TableHeadCell>拍水</TableHeadCell>
       <TableHeadCell>咬钩</TableHeadCell>

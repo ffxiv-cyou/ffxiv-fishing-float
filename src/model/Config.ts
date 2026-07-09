@@ -29,7 +29,7 @@ export class Config {
   intuitionCounter: 'off' | 'right' | 'bottom' = 'off';
   /** 显示当前未知的鱼识信息 */
   showUnknownIntuition: boolean = false;
-  /** 最小杆时 */
+  /** 最小竿时 */
   minDuration: number = 0;
 
   /** 极简模式颜色: [抛竿, 轻杆, 中杆, 重杆] */

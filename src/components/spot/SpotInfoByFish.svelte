@@ -134,7 +134,7 @@
           {tracker.db.getItemName(fishID)}
         </div>
       {/snippet}
-      <Heading tag="h2" class="relative text-2xl leading-tight">杆时</Heading>
+      <Heading tag="h2" class="relative text-2xl leading-tight">竿时</Heading>
       <div class="flex gap-4 mt-2">
         <Toggle bind:checked={showHeatmap}>热力图</Toggle>
         <Toggle bind:checked={isFiltered}>过滤</Toggle>

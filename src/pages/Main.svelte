@@ -153,7 +153,7 @@
     <p>在ACT中添加此悬浮窗后开始使用</p>
     <div class="link-buttons">
       <a class="primary" href="/web/#/help/overlay" target="_blank">安装教程</a>
-      <a href="/web/" target="_blank">查看杆时数据</a>
+      <a href="/web/" target="_blank">查看统计数据</a>
     </div>
   </div>
   <details>

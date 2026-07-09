@@ -104,7 +104,7 @@
     <TableHeadCell>时间</TableHeadCell>
     <TableHeadCell>鱼饵</TableHeadCell>
     <TableHeadCell>渔获</TableHeadCell>
-    <TableHeadCell>杆时</TableHeadCell>
+    <TableHeadCell>竿时</TableHeadCell>
     <TableHeadCell>撒饵</TableHeadCell>
     <TableHeadCell>诱饵</TableHeadCell>
     <TableHeadCell>操作</TableHeadCell>
