@@ -367,7 +367,10 @@ export class FishingSession {
         }
         if (this.lureTimes) {
             data.push(this.lureTimes.map(t => t - this.startTime));
+        } else {
+            data.push(null);
         }
+        data.push([ this.fisherStats.gathering, this.fisherStats.perception, this.fisherStats.gp ]);
         return data;
     }
 }
