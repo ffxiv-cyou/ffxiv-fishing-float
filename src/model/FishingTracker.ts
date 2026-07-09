@@ -558,7 +558,7 @@ export class FishingTracker extends EventTarget {
         let offset = 0;
         const fishIDs = bitMaskMapping(dw, note.fishes, offset);
         offset = fishIDs.offset + maskToBytesLength(note.spot_max_id);
-        const spearFishIDs = bitMaskMapping(dw, note.spear_fishes, offset);
+        const spearFishIDs = bitMaskMapping(dw, note.spear_fishes.slice(1), offset); // 这破玩意从0开始计算的
         offset = spearFishIDs.offset + maskToBytesLength(note.spear_spot_max_id + 1); // 这破玩意从0开始计算的
 
         this.history.storage.SetFishingLog(fishIDs.data, spearFishIDs.data);
@@ -599,7 +599,7 @@ export class FishingTracker extends EventTarget {
             if (fishId === 0)
                 continue;
 
-            const index = note.spear_fishes.indexOf(fishId);
+            const index = note.spear_fishes.slice(1).indexOf(fishId);
             if (index >= 0) {
                 const byteIndex = Math.floor(index / 8) + spearFishOffset;
                 const bitIndex = index % 8;
@@ -626,7 +626,7 @@ export class FishingTracker extends EventTarget {
                 return null;
 
             const fishIDs = bitMaskMapping(dw, note.fishes, 1);
-            const spearFishIDs = bitMaskMapping(dw, note.spear_fishes, fishMaskLength + 1);
+            const spearFishIDs = bitMaskMapping(dw, note.spear_fishes.slice(1), fishMaskLength + 1);
 
             return {
                 fishes: fishIDs.data,
