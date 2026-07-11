@@ -44,11 +44,11 @@
 
 <style>
   .intuition-counter {
-    flex: 8em 0;
     font-size: 0.8em;
     text-align: left;
 
     &[data-counter-style="right"] {
+      flex: 8em 0;
       border-left: 1px solid #808080;
       padding-left: 0.5em;
 
