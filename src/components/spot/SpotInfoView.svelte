@@ -144,6 +144,7 @@
         {rates}
         {lure_tugs}
         bind:baitID
+        {spotID}
       />
     {/if}
   </TabItem>

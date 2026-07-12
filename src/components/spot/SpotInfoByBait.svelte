@@ -10,6 +10,7 @@
     TableBody,
     TableBodyRow,
     TableBodyCell,
+    Select,
   } from "flowbite-svelte";
   import SpotFishView from "./SpotFishView.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
@@ -35,6 +36,7 @@
     rates,
     lure_tugs,
     baitID = $bindable(0),
+    spotID,
   }: {
     baits: number[];
     durations: FishDurationDistribution[];
@@ -43,8 +45,18 @@
     lure_tugs: LureTugStatItem[];
     tracker: FishingTracker;
     baitID: number;
+    spotID: number;
   } = $props();
 
+  function tugType(fishID: number) {
+    for (let i = 0; i < durations.length; i++) {
+      const element = durations[i];
+      if (element.fish_id === fishID) return element.tug_type;
+    }
+    return 0;
+  }
+
+  //#region duration filter
   let isFiltered = $state(false);
   let isChum = $state(false);
   let showHeatmap = $state(false);
@@ -88,6 +100,8 @@
       .sort((a, b) => b.fish_id - a.fish_id);
   }
 
+  //#endregion
+
   function getBaitLureTugs(baitID: number) {
     return lure_tugs
       .filter((d) => d.bait_id === baitID && d.total > 10)
@@ -113,12 +127,55 @@
     }
   }
 
+  function getLureRate(fish: number, level: number) {
+    const tug = tugType(fish);
+    const rateTable = [1.5, 2.5, 6];
+    if (level >= 1 && level <= 3) {
+      return tug === 2 || tug === 3 ? rateTable[level - 1] : 1;
+    }
+    if (level >= 4 && level <= 6) {
+      return tug === 1 ? rateTable[level - 4] : 1;
+    }
+
+    return 1;
+  }
+
   function getPercent(num: number, total: number) {
     return ((num / total) * 100).toFixed(1) + "%";
   }
 
   function getFishRates(baitID: number) {
-    return rates.filter((d) => d.bait === baitID).sort((a, b) => b.id - a.id);
+    let basicRates = rates.filter((d) => d.bait === baitID);
+    basicRates = JSON.parse(JSON.stringify(basicRates)); // deep copy
+
+    if (conditionEnabled) {
+      if (conditionUseRealData) {
+        return conditionRates;
+      }
+
+      if (conditionSlaps !== "") {
+        const slapID = parseInt(conditionSlaps);
+        basicRates = basicRates.filter((d) => d.id !== slapID);
+      }
+
+      if (!conditionHidden) {
+        basicRates = basicRates.filter((d) => !d.is_hidden);
+      }
+
+      if (conditionLure !== "") {
+        const lureLevel = parseInt(conditionLure);
+        basicRates.forEach((v, index, arr) => {
+          const rate = getLureRate(v.id, lureLevel);
+          v.rate *= rate;
+        });
+      }
+
+      let sumRate = 0;
+      basicRates.forEach((v) => (sumRate += v.rate));
+      basicRates.forEach((v) => (v.rate /= sumRate));
+    }
+
+    return basicRates.sort((a, b) => b.id - a.id);
   }
 
   let selectedTab = $state(baitID ? baitID.toString() : "");
@@ -130,6 +187,75 @@
       selectedTab = baits[0]?.toString() ?? "";
     }
   });
+
+  //#region condition calculator
+  let conditionEnabled = $state(false);
+  let conditionUseRealData = $state(false);
+  let conditionLure = $state("");
+  let conditionSlaps = $state("");
+  let conditionHidden = $state(false);
+  let conditionRates: FishProbabilityItem[] = $state([]);
+
+  let lureDropdown = $derived.by(() => {
+    let arr = [];
+    for (let i = 0; i < 7; i++) {
+      arr.push({ value: i.toString(), name: getLureLabel(i)! });
+    }
+    return arr;
+  });
+
+  let slaps = $derived.by(() => {
+    let arr = [
+      { value: "", name: "(所有状态)" },
+      { value: "0", name: "(未拍水)" },
+    ];
+
+    if (conditionUseRealData) {
+      arr = arr.slice(1);
+    }
+
+    let fishes: number[] = [];
+    durations
+      .filter((v) => v.bait_id === baitID)
+      .forEach((v) => {
+        if (fishes.indexOf(v.fish_id) < 0) fishes.push(v.fish_id);
+      });
+
+    fishes.sort().forEach((v) => {
+      arr.push({
+        value: v.toString(),
+        name: tracker.db.getItemName(v),
+      });
+    });
+    return arr;
+  });
+
+  async function loadConditionalProbability(
+    bait: number,
+    lure: number,
+    slap?: number,
+    hidden?: boolean,
+  ) {
+    await tracker.api
+      .getProbability(spotID, bait, {
+        lure,
+        slap,
+        hidden,
+      })
+      .then((v) => {
+        conditionRates = v.rates.sort((a, b) => b.id - a.id);
+      });
+  }
+
+  $effect(() => {
+    if (!conditionEnabled || !conditionUseRealData) {
+      conditionRates = [];
+      return;
+    }
+    loadConditionalProbability(baitID, parseInt(conditionLure), conditionSlaps === "" ? undefined : parseInt(conditionSlaps), conditionHidden);
+  });
+
+  //#endregion
 </script>
 
 {#if baits.length === 0}
@@ -177,6 +303,27 @@
         {/if}
 
         <Heading tag="h2" class="relative text-2xl leading-tight">概率</Heading>
+        <div class="flex gap-4 mt-2 h-10">
+          <Toggle bind:checked={conditionEnabled}>条件概率</Toggle>
+          {#if conditionEnabled}
+            <Toggle bind:checked={conditionUseRealData}>使用真实样本</Toggle>
+            <Select
+              items={lureDropdown}
+              bind:value={conditionLure}
+              name="拟饵"
+              placeholder="选择拟饵状态"
+              class="w-48"
+            />
+            <Select
+              items={slaps}
+              bind:value={conditionSlaps}
+              name="拍水"
+              placeholder="拍水状态"
+              class="w-48"
+            />
+            <Toggle bind:checked={conditionHidden}>鱼词</Toggle>
+          {/if}
+        </div>
         <FishRateView
           title="fish"
           rates={getFishRates(baitID)}

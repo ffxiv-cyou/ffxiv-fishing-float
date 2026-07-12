@@ -117,6 +117,27 @@ export class API {
     return await resp.json();
   }
 
+  public async getProbability(spotID: number, baitID: number, opt?: {
+    lure?: number,
+    slap?: number,
+    hidden?: boolean,
+  }): Promise<ConditionalProbabilityResponse>
+  {
+    let query = `spot_id=${spotID}&bait_id=${baitID}`;
+    if (opt?.lure)
+      query += `&lure_state=${opt.lure}`;
+    if (opt?.slap !== undefined)
+      query += `&slap_id=${opt.slap}`;
+    if (opt?.hidden !== undefined)
+      query += `&has_hidden=${opt.hidden}`;
+
+    const resp = await fetch(`${this.basePath}/fish-probability/conditional?${query}`);
+    if (!resp.ok) {
+      throw new Error(`Failed to get probability: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
   generateHeader(data: Uint8Array): { [key: string]: string } {
     var now = Date.now();
     return {
@@ -436,4 +457,13 @@ export interface DeleteRecordsResponse {
 
 export interface RestoreRecordsResponse {
   restored: number;
+}
+
+export interface ConditionalProbabilityResponse {
+  spot_id: number;
+  bait_id: number;
+  lure_state: number;
+  slap_id?: number;
+  has_hidden?: boolean;
+  rates: Array<FishProbabilityItem>;
 }
