@@ -96,7 +96,7 @@
       }
     }
 
-    return results.slice(0, 10);
+    return results.slice(0, 50);
   });
 
   function visit(item: FilterItem) {
