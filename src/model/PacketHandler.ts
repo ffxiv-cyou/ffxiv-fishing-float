@@ -439,11 +439,11 @@ export class PacketHandler {
                 this.tracker.setSlapFishID(params[0]);
                 break;
 
-            case 5564: // 鱼眼提示词（水中出现了XXXX）
+            case 5564: // 诱饵提示词（水中出现了XXXX）
                 this.tracker.setHiddenFish(params[0], epoch);
                 break;
-            case 5575: // 鱼眼消失（XXXX不见了）
-            case 5582: // 钓起了XXXX（鱼眼）
+            case 5575: // 诱饵提示词消失（XXXX不见了）
+            case 5582: // 钓起了XXXX（诱饵提示词）
                 this.tracker.setHiddenFish(0, epoch);
                 break;
 

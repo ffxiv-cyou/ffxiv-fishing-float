@@ -28,6 +28,7 @@ export class FishingSession {
     private identicalFish: number = 0; // 专一垂钓
     private slapFish: number = 0; // 拍击水面
     private hiddenFish: number = 0; // 隐藏鱼ID
+    private hiddenStacks: number = 0; // 鱼词出现时的层数
 
     private tugType: TugType | null = null;
     private hookType: HookType | null = null;
@@ -117,10 +118,18 @@ export class FishingSession {
         this.onUpdate();
     }
 
-    set HiddenFish(fishID: number) {
+    setHiddenFish(fishID: number, epoch: number) {
         // 防止时序问题把这个数据给刷掉
         if (this.hiddenFish !== 0 && fishID === 0)
             return;
+
+        // 时序，判断下出现鱼词时使用的层数
+        const deltaEpoch = epoch - this.lureAt;
+        if (Math.abs(deltaEpoch) < 800 || this.lureStacks >= 3) {
+            this.hiddenStacks = this.lureStacks;
+        } else {
+            this.hiddenStacks = this.lureStacks + 1;
+        }
 
         this.hiddenFish = fishID;
         this.onUpdate();
@@ -336,6 +345,9 @@ export class FishingSession {
         }
         if (this.lureTarget) flags |= FishingFlags.StateLureTarget;
         if (this.hiddenFish !== 0) flags |= FishingFlags.StateLureHidden;
+        if (this.hiddenStacks !== 0 && this.hiddenStacks <= 3) {
+            flags |= this.hiddenStacks << 24;
+        }
         return flags;
     }
 
@@ -436,4 +448,9 @@ export enum FishingFlags {
     StateHasPatienceResult = 1 << 21, // 包含精准/强力提钩结果
     StatePatiencePrecision = 1 << 22, // 使用了精准提钩
     StatePatienceSuccess = 1 << 23, // 结果为成功
+
+    // bit 24-25
+    StateLureHiddenStack1 = 1 << 24, // 鱼词出现在第一次
+    StateLureHiddenStack2 = 2 << 24, // 鱼词出现在第二次
+    StateLureHiddenStack3 = 3 << 24, // 鱼词出现在第三次
 }

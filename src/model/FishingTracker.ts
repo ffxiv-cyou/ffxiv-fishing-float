@@ -446,10 +446,12 @@ export class FishingTracker extends EventTarget {
 
     public setHiddenFish(fishID: number, epoch: number): void {
         console.log("Hidden fish detected:", fishID);
-        if (this.current)
-            this.current.HiddenFish = fishID;
+        if (this.current) {
+            this.current.setHiddenFish(fishID, epoch);
+        }
     }
 
+    //#region 幻海流计时器
     public setWeather(weatherId: number, delay: number, epoch: number): void {
         if (!this.oceanFishingInstance) {
             console.log("Weather change detected but not in ocean fishing instance, ignoring. WeatherId:", weatherId);
@@ -537,7 +539,9 @@ export class FishingTracker extends EventTarget {
             return null;
         return this.oceanFishinPhases[this.oceanFishinPhases.length - 2];
     }
+    //#endregion
 
+    //#region 钓鱼笔记导出
     public handlePlayerSetup(packet: ArrayBufferLike): void {
         const info = this.db.getPlayerSetupInfo();
         if (!info)
@@ -637,6 +641,7 @@ export class FishingTracker extends EventTarget {
             return null;
         }
     }
+    //#endregion
 }
 
 
