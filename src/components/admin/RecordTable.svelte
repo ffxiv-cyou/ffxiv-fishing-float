@@ -127,6 +127,18 @@
     return `${(duration / 1000).toFixed(1)}s`;
   }
 
+  function fixedWidth(n: number): string {
+    if (n < 10) return "0" + n.toString();
+    return n.toString();
+  }
+
+  function formatEorzeaTime(timestamp: number): string {
+    const et2Real = 70 * 60 * 1000;
+    const timeInDay = timestamp % et2Real;
+    const etMinutes = Math.floor(timeInDay * 1440 / 70 / 60 / 1000);
+    return fixedWidth(Math.floor(etMinutes / 60)) + ":" + fixedWidth(Math.floor(etMinutes % 60))
+  }
+
   function getHookType(flags: number): string {
     const hookValue = (flags & FishingFlags.StateHookMask) >> 11;
     switch (hookValue) {
@@ -191,7 +203,7 @@
 </script>
 
 <div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-  <div class="flex gap-4 mb-4">
+  <div class="flex gap-4 mb-4 flex-wrap">
     <div>
       <Label for="spot">钓场 ID</Label>
       <SpotSelector
@@ -200,7 +212,7 @@
         placeholder="选择钓场"
       />
     </div>
-    <div>
+    <div class="w-32">
       <Label for="bait">鱼饵 ID</Label>
       <Input
         id="bait"
@@ -209,7 +221,7 @@
         placeholder="鱼饵ID"
       />
     </div>
-    <div>
+    <div class="w-32">
       <Label for="fish">鱼 ID</Label>
       <Input
         id="fish"
@@ -218,7 +230,7 @@
         placeholder="鱼ID"
       />
     </div>
-    <div>
+    <div class="w-32">
       <Label for="user">用户 ID</Label>
       <Input
         id="user"
@@ -227,7 +239,7 @@
         placeholder="用户ID"
       />
     </div>
-    <div>
+    <div class="w-32">
       <Label for="timeFrom">竿时下限</Label>
       <Input
         id="timeFrom"
@@ -236,7 +248,7 @@
         placeholder="下限(ms)"
       />
     </div>
-    <div>
+    <div class="w-32">
       <Label for="timeTo">竿时上限</Label>
       <Input
         id="timeTo"
@@ -288,6 +300,7 @@
       {/if}
       <TableHeadCell>用户</TableHeadCell>
       <TableHeadCell>时间</TableHeadCell>
+      <TableHeadCell>ET</TableHeadCell>
       <TableHeadCell>钓场</TableHeadCell>
       <TableHeadCell>鱼饵</TableHeadCell>
       <TableHeadCell>渔获</TableHeadCell>
@@ -320,6 +333,7 @@
           {/if}
           <TableBodyCell>{record.user_id}</TableBodyCell>
           <TableBodyCell>{formatTime(record.time)}</TableBodyCell>
+          <TableBodyCell>{record.lure_at ? formatEorzeaTime(record.lure_at + record.time) : formatEorzeaTime(record.time)}</TableBodyCell>
           <TableBodyCell>{getSpotName(record.spot_id)}</TableBodyCell>
           <TableBodyCell>{getItemName(record.bait_id)}</TableBodyCell>
           <TableBodyCell>
