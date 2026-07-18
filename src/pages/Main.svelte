@@ -85,6 +85,7 @@
         logic.setOpcode(opcodes);
         if (!localOnly) {
           logic.init(overlayToolkit);
+          tracker.init(overlayToolkit);
         }
         logic.init(replay);
         console.log("Game data loaded for version:", version, opcodes);

@@ -15,7 +15,7 @@
     "cbor2": "^2.0.1",
     "idb": "^8.0.3",
     "nanoid": "^5.1.11",
-    "overlay-toolkit": "^0.12.0",
+    "overlay-toolkit": "^0.13.2",
     "pinyinlite": "^1.2.1",
     "uplot": "^1.6.32"
   },

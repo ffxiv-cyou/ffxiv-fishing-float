@@ -8,6 +8,13 @@ import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 import { IntuitionCounter } from "./IntuitionCounter";
 
+import type { MemoryScanResult, MemoryReadResult } from "overlay-toolkit";
+
+export interface IMemorySource {
+    MemoryScanSig(sig: string, offset: number, startAddr?: number): Promise<MemoryScanResult>;
+    MemoryRead(addr: number, length: number): Promise<MemoryReadResult>;
+}
+
 export class FishingTracker extends EventTarget {
     private bait: number = 0;
     private wksBait: number = 0;
@@ -31,6 +38,7 @@ export class FishingTracker extends EventTarget {
     config: Config;
     db: GameDatabase;
     intuition: IntuitionCounter;
+    memory?: IMemorySource;
 
     #subscribe;
     update: (() => void) | null = null;
@@ -47,6 +55,10 @@ export class FishingTracker extends EventTarget {
         this.history = new FishingHistory(this.api, this.config);
         this.db = new GameDatabase();
         this.intuition = new IntuitionCounter();
+    }
+
+    public init(memory: IMemorySource) {
+        this.memory = memory;
     }
 
     private updateSub() {
@@ -136,6 +148,15 @@ export class FishingTracker extends EventTarget {
         this.updateSub();
     }
 
+    private setBaitFromMemory(baitId: number) {
+        this.bait = baitId;
+        if (this.current && this.current.baitId === 0) {
+            this.current.clientSetBait(baitId);
+        }
+        console.log(`Memory, Bait set to: ${baitId}`)
+        this.updateSub();
+    }
+
     public setUsingSwimbait(baitId: number) {
         this.swimBait = baitId;
         console.log(`Bait Override ID set to: ${baitId}`);
@@ -188,6 +209,13 @@ export class FishingTracker extends EventTarget {
 
             // 立即上报数据，避免丢失
             this.history.uploadPendingSessions();
+        } else {
+            if (this.bait === 0) {
+                // 尝试从内存读取鱼饵
+                this.getBaitFromMemory()
+                    .then((b) => this.setBaitFromMemory(b))
+                    .catch(console.warn);
+            }
         }
 
         this.updateSub();
@@ -641,6 +669,52 @@ export class FishingTracker extends EventTarget {
             return null;
         }
     }
+    //#endregion
+
+    //#region 内存读取
+    private async getBaitFromMemory(): Promise<number> {
+        if (!this.memory)
+            return Promise.reject("memory not enabled");
+
+        const actorControlTables = await this.memory.MemoryScanSig("48 8d 35 ?? ?? ?? ?? 8b 84 9e ?? ?? ?? ?? 48 03 c6 ff e0", 0);
+        if (!actorControlTables.valid)
+            return Promise.reject("failed to find signature for actor control.")
+
+        const jumpTableOffset = actorControlTables.getDataView(1)?.getInt32(0, true) ?? 0;
+        if (!jumpTableOffset)
+            return Promise.reject("oops, jump table offset could not recover");
+
+        const jumpTableSetBaitOffset = jumpTableOffset + 4 * 325;
+        const actorControlSetBaitAddr = await this.memory.MemoryRead(actorControlTables.base + jumpTableSetBaitOffset, 4);
+        if (!actorControlSetBaitAddr.valid || !actorControlSetBaitAddr.value)
+            return Promise.reject("failed to get set bait addr");
+
+        const actorControlSetBaitBytes = await this.memory.MemoryScanSig("48 8d 0d ?? ?? ?? ?? e8 ?? ?? ?? ??", actorControlSetBaitAddr.value);
+        if (!actorControlSetBaitBytes.valid)
+            return Promise.reject("failed to find signature for set bait");
+
+        const playerStatePtr = actorControlSetBaitBytes.getRelativePointer(0);
+        const setBaitFuncPtr = actorControlSetBaitBytes.getRelativePointer(1);
+
+        const setBaitBytes = await this.memory.MemoryScanSig("89 91 ?? ?? 00 00", 0, setBaitFuncPtr);
+        if (!setBaitBytes.valid)
+            return Promise.reject("failed to find signature to write bait");
+
+        const baitOffset = setBaitBytes.getDataView(0)?.getInt16(0, true);
+        if (!baitOffset)
+            return Promise.reject("bait offset is not set");
+
+        if (baitOffset !== 0x4e4) {
+            console.warn("bait offset at actor control table is not 0x4e4!!");
+        }
+
+        const bait = await this.memory.MemoryRead(playerStatePtr + baitOffset, 2);
+        if (!bait.valid)
+            return Promise.reject("failed to get bait");
+
+        return bait.value ?? 0;
+    }
+
     //#endregion
 }
 
