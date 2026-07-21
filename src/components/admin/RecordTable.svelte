@@ -20,12 +20,14 @@
     Button,
     PaginationNav,
     P,
+    Select,
   } from "flowbite-svelte";
   import SpotSelector from "@/components/admin/SpotSelect.svelte";
   import ChevronLeftOutline from "../icon/ChevronLeftOutline.svelte";
   import ChevronRightOutline from "../icon/ChevronRightOutline.svelte";
   import { type Snippet } from "svelte";
   import TableSkeleton from "./TableSkeleton.svelte";
+    import ItemCombo from "../ItemCombo.svelte";
 
   let {
     selectedIds,
@@ -68,6 +70,15 @@
   function timeToDate(time?: number): string {
     if (!time) return "";
     return new Date(time).toISOString().slice(0, 16);
+  }
+  function booleanToStr(val?: boolean): string {
+    if (val === undefined) return "";
+    return val ? "true" : "false";
+  }
+  function strToBoolean(val: string): boolean | undefined {
+    if (val === "") return undefined;
+    if (val === "true") return true;
+    return false;
   }
 
   function applyFilters() {
@@ -135,8 +146,12 @@
   function formatEorzeaTime(timestamp: number): string {
     const et2Real = 70 * 60 * 1000;
     const timeInDay = timestamp % et2Real;
-    const etMinutes = Math.floor(timeInDay * 1440 / 70 / 60 / 1000);
-    return fixedWidth(Math.floor(etMinutes / 60)) + ":" + fixedWidth(Math.floor(etMinutes % 60))
+    const etMinutes = Math.floor((timeInDay * 1440) / 70 / 60 / 1000);
+    return (
+      fixedWidth(Math.floor(etMinutes / 60)) +
+      ":" +
+      fixedWidth(Math.floor(etMinutes % 60))
+    );
   }
 
   function getHookType(flags: number): string {
@@ -214,18 +229,18 @@
     </div>
     <div class="w-32">
       <Label for="bait">鱼饵 ID</Label>
-      <Input
+      <ItemCombo
         id="bait"
-        type="number"
+        db={tracker.db}
         bind:value={filters.bait}
         placeholder="鱼饵ID"
       />
     </div>
     <div class="w-32">
       <Label for="fish">鱼 ID</Label>
-      <Input
+      <ItemCombo
         id="fish"
-        type="number"
+        db={tracker.db}
         bind:value={filters.fish}
         placeholder="鱼ID"
       />
@@ -255,6 +270,18 @@
         type="number"
         bind:value={filters.duration_to}
         placeholder="上限(ms)"
+      />
+    </div>
+    <div class="w-32">
+      <Label for="isChum">撒饵</Label>
+      <Select
+        placeholder="不过滤"
+        items={[
+          { value: "", name: "不过滤" },
+          { value: "false", name: "非撒饵" },
+          { value: "true", name: "撒饵" },
+        ]}
+        bind:value={() => booleanToStr(filters.chum), (v) => (filters.chum = strToBoolean(v))}
       />
     </div>
     <div class="w-60">
@@ -333,7 +360,11 @@
           {/if}
           <TableBodyCell>{record.user_id}</TableBodyCell>
           <TableBodyCell>{formatTime(record.time)}</TableBodyCell>
-          <TableBodyCell>{record.lure_at ? formatEorzeaTime(record.lure_at + record.time) : formatEorzeaTime(record.time)}</TableBodyCell>
+          <TableBodyCell
+            >{record.lure_at
+              ? formatEorzeaTime(record.lure_at + record.time)
+              : formatEorzeaTime(record.time)}</TableBodyCell
+          >
           <TableBodyCell>{getSpotName(record.spot_id)}</TableBodyCell>
           <TableBodyCell>{getItemName(record.bait_id)}</TableBodyCell>
           <TableBodyCell>

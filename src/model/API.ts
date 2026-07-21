@@ -175,6 +175,7 @@ export class API {
     if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
     if (filter.duration_to) params.set('duration_to', filter.duration_to.toString()); 
     if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
+    if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
     params.set('page', page.toString());
     params.set('limit', limit.toString());
 
@@ -417,6 +418,7 @@ export interface AdminRecordFilter {
   duration_from?: number;
   duration_to?: number;
   dirty?: boolean;
+  chum?: boolean;
 }
 
 export interface AdminFishingRecord {
