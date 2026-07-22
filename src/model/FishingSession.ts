@@ -5,6 +5,7 @@ import type { FisherStats } from "./FishingTracker";
 export class FishingSession {
     startTime: number = 0;
     endTime: number = 0;
+    startLocalEpoch: number;
     startLocalTime: number;
     endLocalTime: number | null = null;
 
@@ -41,6 +42,7 @@ export class FishingSession {
     update: (() => void) | null = null;
 
     constructor(epoch: number, baitId: number, stats: FisherStats) {
+        this.startLocalEpoch = 0;
         this.startTime = 0;
         this.baitId = baitId;
         this.startLocalTime = Date.now();

@@ -7,6 +7,7 @@ import { GameDatabase } from "./GameDB";
 import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 import { IntuitionCounter } from "./IntuitionCounter";
+import * as Sentry from "@sentry/svelte";
 
 import type { MemoryScanResult, MemoryReadResult } from "overlay-toolkit";
 
@@ -358,6 +359,8 @@ export class FishingTracker extends EventTarget {
         this.intuition.addFish(itemId, quantity);
         console.log(`Caught`, this.current, epoch, Date.now());
         this.lastFish = itemId;
+        this.nextIdenticalFish = 0; // 虽然不知道为啥有时候 buff 状态没同步，但是这里还是清空下
+        this.nextSlapFish = 0;
         this.history.addSession(this.current);
         this.dispatchEvent(new Event("end"));
     }
@@ -372,14 +375,22 @@ export class FishingTracker extends EventTarget {
     }
 
     public cast(epoch: number, bait: number = 0): void {
-        console.log("Casting with bait:", bait, this.CurrentBait, epoch);
+        console.log("local cast with bait:", bait, this.CurrentBait, epoch, Date.now());
         if (bait === 0)
             bait = this.CurrentBait;
 
         if (this.current) {
             const now = Date.now();
             if (now - this.current.startLocalTime < 1000) {
-                console.warn("multicast detected", this.current, epoch, now);
+                Sentry.captureMessage("server cast ahead of local cast detected", {
+                    level: "warning",
+                    extra: {
+                        serverTime: epoch,
+                        localTime: now,
+                        session: this.current,
+                        bait: bait,
+                    }
+                });
                 if (this.current.baitId !== bait) {
                     console.warn("Update bait for current session:", this.current.baitId, bait);
                     this.current.clientSetBait(bait);
@@ -408,18 +419,46 @@ export class FishingTracker extends EventTarget {
     }
 
     public serverBegin(epoch: number) {
+        const now = Date.now();
+        console.log("server cast at", epoch, now);
         // 玛德，居然还有可能先收到服务器的cast包……
         if (this.current !== null) {
             // 正常的服务器抛竿
             if (this.current.startTime === 0) {
+
+                // 时间漂移监测
+                const serverDelta = epoch - this.current.startLocalEpoch;
+                const localDelta = now - this.current.startLocalTime;
+                if (serverDelta < localDelta) {
+                    Sentry.captureMessage("cast time unsynced", {
+                        level: "warning",
+                        extra: {
+                            reqLocalTime: this.current.startLocalTime,
+                            reqServerTime: this.current.startLocalEpoch,
+                            respLocalTime: now,
+                            respServerTime: epoch,
+                            serverRtt: serverDelta,
+                            localRtt: localDelta,
+                            session: this.current
+                        },
+                    });
+                }
+
+                // 抛竿
                 this.current.serverCast(epoch);
                 return;
             }
 
             // 一般来说抛竿有2.5秒的后摇，不可能在2.5秒内再次抛竿的。
-            const now = Date.now();
-            if (this.current.startLocalTime > now - 2500) {
-                console.warn("multicast detected on server cast", this.current, epoch, now);
+            if (now - this.current.startLocalTime < 2500) {
+                Sentry.captureMessage("multicast detected on server cast", {
+                    level: "warning",
+                    extra: {
+                        serverTime: epoch,
+                        localTime: now,
+                        session: this.current,
+                    }
+                });
                 return;
             }
         }
@@ -436,7 +475,29 @@ export class FishingTracker extends EventTarget {
     }
 
     public tug(type: TugType, epoch: number): void {
-        console.log("Tug detected:", type, epoch);
+        const now = Date.now();
+        console.log("Tug detected:", type, epoch, now);
+
+        // 时间漂移监测
+        if (this.current) {
+            const serverDelta = epoch - this.current.startTime;
+            const localDelta = now - this.current.startLocalTime;
+            if (Math.abs(serverDelta - localDelta) > 300) {
+                Sentry.captureMessage("tug time unsynced", {
+                    level: "warning",
+                    extra: {
+                        castLocalTime: this.current.startLocalTime,
+                        castServerTime: this.current.startLocalEpoch,
+                        tugLocalTime: now,
+                        tugServerTime: epoch,
+                        serverDuration: serverDelta,
+                        localDuration: localDelta,
+                        session: this.current
+                    },
+                });
+            }
+        }
+
         this.current?.tug(type, epoch);
         this.dispatchEvent(new CustomEvent<TugType>("tug", { detail: type }));
     }
