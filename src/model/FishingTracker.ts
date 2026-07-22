@@ -773,7 +773,7 @@ export class FishingTracker extends EventTarget {
         if (!bait.valid)
             return Promise.reject("failed to get bait");
 
-        return bait.value ?? 0;
+        return bait.dataView?.getUint16(0, true) ?? 0;
     }
 
     //#endregion
