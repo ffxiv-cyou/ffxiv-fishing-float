@@ -482,12 +482,12 @@ export class FishingTracker extends EventTarget {
         if (this.current) {
             const serverDelta = epoch - this.current.startTime;
             const localDelta = now - this.current.startLocalTime;
-            if (Math.abs(serverDelta - localDelta) > 300) {
+            if (Math.abs(serverDelta - localDelta) > 500) {
                 Sentry.captureMessage("tug time unsynced", {
                     level: "warning",
                     extra: {
                         castLocalTime: this.current.startLocalTime,
-                        castServerTime: this.current.startLocalEpoch,
+                        castServerTime: this.current.startTime,
                         tugLocalTime: now,
                         tugServerTime: epoch,
                         serverDuration: serverDelta,
