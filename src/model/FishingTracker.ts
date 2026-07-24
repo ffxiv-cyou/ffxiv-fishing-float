@@ -429,7 +429,7 @@ export class FishingTracker extends EventTarget {
                 // 时间漂移监测
                 const serverDelta = epoch - this.current.startLocalEpoch;
                 const localDelta = now - this.current.startLocalTime;
-                if (serverDelta < localDelta) {
+                if (serverDelta < localDelta - 10) {
                     Sentry.captureMessage("cast time unsynced", {
                         level: "warning",
                         extra: {
