@@ -311,7 +311,7 @@ export class FishingTracker extends EventTarget {
                 this.current?.setLure(LureType.Modest, buff.stacks, epoch);
                 break;
             case BuffID.FishersIntuition:
-                this.intuition.setIntuitionTriggered();
+                this.intuition.setIntuitionTriggered(buff.duration, epoch);
                 break;
         }
     }

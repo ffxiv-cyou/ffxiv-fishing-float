@@ -55,6 +55,8 @@ export class IntuitionCounter {
     count: IntuitionCount[] = [];
     
     intuitionTriggered: boolean = false;
+    intuitionTriggerAt: number = 0;
+    intuitionDuration: number = 0;
 
     #subscribe;
     update: (() => void) | null = null;
@@ -73,6 +75,18 @@ export class IntuitionCounter {
     get ConditionKnown() {
         this.#subscribe();
         return (this.filter?.length ?? 0) > 0;
+    }
+
+    /**
+     * 鱼识剩余时间
+     */
+    get IntuitionDuration() {
+        this.#subscribe();
+        if (!this.intuitionTriggered)
+            return 0;
+
+        var elapsed = (Date.now() - this.intuitionTriggerAt) / 1000;
+        return Math.max(0, this.intuitionDuration - elapsed);
     }
 
     tryUpdate() {
@@ -118,8 +132,10 @@ export class IntuitionCounter {
         this.tryUpdate();
     }
 
-    setIntuitionTriggered() {
+    setIntuitionTriggered(duration: number, epoch: number) {
         this.intuitionTriggered = true;
+        this.intuitionDuration = duration;
+        this.intuitionTriggerAt = Date.now();
     }
 
     addFish(fishId: number, count: number) {
@@ -152,6 +168,8 @@ export class IntuitionCounter {
         console.log("resetting intuition counter");
         this.count = [];
         this.intuitionTriggered = false;
+        this.intuitionTriggerAt = 0;
+        this.intuitionDuration = 0;
         this.tryUpdate();
     }
 }

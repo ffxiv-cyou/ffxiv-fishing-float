@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { FishingTracker } from "@/model/FishingTracker";
   import { type Snippet } from "svelte";
+  import IntuitionTimer from "./IntuitionTimer.svelte";
 
   let {
     tracker,
@@ -72,6 +73,7 @@
   </div>
   <div class="right">
     {@render childrenRight()}
+    <IntuitionTimer tracker={tracker} />
     {#if remainText}
       <span class="xiv-text blue spectral-hint">幻海流</span>
       <span class="xiv-text blue remain-text">{remainText}</span>
