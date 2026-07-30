@@ -2,6 +2,7 @@
   import type { Config } from "@/model/Config";
   import type { GameDatabase } from "@/model/GameDB";
   import type { IntuitionCounter } from "@/model/IntuitionCounter";
+  import IntuitionTimer from "./IntuitionTimer.svelte";
 
   let {
     db,
@@ -15,10 +16,10 @@
 
   let show = $derived.by(() => {
     // 不显示未知鱼识状态
-    if (!config.ShowUnknownIntuition && !intuition.ConditionKnown) {
+    if (!config.ShowUnknownIntuition && !intuition.ConditionKnown && !intuition.IntuitionTriggered) {
       return false;
     }
-    return intuition.Count.length > 0;
+    return intuition.Count.length > 0 || intuition.IntuitionTriggered;
   });
 
   function formatThresold(value: number) {
@@ -26,19 +27,34 @@
     return "?";
   }
 
+  let configShowTimer = $derived(config.IntuitionTimer === "counter");
+  let showCounter = $derived.by(() => {
+    if (!configShowTimer) return true;
+    return !intuition.IntuitionTriggered;
+  });
+  let showTimer = $derived.by(() => {
+    if (!configShowTimer) return false;
+    return intuition.IntuitionTriggered;
+  });
 </script>
 
 {#if show}
   <div class="intuition-counter" data-counter-style={config.IntuitionCounter}>
     <div class="padding"></div>
-    <ul>
-      {#each intuition.Count as item}
-        <li class="xiv-text blue">
-          {db.getItemName(item.item)}
-          {item.Count}/{formatThresold(item.Thresold)}
-        </li>
-      {/each}
-    </ul>
+    {#if showTimer}
+      <IntuitionTimer {config} {intuition} />
+    {/if}
+
+    {#if showCounter}
+      <ul>
+        {#each intuition.Count as item}
+          <li class="xiv-text blue">
+            {db.getItemName(item.item)}
+            {item.Count}/{formatThresold(item.Thresold)}
+          </li>
+        {/each}
+      </ul>
+    {/if}
   </div>
 {/if}
 

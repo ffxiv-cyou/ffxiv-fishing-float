@@ -77,10 +77,25 @@ export class IntuitionCounter {
         return (this.filter?.length ?? 0) > 0;
     }
 
+    get IntuitionTriggered() {
+        this.#subscribe();
+        return this.intuitionTriggered;
+    }
+
+    /**
+     * 鱼识总时长
+     */
+    get IntuitionDurationTotal() {
+        this.#subscribe();
+        if (!this.intuitionTriggered)
+            return 0;
+        return this.intuitionDuration;
+    }
+
     /**
      * 鱼识剩余时间
      */
-    get IntuitionDuration() {
+    get IntuitionDurationRemain() {
         this.#subscribe();
         if (!this.intuitionTriggered)
             return 0;
@@ -136,6 +151,7 @@ export class IntuitionCounter {
         this.intuitionTriggered = true;
         this.intuitionDuration = duration;
         this.intuitionTriggerAt = Date.now();
+        this.tryUpdate();
     }
 
     addFish(fishId: number, count: number) {

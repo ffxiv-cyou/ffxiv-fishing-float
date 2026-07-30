@@ -1,17 +1,21 @@
 <script lang="ts">
-  import type { FishingTracker } from "@/model/FishingTracker";
+  import ProgressBar from "./ProgressBar.svelte";
+  import type { IntuitionCounter } from "@/model/IntuitionCounter";
+  import type { Config } from "@/model/Config";
 
   let {
-    tracker,
+    intuition,
+    config,
   }: {
-    tracker: FishingTracker;
+    intuition: IntuitionCounter;
+    config: Config;
   } = $props();
 
   let remainTime = $state(0);
   let intervalId: number;
 
   $effect(() => {
-    const inIntuition = tracker.intuition.IntuitionDuration > 0;
+    const inIntuition = intuition.IntuitionDurationRemain > 0;
     updateRemain();
     if (inIntuition) {
       if (!intervalId) {
@@ -25,23 +29,52 @@
     }
   });
 
+  let totalTime = $derived(intuition.IntuitionDurationTotal);
   function updateRemain() {
-    remainTime = tracker.intuition.IntuitionDuration;
+    remainTime = intuition.IntuitionDurationRemain;
   }
 
-  let remainText = $derived.by(() => {
-    if (remainTime === 0) {
-      return "";
+  let theme: "default" | "minimal" | "box" = $derived.by(() => {
+    switch (config.IntuitionTimer) {
+      case "off":
+        return "default";
+      case "status":
+        return config.Theme;
+      case "counter":
+        switch (config.Theme) {
+          case "default":
+            return "box";
+          case "minimal":
+            return "minimal";
+        }
     }
-    const seconds = (remainTime).toFixed(1);
-    return `${seconds}s`;
+  });
+
+  let inlineMode = $derived(config.IntuitionTimer === "status");
+  let align: "left" | "right" | "center" = $derived(
+    config.intuitionTimer === "status" ? "right" : "left",
+  );
+  let color = $derived.by(() => {
+    switch (config.IntuitionTimer) {
+      case "off":
+        return "#00000000";
+      case "status":
+        return "#0f9b2d80";
+      case "counter":
+        return config.HistoryLightColor;
+    }
   });
 </script>
 
-{#if remainText}
-  <span class="xiv-text blue spectral-hint">鱼识</span>
-  <span class="xiv-text blue remain-text">{remainText}</span>
+{#if totalTime}
+  <ProgressBar
+    {config}
+    value={remainTime}
+    total={totalTime}
+    hint="鱼识"
+    {color}
+    {theme}
+    inline={inlineMode}
+    {align}
+  />
 {/if}
-
-<style>
-</style>

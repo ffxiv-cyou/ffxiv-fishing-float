@@ -73,7 +73,9 @@
   </div>
   <div class="right">
     {@render childrenRight()}
-    <IntuitionTimer tracker={tracker} />
+    {#if tracker.config.IntuitionTimer === 'status'}
+      <IntuitionTimer intuition={tracker.intuition} config={tracker.config} />
+    {/if}
     {#if remainText}
       <span class="xiv-text blue spectral-hint">幻海流</span>
       <span class="xiv-text blue remain-text">{remainText}</span>

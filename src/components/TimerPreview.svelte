@@ -100,12 +100,21 @@
   ];
 
   let counter = new IntuitionCounter();
-  counter.setFilter([
-    {item: 4962, count: 2},
-    {item: 4963, count: 3},
-  ])
-  counter.addFish(4962, 1);
-  counter.addFish(4963, 1);
+  if (Math.random() < 0.5) {
+    counter.setFilter([
+      { item: 4962, count: 2 },
+      { item: 4963, count: 3 },
+    ]);
+    counter.setIntuitionTriggered(18, 0);
+  } else {
+    counter.reset();
+    counter.setFilter([
+      { item: 4962, count: 2 },
+      { item: 4963, count: 3 },
+    ]);
+    counter.addFish(4962, 1);
+    counter.addFish(4963, 1);
+  }
 </script>
 
 <Timer

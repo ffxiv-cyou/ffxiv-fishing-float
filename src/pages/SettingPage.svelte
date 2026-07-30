@@ -145,7 +145,7 @@
         >设置后，竿时和历史记录的最右侧时间（最大竿时）将不会小于设定值</span
       >
     </div>
-    <h2>鱼识进度</h2>
+    <h2>鱼识</h2>
     <div class="setting-item">
       <span class="setting-name">显示鱼识进度</span>
       <input
@@ -172,6 +172,33 @@
         bind:group={config.IntuitionCounter}
       />
       <label for="intuition-counter-bottom">底部</label>
+    </div>
+    <div class="setting-item">
+      <span class="setting-name">鱼识时间位置</span>
+      <input
+        type="radio"
+        name="intuition-timer"
+        value="off"
+        id="intuition-timer-off"
+        bind:group={config.IntuitionTimer}
+      />
+      <label for="intuition-timer-off">关闭</label>
+      <input
+        type="radio"
+        name="intuition-timer"
+        value="status"
+        id="intuition-timer-status"
+        bind:group={config.IntuitionTimer}
+      />
+      <label for="intuition-timer-status">右上</label>
+      <input
+        type="radio"
+        name="intuition-timer"
+        value="counter"
+        id="intuition-timer-counter"
+        bind:group={config.IntuitionTimer}
+      />
+      <label for="intuition-timer-counter">计数器内</label>
     </div>
     <div class="setting-item">
       <span class="setting-name">未知鱼识</span>

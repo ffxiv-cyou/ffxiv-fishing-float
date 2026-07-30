@@ -6,7 +6,7 @@ export class Config {
   update: (() => void) | null = null;
 
   /** 样式: 'default'-默认, 'minimal'-极简(渔人的直感) */
-  theme: string = 'default';
+  theme: 'default' | 'minimal' = 'default';
   /** 是否显示历史统计 */
   showHistory: boolean = true;
   /** 是否启用数据上报(匿名上传历史统计以帮助其他捕鱼人) */
@@ -27,6 +27,8 @@ export class Config {
   lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
   /** 鱼识计数器位置: 'off'-关闭, 'right'-右侧, 'bottom'-底部 */
   intuitionCounter: 'off' | 'right' | 'bottom' = 'off';
+  /** 鱼识计时器位置: 'off'-关闭, 'status'-顶部, 'counter'-计数器内部 */
+  intuitionTimer: 'off' | 'status' | 'counter' = 'status';
   /** 显示当前未知的鱼识信息 */
   showUnknownIntuition: boolean = false;
   /** 最小竿时 */
@@ -86,7 +88,8 @@ export class Config {
     this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
     this.statsThresold = obj.statsThresold || { gathering: 0, perception: 0, gp: 0 };
     this.statsThresoldEnabled = obj.statsThresoldEnabled !== undefined ? obj.statsThresoldEnabled : false;
-    this.intuitionCounter = obj.intuitionCounter !== undefined ? obj.intuitionCounter : 'off';
+    this.intuitionCounter = obj.intuitionCounter !== undefined ? obj.intuitionCounter : 'bottom';
+    this.intuitionTimer = obj.intuitionTimer !== undefined ? obj.intuitionTimer : 'counter';
     this.showUnknownIntuition = obj.showUnknownIntuition !== undefined ? obj.showUnknownIntuition : (obj.intuitionCounter !== 'off');
     this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
   }
@@ -121,7 +124,7 @@ export class Config {
     this.#subscribe();
     return this.theme;
   }
-  set Theme(value: string) {
+  set Theme(value: 'default' | 'minimal') {
     this.theme = value;
     this.save();
   }
@@ -329,6 +332,16 @@ export class Config {
   }
   set IntuitionCounter(value: 'off' | 'right' | 'bottom') {
     this.intuitionCounter = value;
+    this.save();
+  }
+
+  /** 鱼识计时器的位置 */
+  get IntuitionTimer() {
+    this.#subscribe();
+    return this.intuitionTimer;
+  }
+  set IntuitionTimer(value: 'off' | 'status' | 'counter') {
+    this.intuitionTimer = value;
     this.save();
   }
 
