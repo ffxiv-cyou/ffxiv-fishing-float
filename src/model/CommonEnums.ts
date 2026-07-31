@@ -79,7 +79,7 @@ export enum FishingActionType {
     SparefulHand = 24, // 熟练妙招
     SelectSwimBait = 25, // 选择了游动饵
     BigGameFishing = 26, // 大鱼的知识
-    Rest = 27, // 歇杆
+    Rest = 27, // 歇竿
     StellarHookset = 28, // 华丽提钩, used in cosmic exploration
 };
 

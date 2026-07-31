@@ -51,15 +51,15 @@
   setInterval(loadData, 10 * 60 * 1000); // 10 minutes
 </script>
 
-<div class="p-4 m-auto">
+<div class="px-4 m-auto">
   {#if loading}
     <Skeleton class="m-auto" />
   {:else}
-    <Table divClass="inline-block">
+    <Table divClass="mt-4 md:inline-block">
       <TableHead>
         <TableHeadCell>钓场</TableHeadCell>
         <TableHeadCell>鱼饵</TableHeadCell>
-        <TableHeadCell>杆数</TableHeadCell>
+        <TableHeadCell>竿数</TableHeadCell>
       </TableHead>
       <TableBody class="divide-y">
         {#each spotBait as item}
@@ -79,7 +79,7 @@
         {/each}
       </TableBody>
     </Table>
-    <Table divClass="ml-10 inline-block">
+    <Table divClass="mt-4 md:ml-10 md:inline-block">
       <TableHead>
         <TableHeadCell>渔获</TableHeadCell>
         <TableHeadCell>钓场</TableHeadCell>

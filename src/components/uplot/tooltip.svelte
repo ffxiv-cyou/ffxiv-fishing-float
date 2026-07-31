@@ -31,11 +31,11 @@
   function getTugTypeName(tugType: number) {
     switch (tugType) {
       case 1:
-        return "轻杆";
+        return "轻竿";
       case 2:
-        return "中杆";
+        return "中竿";
       case 3:
-        return "重杆";
+        return "重竿";
       default:
         return "未知";
     }

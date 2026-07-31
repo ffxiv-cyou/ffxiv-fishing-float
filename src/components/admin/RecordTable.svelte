@@ -178,11 +178,11 @@
     const tugValue = flags & FishingFlags.StateTugMask;
     switch (tugValue) {
       case FishingFlags.StateTugLight:
-        return "轻杆";
+        return "轻竿";
       case FishingFlags.StateTugMedium:
-        return "中杆";
+        return "中竿";
       case FishingFlags.StateTugHeavy:
-        return "重杆";
+        return "重竿";
       default:
         return "-";
     }

@@ -51,7 +51,7 @@
   }
 
   function tugType(type: TugType | null): string {
-    const types = ["轻杆", "中杆", "重杆"];
+    const types = ["轻竿", "中竿", "重竿"];
     return type !== null ? types[type] : "";
   }
 

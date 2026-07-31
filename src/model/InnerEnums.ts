@@ -8,15 +8,15 @@ export enum HookType {
 };
 
 export enum TugType {
-    Light = 0, // 轻杆
-    Medium = 1, // 中杆
-    Heavy = 2, // 重杆
+    Light = 0, // 轻竿
+    Medium = 1, // 中竿
+    Heavy = 2, // 重竿
 };
 
 export enum FailReason {
     None = 0, // 脱钩类
     GatheringNotEnough = 1, // 采集力不足
-    Interrputed = 2, // 中断（提前提杆等）
+    Interrputed = 2, // 中断（提前提竿等）
 };
 
 export enum LureType { 

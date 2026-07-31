@@ -60,19 +60,19 @@
         <span class="setting-name">颜色</span>
         <label for="color-idle">抛竿</label>
         <input type="color" id="color-idle" bind:value={config.IdleColor} />
-        <label for="color-tug-light">轻杆</label>
+        <label for="color-tug-light">轻竿</label>
         <input
           type="color"
           id="color-tug-light"
           bind:value={config.TugLightColor}
         />
-        <label for="color-tug-medium">中杆</label>
+        <label for="color-tug-medium">中竿</label>
         <input
           type="color"
           id="color-tug-medium"
           bind:value={config.TugMediumColor}
         />
-        <label for="color-tug-heavy">重杆</label>
+        <label for="color-tug-heavy">重竿</label>
         <input
           type="color"
           id="color-tug-heavy"

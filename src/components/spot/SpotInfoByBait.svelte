@@ -330,13 +330,13 @@
           db={tracker.db}
         />
 
-        <Heading tag="h2" class="relative text-2xl leading-tight">杆型</Heading>
+        <Heading tag="h2" class="relative text-2xl leading-tight">竿型</Heading>
         <Table>
           <TableHead>
             <TableHeadCell>状态</TableHeadCell>
-            <TableHeadCell>轻杆</TableHeadCell>
-            <TableHeadCell>中杆</TableHeadCell>
-            <TableHeadCell>重杆</TableHeadCell>
+            <TableHeadCell>轻竿</TableHeadCell>
+            <TableHeadCell>中竿</TableHeadCell>
+            <TableHeadCell>重竿</TableHeadCell>
             <TableHeadCell>样本</TableHeadCell>
           </TableHead>
           <TableBody>

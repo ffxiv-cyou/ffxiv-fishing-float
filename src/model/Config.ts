@@ -34,9 +34,9 @@ export class Config {
   /** 最小竿时 */
   minDuration: number = 0;
 
-  /** 极简模式颜色: [抛竿, 轻杆, 中杆, 重杆] */
+  /** 极简模式颜色: [抛竿, 轻竿, 中竿, 重竿] */
   minimalColors: string[] = [];
-  /** 历史统计颜色: [轻杆, 中杆, 重杆] */
+  /** 历史统计颜色: [轻竿, 中竿, 重竿] */
   historyColors: string[] = [];
 
   /** 咬钩提醒音效: 'intuition'-渔人的直感, 'pastry'-鱼捞, ''-关 */
