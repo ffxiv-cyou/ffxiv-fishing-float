@@ -94,6 +94,7 @@
     {rates}
     {lure_tugs}
     bind:baitID
+    spotID={spot?.id ?? 0}
   />
   <Hr />
   <SpotInfoByFish

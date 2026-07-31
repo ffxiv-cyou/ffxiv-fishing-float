@@ -7,7 +7,7 @@ import { HistoryIndexedDBBackend } from "./HistoryIndexesDB";
 export interface HistoryItem {
   zone: number; // 钓场ID
   bait: number; // 鱼饵ID
-  fish: number; // 鱼ID
+  fish?: number; // 鱼ID
   chum: boolean; // 是否撒饵
   tugType: TugType; // 咬钩类型
   biteTime: number; // 咬钩时间（秒）
@@ -155,8 +155,8 @@ export class FishingStorage {
   //#endregion
 
   public async updateHistory(session: FishingSession): Promise<void> {
-    // 没上钩，不记录
-    if (session.ResultID === undefined) {
+    // 没提钩，不记录
+    if (session.HookType === null) {
       return;
     }
 
@@ -177,11 +177,12 @@ export class FishingStorage {
       lureStacks: session.LureStacks,
       lureAt: session.LureAt,
       lureHidden: session.HiddenFish,
-      hookType: session.HookType!,
+      hookType: session.HookType,
     };
 
     await this.histories.addRaw(item);
-    this.onFishCaught(item.fish, false);
+    if (item.fish)
+      this.onFishCaught(item.fish, false);
 
     // 空窗期刚结束的时候的时间是不准确的，忽略掉
     if (session.ElapsedTimeMs < session.LureRestMs + 300) {
@@ -232,23 +233,34 @@ export class FishingStorage {
  */
 export interface HistoryStorageBackend {
   /**
-   * 添加一条记录
+   * 更新咬钩区间
    * @param item 
    */
   add(item: HistoryItem): Promise<void>;
+  /**
+   * 添加原始咬钩记录
+   */
   addRaw(item: HistoryItem): Promise<void>;
 
   deleteRaw(date: number): Promise<HistoryItem | undefined>;
   updateFromRaw(zone: number, bait: number, chum?: boolean): Promise<void>;
 
   /**
-   * 查找记录
+   * 查找咬钩区间
    * @param zone 
    * @param bait 
    * @param chum 
    */
   getHistory(zone: number, bait?: number, chum?: boolean): Promise<HistoryStatsItem[]>;
 
+  /**
+   * 获取原始咬钩记录
+   * @param zone 
+   * @param bait 
+   * @param chum 
+   * @param limit 
+   * @param offset 
+   */
   listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
   countHistory(zone: number, bait?: number, chum?: boolean): Promise<number>;
 
@@ -283,6 +295,9 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
   }
 
   add(session: HistoryItem): Promise<void> {
+    if (session.fish === undefined)
+      return Promise.resolve();
+
     var item = this.histories.find((h) => h.zone === session.zone && h.bait === session.bait && h.fish === session.fish && h.chum === session.chum);
     if (item === undefined) {
       item = {

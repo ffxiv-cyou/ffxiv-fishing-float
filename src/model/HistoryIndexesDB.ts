@@ -168,6 +168,10 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
       return;
     }
 
+    // 脱钩数据不需要更新区间
+    if (session.fish === undefined)
+      return;
+
     const tx = this.db.transaction("historyV2", "readwrite");
     const store = tx.objectStore("historyV2");
     const old = await store.get([session.zone, session.bait, session.fish, HistoryIndexedDBBackend.boolToNum(session.chum)]);
@@ -222,6 +226,9 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
 
     const sessions: DbStatsItem[] = [];
     for (const log of logs) {
+      if (log.fish === undefined) // 不记录脱钩数据
+        continue;
+
       let existing = sessions.find(s => s.zone === log.zone && s.bait === log.bait && s.fish === log.fish && s.chum === log.chum);
       if (existing) {
         if (log.biteTime < existing.minBiteTime) {

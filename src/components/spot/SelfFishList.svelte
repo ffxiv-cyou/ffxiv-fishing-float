@@ -22,7 +22,7 @@
   let {
     tracker,
     spotID,
-    baitID
+    baitID,
   }: {
     tracker: FishingTracker;
     spotID: number;
@@ -43,15 +43,23 @@
   }
 
   $effect(() => {
-    tracker.history.storage.countHistory(spotID, baitID > 0 ? baitID : undefined).then((count) => {
-      historyCount = count;
-    });
+    tracker.history.storage
+      .countHistory(spotID, baitID > 0 ? baitID : undefined)
+      .then((count) => {
+        historyCount = count;
+      });
   });
 
   $effect(() => {
     if (spotID > 0) {
       tracker.history.storage
-        .listHistory(spotID, baitID > 0 ? baitID : undefined, undefined, limit, offset)
+        .listHistory(
+          spotID,
+          baitID > 0 ? baitID : undefined,
+          undefined,
+          limit,
+          offset,
+        )
         .then((records) => {
           history = records;
         });
@@ -60,6 +68,11 @@
 
   function getItemName(id: number) {
     return tracker.db.getItemName(id);
+  }
+
+  function getFishName(id?: number) {
+    if (id === undefined) return "(脱钩)";
+    return getItemName(id);
   }
 
   function getLureType(item: HistoryItem): string {
@@ -114,7 +127,7 @@
       <TableBodyRow>
         <TableBodyCell>{new Date(record.date).toLocaleString()}</TableBodyCell>
         <TableBodyCell>{getItemName(record.bait)}</TableBodyCell>
-        <TableBodyCell>{getItemName(record.fish)}</TableBodyCell>
+        <TableBodyCell>{getFishName(record.fish)}</TableBodyCell>
         <TableBodyCell>{record.biteTime.toFixed(1)}s</TableBodyCell>
         <TableBodyCell>{record.chum ? "是" : "否"}</TableBodyCell>
         <TableBodyCell>{getLureType(record)}</TableBodyCell>
