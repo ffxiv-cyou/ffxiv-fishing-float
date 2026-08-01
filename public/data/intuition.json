@@ -778,6 +778,20 @@
     ]
   },
   {
+    "fish_id": 52011,
+    "spot_id": 5075,
+    "fishes": [
+      {
+        "item": 43795,
+        "count": 2
+      },
+      {
+        "item": 52006,
+        "count": 1
+      }
+    ]
+  },
+  {
     "fish_id": 52297,
     "spot_id": 5069,
     "fishes": [
