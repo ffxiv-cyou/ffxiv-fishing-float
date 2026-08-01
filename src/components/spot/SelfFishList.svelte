@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { FishingTracker } from "@/model/FishingTracker";
   import type { HistoryItem } from "@/model/HistoryStorage";
-  import { LureType } from "@/model/InnerEnums";
+  import { LureType, TugType } from "@/model/InnerEnums";
   import {
     Button,
     Modal,
@@ -18,6 +18,7 @@
   import FeedbackLink from "../FeedbackLink.svelte";
   import ChevronLeftOutline from "../icon/ChevronLeftOutline.svelte";
   import ChevronRightOutline from "../icon/ChevronRightOutline.svelte";
+  import { formatEorzeaTime, formatTime } from "./data_helper";
 
   let {
     tracker,
@@ -70,9 +71,21 @@
     return tracker.db.getItemName(id);
   }
 
-  function getFishName(id?: number) {
-    if (id === undefined) return "(脱钩)";
-    return getItemName(id);
+  function getFishName(item: HistoryItem) {
+    if (item.fish !== undefined) return getItemName(item.fish);
+    switch (item.tugType) {
+      case TugType.Light:
+        return "(轻竿脱钩)";
+      case TugType.Medium:
+        return "(中竿脱钩)";
+      case TugType.Heavy:
+        return "(重竿脱钩)";
+    }
+  }
+
+  function getFishEorzeaTime(item: HistoryItem) {
+    if (item.lureAt) return formatEorzeaTime(item.lureAt);
+    else return formatEorzeaTime(item.date);
   }
 
   function getLureType(item: HistoryItem): string {
@@ -115,6 +128,7 @@
 <Table>
   <TableHead>
     <TableHeadCell>时间</TableHeadCell>
+    <TableHeadCell>ET</TableHeadCell>
     <TableHeadCell>鱼饵</TableHeadCell>
     <TableHeadCell>渔获</TableHeadCell>
     <TableHeadCell>竿时</TableHeadCell>
@@ -125,11 +139,12 @@
   <TableBody>
     {#each history as record}
       <TableBodyRow>
-        <TableBodyCell>{new Date(record.date).toLocaleString()}</TableBodyCell>
+        <TableBodyCell>{formatTime(record.date)}</TableBodyCell>
+        <TableBodyCell>{getFishEorzeaTime(record)}</TableBodyCell>
         <TableBodyCell>{getItemName(record.bait)}</TableBodyCell>
-        <TableBodyCell>{getFishName(record.fish)}</TableBodyCell>
+        <TableBodyCell>{getFishName(record)}</TableBodyCell>
         <TableBodyCell>{record.biteTime.toFixed(1)}s</TableBodyCell>
-        <TableBodyCell>{record.chum ? "是" : "否"}</TableBodyCell>
+        <TableBodyCell>{record.chum ? "撒饵" : "-"}</TableBodyCell>
         <TableBodyCell>{getLureType(record)}</TableBodyCell>
         <TableBodyCell>
           <Button

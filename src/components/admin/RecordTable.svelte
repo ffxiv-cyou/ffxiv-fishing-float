@@ -27,7 +27,12 @@
   import ChevronRightOutline from "../icon/ChevronRightOutline.svelte";
   import { type Snippet } from "svelte";
   import TableSkeleton from "./TableSkeleton.svelte";
-    import ItemCombo from "../ItemCombo.svelte";
+  import ItemCombo from "../ItemCombo.svelte";
+  import {
+    formatDuration,
+    formatEorzeaTime,
+    formatTime,
+  } from "../spot/data_helper";
 
   let {
     selectedIds,
@@ -128,30 +133,6 @@
   function getItemName(id: number | undefined): string {
     if (!id) return "N/A";
     return tracker.db.getItemName(id);
-  }
-
-  function formatTime(timestamp: number): string {
-    return new Date(timestamp).toLocaleString();
-  }
-
-  function formatDuration(duration: number): string {
-    return `${(duration / 1000).toFixed(1)}s`;
-  }
-
-  function fixedWidth(n: number): string {
-    if (n < 10) return "0" + n.toString();
-    return n.toString();
-  }
-
-  function formatEorzeaTime(timestamp: number): string {
-    const et2Real = 70 * 60 * 1000;
-    const timeInDay = timestamp % et2Real;
-    const etMinutes = Math.floor((timeInDay * 1440) / 70 / 60 / 1000);
-    return (
-      fixedWidth(Math.floor(etMinutes / 60)) +
-      ":" +
-      fixedWidth(Math.floor(etMinutes % 60))
-    );
   }
 
   function getHookType(flags: number): string {
@@ -281,7 +262,10 @@
           { value: "false", name: "非撒饵" },
           { value: "true", name: "撒饵" },
         ]}
-        bind:value={() => booleanToStr(filters.chum), (v) => (filters.chum = strToBoolean(v))}
+        bind:value={
+          () => booleanToStr(filters.chum),
+          (v) => (filters.chum = strToBoolean(v))
+        }
       />
     </div>
     <div class="w-60">
