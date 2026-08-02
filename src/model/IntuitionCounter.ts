@@ -53,14 +53,14 @@ class IntuitionCount implements ItemCount {
 export class IntuitionCounter {
     filter: ItemCount[] | undefined = [];
     count: IntuitionCount[] = [];
-    
+
     intuitionTriggered: boolean = false;
     intuitionTriggerAt: number = 0;
     intuitionDuration: number = 0;
 
     #subscribe;
     update: (() => void) | null = null;
-    
+
     constructor() {
         this.#subscribe = createSubscriber((update) => {
             this.update = update;
@@ -127,7 +127,7 @@ export class IntuitionCounter {
             const match = this.filter!.find(f => f.item === c.item);
             if (match) {
                 c.Thresold = match.count;
-            } 
+            }
         });
 
         this.filter!.forEach(f => {
@@ -149,6 +149,25 @@ export class IntuitionCounter {
 
     setIntuitionTriggered(duration: number, epoch: number) {
         this.intuitionTriggered = true;
+        this.intuitionDuration = duration;
+        this.intuitionTriggerAt = Date.now();
+        this.tryUpdate();
+    }
+
+    /**
+     * 标记鱼识时间更新了
+     * @param duration 
+     * @param epoch 
+     * @returns 
+     */
+    setIntuitionUpdate(duration: number, epoch: number) {
+        if (!this.intuitionTriggered)
+            return;
+
+        // 自然状态下这个 duration 也会流逝，所以要排除这种情况
+        if (this.intuitionDuration > duration)
+            return;
+
         this.intuitionDuration = duration;
         this.intuitionTriggerAt = Date.now();
         this.tryUpdate();

@@ -248,6 +248,7 @@ export class FishingTracker extends EventTarget {
         // 对比当前buff列表，找出新增和移除的buff
         var gainedBuffs: BuffState[] = [];
         var lostBuffs: BuffState[] = [];
+        var durationChangedBuffs: BuffState[] = [];
 
         for (let buff of filterBuffList) {
             if (!this.buffs.has(buff.buffId)) {
@@ -260,6 +261,9 @@ export class FishingTracker extends EventTarget {
                 }
                 if (old.stacks > buff.stacks) {
                     lostBuffs.push(buff);
+                }
+                if (old.duration !== buff.duration) {
+                    durationChangedBuffs.push(buff);
                 }
             }
             this.buffs.set(buff.buffId, buff);
@@ -277,6 +281,9 @@ export class FishingTracker extends EventTarget {
         }
         for (let buff of lostBuffs) {
             this.onBuffLose(buff, epoch);
+        }
+        for (let buff of durationChangedBuffs) {
+            this.onBuffDurationChange(buff, epoch);
         }
         this.updateSub();
     }
@@ -326,6 +333,14 @@ export class FishingTracker extends EventTarget {
                 break;
             case BuffID.FishersIntuition:
                 this.intuition.reset();
+                break;
+        }
+    }
+    
+    onBuffDurationChange(buff: BuffState, epoch: number) {
+        switch (buff.buffId) {
+            case BuffID.FishersIntuition:
+                this.intuition.setIntuitionUpdate(buff.duration, epoch);
                 break;
         }
     }
