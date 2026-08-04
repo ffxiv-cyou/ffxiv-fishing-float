@@ -11,6 +11,7 @@ import NoteExport from "@/web/NoteExport.svelte";
 import AdminLogin from "@/web/admin/AdminLogin.svelte";
 import AdminRecords from "@/web/admin/AdminRecords.svelte";
 import AdminDeleted from "@/web/admin/AdminDeleted.svelte";
+import AdminSuspicious from "@/web/admin/AdminSuspicious.svelte";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -67,6 +68,11 @@ export const routes: Array<RouteConfig> = [
     path: "/admin",
     name: "数据管理",
     component: AdminRecords,
+  },
+  {
+    path: "/admin/suspicious",
+    name: "可疑记录",
+    component: AdminSuspicious,
   }
 ];
 

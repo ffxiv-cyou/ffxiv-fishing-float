@@ -121,8 +121,7 @@ export class API {
     lure?: number,
     slap?: number,
     hidden?: boolean,
-  }): Promise<ConditionalProbabilityResponse>
-  {
+  }): Promise<ConditionalProbabilityResponse> {
     let query = `spot_id=${spotID}&bait_id=${baitID}`;
     if (opt?.lure)
       query += `&lure_state=${opt.lure}`;
@@ -173,7 +172,7 @@ export class API {
     if (filter.from) params.set('from', filter.from.toString());
     if (filter.to) params.set('to', filter.to.toString());
     if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
-    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString()); 
+    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
     if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
     if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
     params.set('page', page.toString());
@@ -255,6 +254,127 @@ export class API {
         throw new Error('Unauthorized');
       }
       throw new Error(`Failed to restore records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async getSuspiciousRecords(filter: AdminSuspiciousFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    if (filter.spot) params.set('spot', filter.spot.toString());
+    if (filter.bait) params.set('bait', filter.bait.toString());
+    if (filter.fish) params.set('fish', filter.fish.toString());
+    if (filter.user) params.set('user', filter.user.toString());
+    if (filter.from) params.set('from', filter.from.toString());
+    if (filter.to) params.set('to', filter.to.toString());
+    if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
+    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
+    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
+    if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
+    if (filter.reason !== undefined) params.set('reason', filter.reason.toString());
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/records/suspicious?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get admin records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async deleteSuspiciousRecords(ids: number[]): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/records/suspicious?${params}`, {
+      method: 'DELETE',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to delete records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async dismissSuspiciousRecords(ids: number[]): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/records/suspicious/dismiss?${params}`, {
+      method: 'POST',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to delete records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+  
+  public async restoreSuspiciousRecords(ids: number[]): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/records/suspicious/restore?${params}`, {
+      method: 'POST',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to delete records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async getDeletedSuspiciousRecords(filter: AdminSuspiciousFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    if (filter.spot) params.set('spot', filter.spot.toString());
+    if (filter.bait) params.set('bait', filter.bait.toString());
+    if (filter.fish) params.set('fish', filter.fish.toString());
+    if (filter.user) params.set('user', filter.user.toString());
+    if (filter.from) params.set('from', filter.from.toString());
+    if (filter.to) params.set('to', filter.to.toString());
+    if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
+    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
+    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
+    if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
+    if (filter.reason !== undefined) params.set('reason', filter.reason.toString());
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/records/suspicious/deleted?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get admin records: ${resp.statusText}`);
     }
     return await resp.json();
   }
@@ -421,6 +541,10 @@ export interface AdminRecordFilter {
   chum?: boolean;
 }
 
+export interface AdminSuspiciousFilter extends AdminRecordFilter {
+  reason?: SuspiciousReason;
+}
+
 export interface AdminFishingRecord {
   id: number;
   user_id: number;
@@ -468,4 +592,26 @@ export interface ConditionalProbabilityResponse {
   slap_id?: number;
   has_hidden?: boolean;
   rates: Array<FishProbabilityItem>;
+}
+
+export enum SuspiciousReason {
+  FishNotInSpot = 1, // 鱼不在钓场中
+  DurationOutOfRange = 2, // 杆时太短或太长
+  BiteTooFast = 3, // 咬钩时间过快
+}
+
+export enum SuspiciousSeverity {
+  Suspicious = 1,
+  Certain = 2,
+}
+
+export interface AdminSuspiciousRecord extends AdminFishingRecord {
+  record_id: number;
+  reason: SuspiciousReason;
+  severity: SuspiciousSeverity;
+}
+
+export interface AdminSuspiciousListResponse {
+  data: AdminSuspiciousRecord[];
+  count: number;
 }

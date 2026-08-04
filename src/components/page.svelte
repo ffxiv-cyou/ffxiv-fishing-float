@@ -118,6 +118,8 @@
     <PropComponent
       {...routeParams}
       {...rest}
+      {path}
+      {url}
       navigate={updateHash}
       {setTitle}
     />

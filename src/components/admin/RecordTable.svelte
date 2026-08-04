@@ -40,6 +40,7 @@
     onToggleSelect,
     onToggleSelectAll,
     onLoad,
+    getID = (r) => r.id,
     bottomNav,
     operation,
     tracker,
@@ -53,6 +54,7 @@
       page: number,
       pageSize: number,
     ) => Promise<AdminRecordListResponse>;
+    getID?: (record: AdminFishingRecord) => number;
     tracker: FishingTracker;
     bottomNav?: Snippet<[{}]>;
     operation: Snippet<[AdminFishingRecord]>;
@@ -268,7 +270,7 @@
         }
       />
     </div>
-    <div class="w-60">
+    <div class="w-48">
       <Label for="dateFrom">开始时间</Label>
       <Input
         id="dateFrom"
@@ -278,7 +280,7 @@
         }
       />
     </div>
-    <div class="w-60">
+    <div class="w-48">
       <Label for="dateTo">结束时间</Label>
       <Input
         id="dateTo"
@@ -302,7 +304,7 @@
       <TableHeadCell>
         <Checkbox
           checked={selectedIds.length === records.length && records.length > 0}
-          onchange={() => onToggleSelectAll(records.map((r) => r.id))}
+          onchange={() => onToggleSelectAll(records.map(r => getID(r)))}
         />
       </TableHeadCell>
       <TableHeadCell>ID</TableHeadCell>
@@ -330,8 +332,8 @@
         <TableBodyRow>
           <TableBodyCell>
             <Checkbox
-              checked={selectedIds.includes(record.id)}
-              onchange={() => onToggleSelect(record.id)}
+              checked={selectedIds.includes(getID(record))}
+              onchange={() => onToggleSelect(getID(record))}
             />
           </TableBodyCell>
           <TableBodyCell>{record.id}</TableBodyCell>

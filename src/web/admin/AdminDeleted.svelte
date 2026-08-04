@@ -4,11 +4,14 @@
   import { Button, Modal, P, Alert, A } from "flowbite-svelte";
   import RecordTable from "@/components/admin/RecordTable.svelte";
   import Trash from "@/components/icon/Trash.svelte";
+  import AdminNavigator from "@/components/admin/AdminNavigator.svelte";
 
   let {
     tracker,
+    path,
   }: {
     tracker: FishingTracker;
+    path?: string;
   } = $props();
 
   let api = $derived(tracker.api);
@@ -65,10 +68,7 @@
 </script>
 
 <div class="p-4">
-  <div class="mb-4 flex justify-between items-center">
-    <h1 class="text-2xl font-bold">已删除记录</h1>
-    <A href="#/admin">返回记录管理</A>
-  </div>
+  <AdminNavigator {path}></AdminNavigator>
 
   {#if error}
     <Alert color="red" class="mb-4">{error}</Alert>
