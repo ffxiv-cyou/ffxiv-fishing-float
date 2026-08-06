@@ -200,8 +200,8 @@
   //#endregion
 </script>
 
-<div class="mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-  <div class="flex gap-4 mb-4 flex-wrap">
+<div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+  <div class="flex gap-4 flex-wrap">
     <div>
       <Label for="spot">钓场 ID</Label>
       <SpotSelector

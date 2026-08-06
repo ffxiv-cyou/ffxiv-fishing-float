@@ -194,6 +194,7 @@
   let conditionLure = $state("");
   let conditionSlaps = $state("");
   let conditionHidden = $state(false);
+  let conditionIntuition = $state(false);
   let conditionRates: FishProbabilityItem[] = $state([]);
 
   let lureDropdown = $derived.by(() => {
@@ -235,12 +236,14 @@
     lure: number,
     slap?: number,
     hidden?: boolean,
+    intuition?: boolean,
   ) {
     await tracker.api
       .getProbability(spotID, bait, {
         lure,
         slap,
         hidden,
+        intuition
       })
       .then((v) => {
         conditionRates = v.rates.sort((a, b) => b.id - a.id);
@@ -252,7 +255,7 @@
       conditionRates = [];
       return;
     }
-    loadConditionalProbability(baitID, parseInt(conditionLure), conditionSlaps === "" ? undefined : parseInt(conditionSlaps), conditionHidden);
+    loadConditionalProbability(baitID, parseInt(conditionLure), conditionSlaps === "" ? undefined : parseInt(conditionSlaps), conditionHidden, conditionIntuition);
   });
 
   //#endregion
@@ -322,6 +325,9 @@
               class="w-48"
             />
             <Toggle bind:checked={conditionHidden}>鱼词</Toggle>
+            {#if conditionUseRealData}
+              <Toggle bind:checked={conditionIntuition}>鱼识</Toggle>
+            {/if}
           {/if}
         </div>
         <FishRateView

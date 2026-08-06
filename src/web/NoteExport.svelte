@@ -89,7 +89,7 @@
               href="https://fish.ffmomola.com/?utm_source=fishing-float"
               target="_blank"
               rel="noopener noreferrer">鱼糕</A
-            >，点击右上角的齿轮按钮，选择“导出”功能，导出现有设置。</Li
+            >，点击左下角的设置按钮，选择“导入/导出”功能，导出现有设置。</Li
           >
           <Li>在下面上传导出的文件，程序会自动将笔记数据合并到新的文件中。</Li>
           <Li

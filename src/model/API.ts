@@ -121,6 +121,7 @@ export class API {
     lure?: number,
     slap?: number,
     hidden?: boolean,
+    intuition?: boolean,
   }): Promise<ConditionalProbabilityResponse> {
     let query = `spot_id=${spotID}&bait_id=${baitID}`;
     if (opt?.lure)
@@ -129,6 +130,8 @@ export class API {
       query += `&slap_id=${opt.slap}`;
     if (opt?.hidden !== undefined)
       query += `&has_hidden=${opt.hidden}`;
+    if (opt?.intuition !== undefined)
+      query += `&has_intuition=${opt.intuition}`;
 
     const resp = await fetch(`${this.basePath}/fish-probability/conditional?${query}`);
     if (!resp.ok) {
@@ -591,6 +594,7 @@ export interface ConditionalProbabilityResponse {
   lure_state: number;
   slap_id?: number;
   has_hidden?: boolean;
+  has_intuition?: boolean;
   rates: Array<FishProbabilityItem>;
 }
 
