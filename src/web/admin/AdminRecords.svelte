@@ -5,13 +5,14 @@
   import RecordTable from "@/components/admin/RecordTable.svelte";
   import Trash from "@/components/icon/Trash.svelte";
   import AdminNavigator from "@/components/admin/AdminNavigator.svelte";
+  import type { RecordFilter } from "@/model/API";
 
   let {
     tracker,
     path,
   }: {
     tracker: FishingTracker;
-    path?: string
+    path?: string;
   } = $props();
 
   let api = $derived(tracker.api);
@@ -67,6 +68,14 @@
     }
     deleteConfirm.open = false;
   }
+
+  async function exportRecords(params: RecordFilter) {
+    try {
+      await api.exportFishingRecords(params);
+    } catch (e: any) {
+      error = e.message || "导出失败";
+    }
+  }
 </script>
 
 <div class="p-4">
@@ -91,6 +100,11 @@
       >
         <Trash class="w-4 h-4" />
       </button>
+    {/snippet}
+    {#snippet filterBar(filter)}
+      <Button color="alternative" onclick={() => exportRecords(filter)}
+        >导出</Button
+      >
     {/snippet}
     {#snippet bottomNav()}
       <div class="flex items-center gap-2">

@@ -165,9 +165,7 @@ export class API {
     };
   }
 
-  public async getAdminRecords(filter: AdminRecordFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
-    const params = new URLSearchParams();
-    params.set('_t', Date.now().toString());
+  private setFilterParams(filter: RecordFilter, params: URLSearchParams) {
     if (filter.spot) params.set('spot', filter.spot.toString());
     if (filter.bait) params.set('bait', filter.bait.toString());
     if (filter.fish) params.set('fish', filter.fish.toString());
@@ -176,8 +174,17 @@ export class API {
     if (filter.to) params.set('to', filter.to.toString());
     if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
     if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
-    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
     if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
+    if (filter.has_intuition !== undefined) params.set('has_intuition', filter.has_intuition.toString());
+    if (filter.slap_id !== undefined) params.set('slap_id', filter.slap_id.toString());
+    if (filter.tug !== undefined) params.set('tug', filter.tug.toString());
+  }
+
+  public async getAdminRecords(filter: AdminRecordFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    this.setFilterParams(filter, params);
+    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
     params.set('page', page.toString());
     params.set('limit', limit.toString());
 
@@ -218,12 +225,7 @@ export class API {
   public async getDeletedRecords(filter: AdminRecordFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
     const params = new URLSearchParams();
     params.set('_t', Date.now().toString());
-    if (filter.spot) params.set('spot', filter.spot.toString());
-    if (filter.bait) params.set('bait', filter.bait.toString());
-    if (filter.fish) params.set('fish', filter.fish.toString());
-    if (filter.user) params.set('user', filter.user.toString());
-    if (filter.from) params.set('from', filter.from.toString());
-    if (filter.to) params.set('to', filter.to.toString());
+    this.setFilterParams(filter, params);
     params.set('page', page.toString());
     params.set('limit', limit.toString());
 
@@ -261,20 +263,39 @@ export class API {
     return await resp.json();
   }
 
+  /**
+   * Export fishing records as a CSV file download.
+   * Requires at least one of spot, bait, or fish in the filter.
+   * @param filter filters applied to the export
+   */
+  public async exportFishingRecords(filter: RecordFilter): Promise<void> {
+    if (!filter.spot && !filter.bait && !filter.fish) {
+      throw new Error('At least one of spot, bait, or fish is required');
+    }
+    const params = new URLSearchParams();
+    this.setFilterParams(filter, params);
+
+    const resp = await fetch(`${this.basePath}/export?${params}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to export fishing records: ${resp.statusText}`);
+    }
+
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'fishing_data.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   public async getSuspiciousRecords(filter: AdminSuspiciousFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
     const params = new URLSearchParams();
     params.set('_t', Date.now().toString());
-    if (filter.spot) params.set('spot', filter.spot.toString());
-    if (filter.bait) params.set('bait', filter.bait.toString());
-    if (filter.fish) params.set('fish', filter.fish.toString());
-    if (filter.user) params.set('user', filter.user.toString());
-    if (filter.from) params.set('from', filter.from.toString());
-    if (filter.to) params.set('to', filter.to.toString());
-    if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
-    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
-    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
-    if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
-    if (filter.reason !== undefined) params.set('reason', filter.reason.toString());
+    this.setFilterParams(filter, params);
     params.set('page', page.toString());
     params.set('limit', limit.toString());
 
@@ -330,7 +351,7 @@ export class API {
     }
     return await resp.json();
   }
-  
+
   public async restoreSuspiciousRecords(ids: number[]): Promise<DeleteRecordsResponse> {
     const params = new URLSearchParams();
     ids.forEach(id => params.append('id', id.toString()));
@@ -353,16 +374,7 @@ export class API {
   public async getDeletedSuspiciousRecords(filter: AdminSuspiciousFilter, page: number, limit: number): Promise<AdminRecordListResponse> {
     const params = new URLSearchParams();
     params.set('_t', Date.now().toString());
-    if (filter.spot) params.set('spot', filter.spot.toString());
-    if (filter.bait) params.set('bait', filter.bait.toString());
-    if (filter.fish) params.set('fish', filter.fish.toString());
-    if (filter.user) params.set('user', filter.user.toString());
-    if (filter.from) params.set('from', filter.from.toString());
-    if (filter.to) params.set('to', filter.to.toString());
-    if (filter.duration_from) params.set('duration_from', filter.duration_from.toString());
-    if (filter.duration_to) params.set('duration_to', filter.duration_to.toString());
-    if (filter.dirty !== undefined) params.set('dirty', filter.dirty.toString());
-    if (filter.chum !== undefined) params.set('chum', filter.chum ? "true" : "false");
+    this.setFilterParams(filter, params);
     if (filter.reason !== undefined) params.set('reason', filter.reason.toString());
     params.set('page', page.toString());
     params.set('limit', limit.toString());
@@ -531,7 +543,7 @@ export interface HomeStatsResponse {
   };
 }
 
-export interface AdminRecordFilter {
+export interface RecordFilter {
   spot?: number;
   bait?: number;
   fish?: number;
@@ -540,8 +552,14 @@ export interface AdminRecordFilter {
   to?: number;
   duration_from?: number;
   duration_to?: number;
-  dirty?: boolean;
   chum?: boolean;
+  has_intuition?: boolean;
+  slap_id?: number;
+  tug?: number;
+}
+
+export interface AdminRecordFilter extends RecordFilter {
+  dirty?: boolean;
 }
 
 export interface AdminSuspiciousFilter extends AdminRecordFilter {

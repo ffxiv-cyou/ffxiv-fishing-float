@@ -43,6 +43,7 @@
     getID = (r) => r.id,
     bottomNav,
     operation,
+    filterBar,
     tracker,
   }: {
     selectedIds: number[];
@@ -57,6 +58,7 @@
     getID?: (record: AdminFishingRecord) => number;
     tracker: FishingTracker;
     bottomNav?: Snippet<[{}]>;
+    filterBar?: Snippet<[AdminRecordFilter]>;
     operation: Snippet<[AdminFishingRecord]>;
   } = $props();
 
@@ -290,10 +292,13 @@
         }
       />
     </div>
-    <div class="w-48">
+    <div class="w-60">
       <Label class="invisible">操作</Label>
       <Button onclick={applyFilters}>查询</Button>
       <Button color="alternative" onclick={resetFilters}>重置</Button>
+      {#if filterBar}
+        {@render filterBar(filters)}
+      {/if}
     </div>
   </div>
 </div>
@@ -304,7 +309,7 @@
       <TableHeadCell>
         <Checkbox
           checked={selectedIds.length === records.length && records.length > 0}
-          onchange={() => onToggleSelectAll(records.map(r => getID(r)))}
+          onchange={() => onToggleSelectAll(records.map((r) => getID(r)))}
         />
       </TableHeadCell>
       <TableHeadCell>ID</TableHeadCell>
