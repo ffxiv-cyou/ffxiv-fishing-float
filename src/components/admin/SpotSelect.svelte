@@ -13,35 +13,7 @@
     id?: string;
   } = $props();
 
-  interface SpotOption {
-    id: number;
-    name: string;
-    fullName: string;
-  }
-
   let tree = $derived(db.getPlaceTree());
-
-  let options = $derived.by(() => {
-    const result: SpotOption[] = [];
-    const tree = db.getPlaceTree();
-
-    for (const territory of tree) {
-      if (territory.children) {
-        for (const zone of territory.children) {
-          if (zone.children) {
-            for (const spot of zone.children) {
-              result.push({
-                id: spot.id,
-                name: spot.name,
-                fullName: `${territory.name} > ${zone.name} > ${spot.name}`,
-              });
-            }
-          }
-        }
-      }
-    }
-    return result;
-  });
 
   function handleChange(e: Event) {
     const target = e.target as HTMLSelectElement;

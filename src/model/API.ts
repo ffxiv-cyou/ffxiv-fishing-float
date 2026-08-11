@@ -393,6 +393,26 @@ export class API {
     }
     return await resp.json();
   }
+  
+  public async banUser(id: number, removeRecord: boolean): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    params.set("user_id", id.toString());
+    params.set("delete_data", removeRecord.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/users/ban?${params}`, {
+      method: 'POST',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to ban user: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
 }
 
 export interface FishDurationResponse {

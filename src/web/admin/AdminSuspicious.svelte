@@ -7,6 +7,7 @@
   import AdminNavigator from "@/components/admin/AdminNavigator.svelte";
   import CircleX from "@/components/icon/CircleX.svelte";
   import { type AdminSuspiciousRecord } from "@/model/API";
+  import Ban from "@/components/icon/Ban.svelte";
 
   let {
     tracker,
@@ -33,7 +34,7 @@
     open: false,
     ids: [] as number[],
     message: "",
-    confirm: "确认",
+    options: [{ key: "confirm", name: "确认" }],
     callback: (val: { action: string }) => {},
   });
 
@@ -59,7 +60,7 @@
       open: true,
       ids,
       message: `确定删除 ${ids.length} 条记录吗？`,
-      confirm: "删除",
+      options: [{ key: "delete", name: "删除" }],
       callback: confirmDelete,
     };
   }
@@ -68,8 +69,20 @@
       open: true,
       ids,
       message: `确定忽略 ${ids.length} 条记录吗？`,
-      confirm: "忽略",
+      options: [{ key: "dismiss", name: "忽略" }],
       callback: confirmDismiss,
+    };
+  }
+  function openBanModal(user: number) {
+    deleteConfirm = {
+      open: true,
+      ids: [user],
+      message: `确定要封禁用户 ${user} 并删除所有其上传的记录吗？`,
+      options: [
+        { key: "ban", name: "仅封禁" },
+        { key: "ban_delete", name: "封禁并删除" },
+      ],
+      callback: confirmBanUser,
     };
   }
 
@@ -89,9 +102,22 @@
   }
 
   async function confirmDismiss(val: { action: string }) {
-    if (val.action === "delete") {
+    if (val.action === "dismiss") {
       try {
         await api.dismissSuspiciousRecords(deleteConfirm.ids);
+        await tableRef.loadRecords();
+        selectedIds = [];
+      } catch (e: any) {
+        error = e.message || "忽略失败";
+      }
+    }
+    deleteConfirm.open = false;
+  }
+
+  async function confirmBanUser(val: { action: string }) {
+    if (val.action === "ban" || val.action === "ban_delete") {
+      try {
+        await api.banUser(deleteConfirm.ids[0], val.action === "ban_delete");
         await tableRef.loadRecords();
         selectedIds = [];
       } catch (e: any) {
@@ -119,7 +145,7 @@
     bind:this={tableRef}
   >
     {#snippet operation(record)}
-    {@const r = record as AdminSuspiciousRecord}
+      {@const r = record as AdminSuspiciousRecord}
       <button
         class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
         onclick={() => openDeleteModal([r.record_id])}
@@ -133,6 +159,13 @@
         aria-label="忽略"
       >
         <CircleX class="w-4 h-4" />
+      </button>
+      <button
+        class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+        onclick={() => openBanModal(r.user_id)}
+        aria-label="封禁"
+      >
+        <Ban class="w-4 h-4" />
       </button>
     {/snippet}
     {#snippet bottomNav()}
@@ -170,7 +203,9 @@
     <P class="text-sm text-gray-500">此操作可以稍后在"已删除记录"中恢复。</P>
 
     {#snippet footer()}
-      <Button type="submit" value="delete" color="red">{deleteConfirm.confirm}</Button>
+      {#each deleteConfirm.options as opt}
+        <Button type="submit" value={opt.key} color="red">{opt.name}</Button>
+      {/each}
       <Button type="submit" value="cancel" color="alternative">取消</Button>
     {/snippet}
   </Modal>
