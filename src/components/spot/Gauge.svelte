@@ -5,17 +5,26 @@
     colorFront = "var(--color-secondary-500)",
     colorBack = "var(--color-secondary-100)",
     class: className = "",
+    percent,
   }: {
     value: number;
-    max: number;
+    max?: number;
+    percent?: number;
     colorFront?: string;
     colorBack?: string;
     class?: string;
   } = $props();
 
   let percentage = $derived.by(() => {
-    if (max === 0) return 0;
+    if (percent !== undefined) return percent * 100;
+
+    if (!max) return 0;
     return (value / max) * 100;
+  });
+
+  let countLabel = $derived.by(() => {
+    if (max) return `${value}/${max}`;
+    else return `${value}`;
   });
 </script>
 
@@ -26,8 +35,8 @@
   <div class="percentage"></div>
   <div class="mask"></div>
   <div class="value text-sm">
-    <div class="">{percentage.toFixed(1)}%</div>
-    <div class="text-xs text-gray-500">{value}/{max}</div>
+    <div class="primary">{percentage.toFixed(1)}%</div>
+    <div class="text-xs text-gray-500">{countLabel}</div>
   </div>
 </div>
 
@@ -42,13 +51,19 @@
 
   .gauge .mask {
     position: absolute;
-    left: 20%;
-    right: 20%;
-    bottom: 20%;
-    top: 20%;
+    --circle-size: 20%;
+    left: var(--circle-size);
+    right: var(--circle-size);
+    bottom: var(--circle-size);
+    top: var(--circle-size);
     background-color: var(--color-white);
     border-radius: 100% 100% 100% 100%;
   }
+
+  .gauge.small .mask {
+    --circle-size: 10%;
+  }
+
   .gauge .percentage {
     position: absolute;
     top: -1px;
@@ -69,5 +84,9 @@
     left: 0;
     width: 100%;
     text-align: center;
+  }
+
+  .gauge .value .primary {
+    margin-bottom: -4px;
   }
 </style>

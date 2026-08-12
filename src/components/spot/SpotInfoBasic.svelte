@@ -61,10 +61,67 @@
   function isFishingLogged(fishID: number): boolean {
     return tracker.history.storage.isFishingLogged(fishID, false);
   }
+
+  let all: FishDurationDistribution[] = $derived.by(() => {
+    const d = new Array(...(stats?.duration?.distributions ?? []));
+    d.sort((a, b) => b.fish_id - a.fish_id);
+    return d;
+  });
+
+  let baits: number[] = $derived.by(() =>
+    Array.from(new Set(all.map((d) => d.bait_id))).sort((a, b) => b - a),
+  );
+
+  function getRate(bait: number, fish: number) {
+    const rate = stats?.probability.rates.find(
+      (x) => x.bait === bait && x.id === fish,
+    );
+    if (rate === undefined) return undefined;
+
+    return { count: rate.count, rate: rate.rate, tug: rate.tug };
+  }
 </script>
 
 <Heading tag="h2" class="relative text-2xl leading-tight">竿时</Heading>
 <SpotFishView {durations} db={tracker.db} title="fish" />
+
+{#if spot?.fish?.length ?? 0 > 0}
+  <Heading tag="h2" class="relative text-2xl leading-tight">鱼饵表</Heading>
+  <Table class="w-auto">
+    <TableHead>
+      <TableHeadCell></TableHeadCell>
+      {#each spot?.fish as fishID}
+        <TableHeadCell class="text-center">
+          <span>{tracker.db.getItemName(fishID)}</span>
+        </TableHeadCell>
+      {/each}
+    </TableHead>
+    <TableBody>
+      {#each baits as bait}
+        <TableBodyRow>
+          <TableBodyCell>
+            <span>{tracker.db.getItemName(bait)}</span>
+          </TableBodyCell>
+          {#each spot?.fish as fishID}
+            {@const rate = getRate(bait, fishID)}
+            <TableBodyCell>
+              {#if rate}
+                <Gauge
+                  percent={rate.rate}
+                  value={rate.count}
+                  colorFront={`var(--color-${tugColor(rate.tug)}-500)`}
+                  colorBack={`var(--color-${tugColor(rate.tug)}-200)`}
+                  class="w-16 h-16 small"
+                />
+              {/if}
+            </TableBodyCell>
+          {/each}
+        </TableBodyRow>
+      {/each}
+    </TableBody>
+  </Table>
+{/if}
+
 {#if spot?.fish?.length ?? 0 > 0}
   <Heading tag="h2" class="relative text-2xl leading-tight mb-4"
     >鱼类列表</Heading
