@@ -65,7 +65,7 @@
   $effect(() => {
     if (spotID > 0) {
       const spotName = tracker.db.getZoneName(spotID);
-      setTitle(`钓场信息 - ${spotName}`);
+      setTitle(`${spotName} - 钓场信息`);
     } else {
       setTitle("钓场信息");
     }

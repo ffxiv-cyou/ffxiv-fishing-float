@@ -64,7 +64,7 @@
       <NavBrand href="#/">
         <span
           class="self-center text-xl font-semibold whitespace-nowrap dark:text-white"
-          >鱼漂-统计数据</span
+          >鱼漂</span
         >
       </NavBrand>
       <div class="flex md:order-0">

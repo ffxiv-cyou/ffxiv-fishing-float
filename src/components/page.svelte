@@ -103,7 +103,7 @@
   }
 
   function setTitle(title: string) {
-    document.title = title;
+    document.title = title + " - 鱼漂";
   }
 
   $effect(() => {
