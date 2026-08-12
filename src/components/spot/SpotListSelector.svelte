@@ -17,7 +17,7 @@
 
   let tree = $derived(db.getPlaceTree());
 
-  let territoryID = $state(0);
+  let territoryID = $state(-1);
   let territory = $derived(tree?.find((p) => p.id === territoryID));
 
   let zoneID = $state(0);

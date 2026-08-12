@@ -104,7 +104,7 @@
           </TableBodyCell>
           {#each spot?.fish as fishID}
             {@const rate = getRate(bait, fishID)}
-            <TableBodyCell>
+            <TableBodyCell class="text-center">
               {#if rate}
                 <Gauge
                   percent={rate.rate}
