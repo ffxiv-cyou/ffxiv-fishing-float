@@ -436,6 +436,11 @@ export class FishingTracker extends EventTarget {
     public serverBegin(epoch: number) {
         const now = Date.now();
         console.log("server cast at", epoch, now);
+        if (this.isInFishingEvent === false) {
+            console.log("cast from non-fishing event, force set fishing event to true");
+            this.setFishingEvent(true, epoch);
+        }
+
         // 玛德，居然还有可能先收到服务器的cast包……
         if (this.current !== null) {
             // 正常的服务器抛竿
