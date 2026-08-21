@@ -59,10 +59,10 @@ export class FishingHistory {
     this.triggerUpload();
 
     if (session.TugType != null) {
-      // 有可能此时数据还不完整，延迟 1 秒写入
+      // 有可能此时数据还不完整，延迟一小会写入
       setTimeout(() => {
         this.storage.updateHistory(session);
-      }, 1000);
+      }, 100);
     }
   }
 
