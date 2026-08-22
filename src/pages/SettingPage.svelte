@@ -205,7 +205,7 @@
       <input
         type="checkbox"
         id="show-unknown-intuition"
-        bind:checked={config.UploadHistory}
+        bind:checked={config.ShowUnknownIntuition}
       />
       <label for="show-unknown-intuition">显示</label>
       <span class="setting-desc"

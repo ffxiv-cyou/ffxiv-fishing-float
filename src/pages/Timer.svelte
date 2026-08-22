@@ -4,7 +4,7 @@
   import type { FishingTracker } from "../model/FishingTracker";
   import type { HistoryStatsItem } from "../model/HistoryStorage";
   import { LureType, TugType } from "../model/InnerEnums";
-  import type { FishDurationResponse } from "@/model/API";
+  import { type FishDurationResponse, FishHookType } from "@/model/API";
   import { createPrecastLookup } from "@/components/spot/data_helper";
 
   let {
@@ -60,7 +60,11 @@
         maxTime = item.maxBiteTime;
       }
     }
-    return Math.max(Math.ceil(maxTime / 2) * 2, tracker.config.MinDuration, (now ?? 0) + 5);
+    return Math.max(
+      Math.ceil(maxTime / 2) * 2,
+      tracker.config.MinDuration,
+      (now ?? 0) + 5,
+    );
   }); // in seconds
 
   function updateSession() {
@@ -107,10 +111,38 @@
     if (current?.SlapFish) result.push(current.SlapFish);
 
     if (current?.LureTarget) {
-      let flag = current.LureType === LureType.Modest;
       for (let stat of historyStats) {
-        if ((stat.tugType === TugType.Light) === flag) continue;
-        result.push(stat.fish);
+        switch (stat.tugType) {
+          case TugType.Light:
+            if (current.LureType === LureType.Ambitious) result.push(stat.fish);
+            break;
+          case TugType.Medium:
+            if (current.LureType === LureType.Modest) result.push(stat.fish);
+            break;
+          case TugType.Heavy:
+            // 从在线数据中判断鱼王是精准还是强力的
+            let d = onlineHistory?.samples?.find((s) => s.id === stat.fish);
+            if (d && d.hook_type !== FishHookType.Unknown) {
+              if (
+                d.hook_type === FishHookType.Powerful &&
+                current.LureType === LureType.Modest
+              ) {
+                result.push(stat.fish);
+              }
+              if (
+                d.hook_type === FishHookType.Precision &&
+                current.LureType === LureType.Ambitious
+              ) {
+                result.push(stat.fish);
+              }
+            } else {
+              // 没有的话就当是强力的
+              if (current.LureType === LureType.Modest) {
+                result.push(stat.fish);
+              }
+            }
+            break;
+        }
       }
     }
     return result;
@@ -122,7 +154,11 @@
    * @param chum
    * @param precastLookup
    */
-  function mergeStats(stats: HistoryStatsItem[], chum: boolean, precastLookup: (baitId: number) => number) {
+  function mergeStats(
+    stats: HistoryStatsItem[],
+    chum: boolean,
+    precastLookup: (baitId: number) => number,
+  ) {
     let merged = [];
     for (let stat of stats) {
       let minBiteTime = stat.minBiteTime;
@@ -175,7 +211,11 @@
         if (cancelled) {
           return;
         }
-        localHistory = mergeStats(stats, chumState, createPrecastLookup(new Set(stats.map(s => s.fish))));
+        localHistory = mergeStats(
+          stats,
+          chumState,
+          createPrecastLookup(new Set(stats.map((s) => s.fish))),
+        );
       })
       .catch((err) => {
         if (!cancelled) {
@@ -195,7 +235,7 @@
   let onlineHistory: FishDurationResponse | undefined = $state(undefined);
   $effect(() => {
     let cancelled = false;
-    if (!tracker.config.UploadHistory || zone === 0) {
+    if (!tracker.config.UseOnlineHistory || zone === 0) {
       onlineHistory = undefined;
       return;
     }
@@ -208,7 +248,9 @@
           onlineHistory = response;
 
           // 部分情况下一个钓场可能有多个鱼识（宇宙探索），这里重新做一次 filter
-          let fishesForBait = response.distributions.filter((d) => d.bait_id === bait).map((d) => d.fish_id);
+          let fishesForBait = response.distributions
+            .filter((d) => d.bait_id === bait)
+            .map((d) => d.fish_id);
           tracker.updateIntuitionFilter(zone, fishesForBait);
         }
       })
@@ -235,7 +277,7 @@
     if (!tracker.config.MergeChumTime) {
       filtered = filtered.filter((d) => d.is_chum === chum);
     }
-    let converted : HistoryStatsItem[] = filtered.map((d) => ({
+    let converted: HistoryStatsItem[] = filtered.map((d) => ({
       zone: zone,
       fish: d.fish_id,
       bait: d.bait_id,
@@ -245,16 +287,18 @@
       maxBiteTime: d.range.effective_max / 1000,
       chum: d.is_chum,
     }));
-    let remoteHistory = mergeStats(converted, chum, createPrecastLookup(new Set(converted.map(s => s.fish))));
+    let remoteHistory = mergeStats(
+      converted,
+      chum,
+      createPrecastLookup(new Set(converted.map((s) => s.fish))),
+    );
 
     // 合并本地和在线数据
     let merged = localHistory.map((item) => ({ ...item }));
     for (let stat of remoteHistory) {
       let existing = merged.find(
         (s) =>
-          s.fish === stat.fish &&
-          s.bait === stat.bait &&
-          s.chum === stat.chum,
+          s.fish === stat.fish && s.bait === stat.bait && s.chum === stat.chum,
       );
       if (existing) {
         existing.count += stat.count;

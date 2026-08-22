@@ -393,7 +393,7 @@ export class API {
     }
     return await resp.json();
   }
-  
+
   public async banUser(id: number, removeRecord: boolean): Promise<DeleteRecordsResponse> {
     const params = new URLSearchParams();
     params.set("user_id", id.toString());
@@ -422,7 +422,22 @@ export interface FishDurationResponse {
   filtered: number;
   distributions: Array<FishDurationDistribution>;
   merged: Array<FishDurationDistribution>;
+  samples: Array<FishSampleCount>;
 }
+
+export interface FishSampleCount {
+  id: number;
+  count: number;
+  size_min: number;
+  size_max: number;
+  hook_type: FishHookType;
+}
+
+export enum FishHookType {
+  Unknown = 0, // 未知
+  Precision = 1, // 精准
+  Powerful = 2, // 强力
+};
 
 export interface FishDurationDistribution {
   bait_id: number;
