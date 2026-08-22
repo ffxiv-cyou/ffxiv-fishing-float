@@ -49,7 +49,11 @@
         break;
     }
 
-    if (highlight && highlight.includes(item.fish) && !downplay?.includes(item.fish)) {
+    if (
+      highlight &&
+      highlight.includes(item.fish) &&
+      !downplay?.includes(item.fish)
+    ) {
       classes.push("active");
     }
     if (downplay && downplay.includes(item.fish)) {
@@ -59,16 +63,17 @@
   }
 
   let filtedStats = $derived.by(() => {
-    if (lureTime === undefined || !tweakByLure)
-      return stats;
-
     let mod = [];
     for (let item of stats) {
-      mod.push({
-        ...item,
-        minBiteTime: Math.max(item.minBiteTime, lureTime!),
-        maxBiteTime: Math.max(item.maxBiteTime, lureTime!),
-      });
+      if (lureTime === undefined || !tweakByLure) {
+        mod.push(item);
+      } else {
+        mod.push({
+          ...item,
+          minBiteTime: Math.max(item.minBiteTime, lureTime!),
+          maxBiteTime: Math.max(item.maxBiteTime, lureTime!),
+        });
+      }
     }
     // 确保顺序不变
     return mod.sort((a, b) => a.fish - b.fish);
@@ -211,7 +216,13 @@
     right: calc(100% - var(--pos) / var(--total-time) * 100%);
     top: 0;
     bottom: 0;
-    background: repeating-linear-gradient(45deg, #99999933, #99999933 5px, #66666633 5px, #66666633 10px);
+    background: repeating-linear-gradient(
+      45deg,
+      #99999933,
+      #99999933 5px,
+      #66666633 5px,
+      #66666633 10px
+    );
   }
 
   :global([data-lure-window="label"]) .lure-cursor {
