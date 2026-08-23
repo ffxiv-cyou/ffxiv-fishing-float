@@ -80,6 +80,11 @@
 
     return { count: rate.count, rate: rate.rate, tug: rate.tug };
   }
+
+  function getTugsByBait(bait: number) {
+    const tugs = stats?.lure_tug.filter((x) => x.bait_id === bait);
+    return tugs?.reduce((prev, curr) => prev + curr.total, 0) ?? 0;
+  }
 </script>
 
 <Heading tag="h2" class="relative text-2xl leading-tight">竿时</Heading>
@@ -100,7 +105,10 @@
       {#each baits as bait}
         <TableBodyRow>
           <TableBodyCell>
-            <span>{tracker.db.getItemName(bait)}</span>
+            <div>{tracker.db.getItemName(bait)}</div>
+            <div class="text-gray-500 text-xs">
+              {getTugsByBait(bait)}
+            </div>
           </TableBodyCell>
           {#each spot?.fish as fishID}
             {@const rate = getRate(bait, fishID)}
