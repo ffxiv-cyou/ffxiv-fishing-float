@@ -120,8 +120,24 @@
     window.open("/#/setting", "Settings", "width=800,height=700");
   }
 
+  async function openExportUrl() {
+    const tools = await overlayToolkit.GetPluginInfo().then((ver) => ver.tools);
+    if (tools == null || !tools.includes("otk::open_browser")) {
+      throw new Error("open_browser tool not available");
+    }
+    let url =
+      location.protocol +
+      "//" +
+      location.host +
+      "/web/#/export/" +
+      tracker.getFishingLogShareUrl();
+    await overlayToolkit.OpenBrowser(url);
+  }
+
   function openNoteExportPage() {
-    window.open("/web/#/export/", "NoteExport", "width=800,height=400");
+    openExportUrl().catch(() => {
+      window.open("/web/#/export/", "NoteExport", "width=800,height=400");
+    });
   }
 
   let statsIsLow = $derived.by(() => {
@@ -137,9 +153,7 @@
     );
   });
 
-  let showSettingBtn = $derived(
-    (tracker.config.ShowSettingBtn) || showConfig,
-  );
+  let showSettingBtn = $derived(tracker.config.ShowSettingBtn || showConfig);
 
   (window as any).FishingFloat = {
     openHistory,
