@@ -93,8 +93,7 @@ const COLUMNS = [
   "咬钩类型",
   "提竿",
   "诱饵",
-  "诱饵目标",
-  "诱饵隐藏鱼",
+  "鱼词",
 ];
 
 export function historyToCSV(records: HistoryItem[], db: GameDatabase): string {
@@ -112,7 +111,6 @@ export function historyToCSV(records: HistoryItem[], db: GameDatabase): string {
         tugLabel(r.tugType),
         hookLabel(r.hookType),
         lureText(r),
-        r.lureTarget ? "是" : "否",
         r.lureHidden ? db.getItemName(r.lureHidden) : "",
       ]),
     );
