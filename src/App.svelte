@@ -3,6 +3,7 @@
   import { routes } from "@/router/index";
   import Page from "./components/page.svelte";
   import * as Sentry from "@sentry/svelte";
+  import { initFileBridge } from "./lib/fileBridge";
 
   let prodMode = $state(false);
   let desktopMode = $state(false);
@@ -14,19 +15,19 @@
     if (prodMode) {
       const overlayUuid = (window as any).OverlayPluginApi?.overlayUuid;
       const overlayName = (window as any).OverlayPluginApi?.overlayName;
-      Sentry.setContext("overlay_env", { 
-        uuid: overlayUuid, 
-        name: overlayName, 
-        desktop: desktopMode 
+      Sentry.setContext("overlay_env", {
+        uuid: overlayUuid,
+        name: overlayName,
+        desktop: desktopMode,
       });
     }
   }
 
+  initFileBridge();
   reloadEnvMode();
 
   $effect(() => {
-    if (prodMode) 
-      return;
+    if (prodMode) return;
 
     const interval = setInterval(() => {
       reloadEnvMode();

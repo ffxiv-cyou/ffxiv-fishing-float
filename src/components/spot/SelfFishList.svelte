@@ -19,6 +19,7 @@
   import ChevronLeftOutline from "../icon/ChevronLeftOutline.svelte";
   import ChevronRightOutline from "../icon/ChevronRightOutline.svelte";
   import { formatEorzeaTime, formatTime } from "./data_helper";
+  import { exportFileName, historyToCSV, saveCSV } from "@/lib/historyExport";
 
   let {
     tracker,
@@ -38,6 +39,20 @@
   let totalPages = $derived(Math.ceil(historyCount / limit));
 
   let offset = $derived((currentPage - 1) * limit);
+
+  let exporting = $state(false);
+
+  async function exportCSV() {
+    if (exporting) return;
+    exporting = true;
+    try {
+      const records = await tracker.history.storage.listHistory(spotID);
+      const csv = historyToCSV(records, tracker.db);
+      await saveCSV(exportFileName(tracker.db.getZoneName(spotID)), csv);
+    } finally {
+      exporting = false;
+    }
+  }
 
   function handlePageChange(page: number) {
     currentPage = page;
@@ -125,6 +140,9 @@
   }
 </script>
 
+<div class="flex justify-end mb-2">
+  <Button size="sm" onclick={exportCSV} disabled={exporting}>导出 CSV</Button>
+</div>
 <Table>
   <TableHead>
     <TableHeadCell>时间</TableHeadCell>
