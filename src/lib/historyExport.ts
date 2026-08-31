@@ -92,9 +92,16 @@ const COLUMNS = [
   "撒饵",
   "咬钩类型",
   "提竿",
+  "大尺寸",
+  "大小",
   "诱饵",
   "鱼词",
 ];
+
+function formatBoolean(value: boolean | undefined): string {
+  if (value === undefined) return "-";
+  return value ? "是" : "否";
+}
 
 export function historyToCSV(records: HistoryItem[], db: GameDatabase): string {
   const lines: string[] = [csvRow(COLUMNS)];
@@ -110,6 +117,8 @@ export function historyToCSV(records: HistoryItem[], db: GameDatabase): string {
         r.chum ? "撒饵" : "-",
         tugLabel(r.tugType),
         hookLabel(r.hookType),
+        formatBoolean(r.raw?.FishResult?.isHQ),
+        r.raw?.FishResult?.size ? (r.raw.FishResult.size / 10).toFixed(1) : "-",
         lureText(r),
         r.lureHidden ? db.getItemName(r.lureHidden) : "",
       ]),

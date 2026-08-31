@@ -21,6 +21,8 @@ export interface HistoryItem {
   lureHidden: number; // 诱饵隐藏鱼
 
   hookType: number;
+
+  raw?: FishingSession; // 原始钓鱼数据
 }
 
 // 统计记录
@@ -178,6 +180,7 @@ export class FishingStorage {
       lureAt: session.LureAt,
       lureHidden: session.HiddenFish,
       hookType: session.HookType,
+      raw: session,
     };
 
     await this.histories.addRaw(item);
