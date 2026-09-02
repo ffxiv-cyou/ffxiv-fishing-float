@@ -67,6 +67,14 @@
   let filterList: FilterItem[] = $derived.by(() => {
     if (!searchValue || textValue === searchValue) return [];
 
+    let id = parseInt(searchValue);
+    if (id > 0) {
+      return [{
+        id,
+        name: db.getItemName(id)
+      }];
+    }
+
     let results: FilterItem[] = [];
     const keys = Object.keys(db.itemNames);
     for (const key of keys) {
