@@ -6,6 +6,13 @@
   import { PcapReplay } from "@/model/dev/replay";
   import Notice, { type Message } from "@/pages/Notice.svelte";
   import SpectralTimer from "@/components/SpectralTimer.svelte";
+  import {
+    initFeedbackOverlayHandler,
+    submitFeedbackToSentry,
+    type FeedbackAttachment,
+    type FeedbackFields,
+    type FeedbackResult,
+  } from "@/lib/feedbackBridge";
 
   let tracker = $state(new FishingTracker());
   let logic = new PacketHandler(tracker);
@@ -140,6 +147,35 @@
     });
   }
 
+  function openFeedback() {
+    window.open("/web/#/feedback", "Feedback", "width=920,height=760");
+  }
+
+  async function submitFeedback(
+    fields: FeedbackFields,
+    screenshot?: FeedbackAttachment,
+  ): Promise<FeedbackResult> {
+    const extraAttachments: FeedbackAttachment[] = [];
+    if (fields.includePcap) {
+      const pcap = logic.dumpPcap();
+      if (pcap) {
+        extraAttachments.push({
+          data: new Uint8Array(pcap),
+          filename: "recent_packets.pcap",
+          contentType: "application/octet-stream",
+        });
+      }
+    }
+    return submitFeedbackToSentry(fields, screenshot, {
+      source: "overlay",
+      extraAttachments,
+    });
+  }
+
+  initFeedbackOverlayHandler({
+    onSubmit: submitFeedback,
+  });
+
   let statsIsLow = $derived.by(() => {
     if (!tracker.config.StatsThresoldEnabled || !tracker.IsInFishingEvent)
       return false;
@@ -224,6 +260,12 @@
         aria-label="open window"
         onclick={openNoteExportPage}
         >导出笔记 &raquo;
+      </button>
+      <button
+        class="xiv-text blue"
+        aria-label="open window"
+        onclick={openFeedback}
+        >反馈 &raquo;
       </button>
     {/if}
   {/snippet}

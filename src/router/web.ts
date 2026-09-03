@@ -8,6 +8,7 @@ import SpotInfo from "@/web/SpotInfo.svelte";
 import FAQ from "@/web/FAQ.svelte";
 import Methodology from "@/web/Methodology.svelte";
 import NoteExport from "@/web/NoteExport.svelte";
+import Feedback from "@/web/Feedback.svelte";
 import AdminLogin from "@/web/admin/AdminLogin.svelte";
 import AdminRecords from "@/web/admin/AdminRecords.svelte";
 import AdminDeleted from "@/web/admin/AdminDeleted.svelte";
@@ -53,6 +54,11 @@ export const routes: Array<RouteConfig> = [
     path: "/export/:data",
     name: "导出钓鱼笔记",
     component: NoteExport,
+  },
+  {
+    path: "/feedback",
+    name: "问题反馈",
+    component: Feedback,
   },
   {
     path: "/admin/login",
@@ -103,6 +109,10 @@ export const navTree: NavTree[] = [
       {
         name: "安装桌面版",
         path: "/help/app"
+      },
+      {
+        name: "问题反馈",
+        path: "/feedback"
       },
       {
         name: "隐私政策",

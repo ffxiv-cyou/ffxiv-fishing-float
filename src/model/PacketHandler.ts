@@ -3,6 +3,7 @@ import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, 
 import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType, FishingSpotName } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
+import { createPcapFile } from "./dev/pcap";
 
 interface OpcodeMap {
     [key: string]: number;
@@ -39,6 +40,33 @@ export class PacketHandler {
     }
 
     opcodeMap: Map<number, PacketType> = new Map<number, PacketType>();
+
+    public static readonly RingBufferSize = 1000;
+
+    private ringBuffer: { epoch: number; dir: boolean; data: Uint8Array }[] = [];
+
+    private pushToRingBuffer(packet: Packet): void {
+        this.ringBuffer.push({
+            epoch: packet.epoch,
+            dir: packet.dir,
+            data: new Uint8Array(packet.data),
+        });
+        if (this.ringBuffer.length > PacketHandler.RingBufferSize) {
+            this.ringBuffer.shift();
+        }
+    }
+
+    /** 生成最近原始包的 pcap；缓冲为空时返回 null。 */
+    public dumpPcap(): ArrayBuffer | null {
+        if (this.ringBuffer.length === 0) return null;
+        // 复制 data，避免 createPcapFile 对 data[12] 的修补污染缓冲
+        const packets = this.ringBuffer.map((p) => ({
+            epoch: p.epoch,
+            dir: p.dir,
+            data: new Uint8Array(p.data),
+        }));
+        return createPcapFile(packets);
+    }
 
     public init(source: IPacketSource): void {
         source.SubscribePacket("FishingFloat", this.genPacketFilter(), (packet: Packet) => this.packetHandler(packet));
@@ -90,6 +118,8 @@ export class PacketHandler {
         if (!PacketHandler.isSourceEqualsTarget(dw)) {
             return;
         }
+
+        this.pushToRingBuffer(packet);
 
         switch (pktType) {
             case PacketType.PlayerSetup:
