@@ -7,6 +7,13 @@
   import HistoryStats from "./HistoryStats.svelte";
   import IntuitionCounter from "./IntuitionCounter.svelte";
   import type { IntuitionCounter as Counter } from "../model/IntuitionCounter";
+  import type { TugLabelScheme } from "../model/Config";
+
+  const TUG_LABELS: Record<TugLabelScheme, string[]> = {
+    heavy: ["轻竿", "中竿", "重竿"],
+    big: ["轻竿", "中竿", "鱼王竿"],
+    marks: ["!", "!!", "!!!"],
+  };
 
   let {
     db,
@@ -51,7 +58,7 @@
   }
 
   function tugType(type: TugType | null): string {
-    const types = ["轻竿", "中竿", "重竿"];
+    const types = TUG_LABELS[config.TugLabelScheme];
     return type !== null ? types[type] : "";
   }
 

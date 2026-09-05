@@ -1,6 +1,8 @@
 import { createSubscriber } from 'svelte/reactivity';
 import type { FisherStats } from './FishingTracker';
 
+export type TugLabelScheme = 'heavy' | 'big' | 'marks';
+
 export class Config {
   #subscribe;
   update: (() => void) | null = null;
@@ -24,7 +26,7 @@ export class Config {
   /** 是否合并显示撒饵和非撒饵时间 */
   mergeChumTime: boolean = true;
   /** 雄心/谦逊空窗期处理: 'off'-关闭, 'label'-显示标记, 'tweak'-调整历史显示 */
-  lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'off';
+  lureEmptyWindowHandling: 'off' | 'label' | 'tweak' = 'label';
   /** 鱼识计数器位置: 'off'-关闭, 'right'-右侧, 'bottom'-底部 */
   intuitionCounter: 'off' | 'right' | 'bottom' = 'off';
   /** 鱼识计时器位置: 'off'-关闭, 'status'-顶部, 'counter'-计数器内部 */
@@ -33,6 +35,8 @@ export class Config {
   showUnknownIntuition: boolean = false;
   /** 最小竿时 */
   minDuration: number = 0;
+  /** 咬钩标签方案: 'heavy'-轻/中/重竿, 'big'-轻/中/鱼王竿, 'marks'-!/!!/!!! */
+  tugLabelScheme: TugLabelScheme = 'heavy';
 
   /** 极简模式颜色: [抛竿, 轻竿, 中竿, 重竿] */
   minimalColors: string[] = [];
@@ -82,7 +86,7 @@ export class Config {
     this.volume = obj.volume !== undefined ? obj.volume : 100;
     this.minimalColors = obj.minimalColors || ['#eeeeee', '#69aff3', '#cc99ff', '#f1c64a'];
     this.mergeChumTime = obj.mergeChumTime !== undefined ? obj.mergeChumTime : true;
-    this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'off';
+    this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'label';
     this.uploadHistory = obj.uploadHistory !== undefined ? obj.uploadHistory : true;
     this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a'];
     this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
@@ -92,6 +96,7 @@ export class Config {
     this.intuitionTimer = obj.intuitionTimer !== undefined ? obj.intuitionTimer : 'counter';
     this.showUnknownIntuition = obj.showUnknownIntuition !== undefined ? obj.showUnknownIntuition : (obj.intuitionCounter !== 'off');
     this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
+    this.tugLabelScheme = obj.tugLabelScheme || 'heavy';
   }
 
   reset() {
@@ -362,6 +367,16 @@ export class Config {
   }
   set MinDuration(value: number) {
     this.minDuration = value;
+    this.save();
+  }
+
+  /** 咬钩标签方案: 'heavy'-轻/中/重竿, 'big'-轻/中/鱼王竿, 'marks'-!/!!/!!! */
+  get TugLabelScheme() {
+    this.#subscribe();
+    return this.tugLabelScheme;
+  }
+  set TugLabelScheme(value: TugLabelScheme) {
+    this.tugLabelScheme = value;
     this.save();
   }
 }

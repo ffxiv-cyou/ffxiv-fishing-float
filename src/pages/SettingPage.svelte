@@ -103,6 +103,34 @@
       >
     </div>
     <div class="setting-item">
+      <span class="setting-name">咬钩标签</span>
+      <input
+        type="radio"
+        name="tug-label"
+        value="heavy"
+        id="tug-label-heavy"
+        bind:group={config.TugLabelScheme}
+      />
+      <label for="tug-label-heavy">轻/中/重</label>
+      <input
+        type="radio"
+        name="tug-label"
+        value="big"
+        id="tug-label-big"
+        bind:group={config.TugLabelScheme}
+      />
+      <label for="tug-label-big">轻/中/鱼王</label>
+      <input
+        type="radio"
+        name="tug-label"
+        value="marks"
+        id="tug-label-marks"
+        bind:group={config.TugLabelScheme}
+      />
+      <label for="tug-label-marks">!/!!/!!!</label>
+      <span class="setting-desc">咬钩时显示的文本</span>
+    </div>
+    <div class="setting-item">
       <span class="setting-name">双维过低提示</span>
       <input
         type="checkbox"

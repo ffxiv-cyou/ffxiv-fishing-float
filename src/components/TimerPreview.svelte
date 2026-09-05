@@ -124,9 +124,9 @@
   zone={426}
   bait={29717}
   chum={false}
-  tug={null}
+  tug={TugType.Heavy}
   result={null}
-  now={12.3}
+  now={23.4}
   lureRest={14.5}
   total={Math.max(32.0, config.MinDuration)}
   highlight={[]}
