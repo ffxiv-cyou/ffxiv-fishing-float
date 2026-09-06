@@ -88,7 +88,7 @@ export class Config {
     this.mergeChumTime = obj.mergeChumTime !== undefined ? obj.mergeChumTime : true;
     this.lureEmptyWindowHandling = obj.lureEmptyWindowHandling || 'label';
     this.uploadHistory = obj.uploadHistory !== undefined ? obj.uploadHistory : true;
-    this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a'];
+    this.historyColors = obj.historyColors || ['#4caf50', '#f44336', '#ccaf0a', '#b5c115'];
     this.useOnlineHistory = obj.useOnlineHistory !== undefined ? obj.useOnlineHistory : true;
     this.statsThresold = obj.statsThresold || { gathering: 0, perception: 0, gp: 0 };
     this.statsThresoldEnabled = obj.statsThresoldEnabled !== undefined ? obj.statsThresoldEnabled : false;
@@ -97,6 +97,10 @@ export class Config {
     this.showUnknownIntuition = obj.showUnknownIntuition !== undefined ? obj.showUnknownIntuition : (obj.intuitionCounter !== 'off');
     this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
     this.tugLabelScheme = obj.tugLabelScheme || 'heavy';
+
+    if (this.historyColors.length < 4) {
+      this.historyColors.push('#b5c115');
+    }
   }
 
   reset() {
@@ -299,6 +303,19 @@ export class Config {
   }
   set HistoryHeavyColor(value: string) {
     this.historyColors[2] = value;
+    this.save();
+  }
+  /** 历史统计-重杆(精准)颜色 */
+  get HistoryHeavyPrecisionColor() {
+    this.#subscribe();
+    return this.historyColors.length > 3 ? this.historyColors[3] : this.historyColors[2];
+  }
+  set HistoryHeavyPrecisionColor(value: string) {
+    if (this.historyColors.length > 3) {
+      this.historyColors[3] = value;
+    } else {
+      this.historyColors.push(value);
+    }
     this.save();
   }
 

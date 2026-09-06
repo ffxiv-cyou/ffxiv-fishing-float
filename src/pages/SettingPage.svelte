@@ -283,6 +283,12 @@
           id="color-history-heavy"
           bind:value={config.HistoryHeavyColor}
         />
+        <label for="color-history-heavy-precise">重杆(精准)</label>
+        <input
+          type="color"
+          id="color-history-heavy-precise"
+          bind:value={config.HistoryHeavyPrecisionColor}
+        />
       </div>
       <div class="setting-item">
         <span class="setting-name">换算撒饵时间</span>

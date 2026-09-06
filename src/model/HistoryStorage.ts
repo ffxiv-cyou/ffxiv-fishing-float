@@ -37,6 +37,7 @@ export interface HistoryStatsItem {
   maxBiteTime: number;
 
   count: number;
+  isPrecise?: boolean; // 是否为精准咬钩
 }
 
 /**

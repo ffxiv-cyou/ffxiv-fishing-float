@@ -78,6 +78,7 @@
     str += `--history-light-color:${config.HistoryLightColor};`;
     str += `--history-medium-color:${config.HistoryMediumColor};`;
     str += `--history-heavy-color:${config.HistoryHeavyColor};`;
+    str += `--history-heavy-precision-color:${config.HistoryHeavyPrecisionColor};`;
     return str;
   });
 </script>

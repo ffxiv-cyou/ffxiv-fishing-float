@@ -308,6 +308,15 @@
         merged.push(stat);
       }
     }
+
+    // 更新精准信息
+    for (let stat of merged) {
+      let d = onlineHistory?.samples?.find((s) => s.id === stat.fish);
+      if (d && d.hook_type === FishHookType.Precision) {
+        stat.isPrecise = true;
+      }
+    }
+
     return merged;
   });
 

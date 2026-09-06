@@ -45,7 +45,11 @@
         classes.push("tug-medium");
         break;
       case TugType.Heavy:
-        classes.push("tug-heavy");
+        if (item.isPrecise) {
+          classes.push("tug-heavy-precise");
+        } else {
+          classes.push("tug-heavy");
+        }
         break;
     }
 
@@ -162,6 +166,9 @@
   }
   .tug-heavy {
     --color: var(--history-heavy-color);
+  }
+  .tug-heavy-precise {
+    --color: var(--history-heavy-precision-color);
   }
 
   .stats-item::before,
