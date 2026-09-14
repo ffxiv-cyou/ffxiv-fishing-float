@@ -1,4 +1,5 @@
 import type { Packet, PacketFilter } from "overlay-toolkit";
+import * as Sentry from "@sentry/svelte";
 import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, FFXIVIpcWeatherChange, PacketSegment, PacketType, StatusEffect } from "./Opcode";
 import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType, FishingSpotName } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
@@ -42,6 +43,29 @@ export class PacketHandler {
     opcodeMap: Map<number, PacketType> = new Map<number, PacketType>();
 
     public static readonly RingBufferSize = 1000;
+
+    // opcode 疑似过期时的聚合上报：解析越界只记数，
+    // 首次立刻报一条，每小时最多再汇总报一条，避免刷屏。
+    // （Unknown opcode 不会发生：插件只返回订阅时传过去的 opcode list）
+    private parseErrorCounts: Map<number, number> = new Map();
+    private lastOpcodeAlertAt: number = 0;
+    private static readonly OPCODE_ALERT_COOLDOWN_MS = 60 * 60 * 1000;
+
+    private maybeReportParseErrors(): void {
+        const now = Date.now();
+        if (now - this.lastOpcodeAlertAt < PacketHandler.OPCODE_ALERT_COOLDOWN_MS)
+            return;
+        this.lastOpcodeAlertAt = now;
+        const parseErrors = Array.from(this.parseErrorCounts.entries());
+        this.parseErrorCounts.clear();
+        Sentry.captureMessage("Possible stale opcode detected", {
+            level: "warning",
+            extra: {
+                gameDataVersion: this.tracker.gameDataVersion,
+                parseErrors,
+            },
+        });
+    }
 
     private ringBuffer: { epoch: number; dir: boolean; data: Uint8Array }[] = [];
 
@@ -113,6 +137,13 @@ export class PacketHandler {
             return;
         }
 
+        // 防御性解析：包长连包头都装不下时直接丢弃。
+        // 版本更新造成 opcode 错位时，短包会被错配到大 struct 越界（见 FISHER-2/FISHER-45）。
+        if (packet.data.byteLength < PacketSegment.PacketSize()) {
+            console.warn("Packet too short, dropped:", packet.opcode, packet.data.byteLength);
+            return;
+        }
+
         const dw = new DataView(packet.data.buffer, packet.data.byteOffset, packet.data.byteLength);
 
         if (!PacketHandler.isSourceEqualsTarget(dw)) {
@@ -121,54 +152,70 @@ export class PacketHandler {
 
         this.pushToRingBuffer(packet);
 
+        try {
+            this.dispatchPacket(pktType, dw, packet.epoch);
+        } catch (e) {
+            // 只吞 RangeError：用旧 struct 解析新包时越界是预期内的版本错位，
+            // 记 warn + 聚合上报，不刷屏；其他异常继续抛出。
+            if (e instanceof RangeError) {
+                console.warn("Packet parse out of bounds, dropped:", packet.opcode, pktType, packet.data.byteLength, e);
+                this.parseErrorCounts.set(packet.opcode, (this.parseErrorCounts.get(packet.opcode) ?? 0) + 1);
+                this.maybeReportParseErrors();
+                return;
+            }
+            throw e;
+        }
+    }
+
+    private dispatchPacket(pktType: PacketType, dw: DataView, epoch: number): void {
         switch (pktType) {
             case PacketType.PlayerSetup:
-                this.handlePlayerSetup(dw, packet.epoch);
+                this.handlePlayerSetup(dw, epoch);
                 break;
             case PacketType.PlayerStats:
-                this.handlePlayerStats(dw, packet.epoch);
+                this.handlePlayerStats(dw, epoch);
                 break;
             case PacketType.UpdateHpMpTp:
-                this.handleUpdateHpMpTp(dw, packet.epoch);
+                this.handleUpdateHpMpTp(dw, epoch);
                 break;
             case PacketType.ActorControl:
-                this.handleActorControl(dw, packet.epoch);
+                this.handleActorControl(dw, epoch);
                 break;
             case PacketType.ActorControlSelf:
-                this.handleActorControlSelf(dw, packet.epoch);
+                this.handleActorControlSelf(dw, epoch);
                 break;
             case PacketType.FishingResultMsg:
-                this.handleFishingResult(dw, packet.epoch);
+                this.handleFishingResult(dw, epoch);
                 break;
             case PacketType.ClientTrigger:
-                this.handleClientTrigger(dw, packet.epoch);
+                this.handleClientTrigger(dw, epoch);
                 break;
             case PacketType.EventStart:
-                this.handleEventStart(dw, packet.epoch);
+                this.handleEventStart(dw, epoch);
                 break;
             case PacketType.EventPlay:
-                this.handleEventPlay(dw, packet.epoch);
+                this.handleEventPlay(dw, epoch);
                 break;
             case PacketType.EventPlay4:
-                this.handleEventPlay4(dw, packet.epoch);
+                this.handleEventPlay4(dw, epoch);
                 break;
             case PacketType.EventFinish:
-                this.handleEventFinish(dw, packet.epoch);
+                this.handleEventFinish(dw, epoch);
                 break;
             case PacketType.GuessDoAction:
-                this.handleGuessDoAction(dw, packet.epoch);
+                this.handleGuessDoAction(dw, epoch);
                 break;
             case PacketType.SystemLogMessage:
-                this.handleSystemLogMessage(dw, packet.epoch);
+                this.handleSystemLogMessage(dw, epoch);
                 break;
             case PacketType.StatusEffectList:
-                this.handleStatusEffectList(dw, packet.epoch);
+                this.handleStatusEffectList(dw, epoch);
                 break;
             case PacketType.StatusEffectList3:
-                this.handleStatusEffectList3(dw, packet.epoch);
+                this.handleStatusEffectList3(dw, epoch);
                 break;
             case PacketType.WeatherChange:
-                this.handleWeatherChange(dw, packet.epoch);
+                this.handleWeatherChange(dw, epoch);
                 break;
             default:
                 console.warn(`Unhandled packet type: ${pktType}`);

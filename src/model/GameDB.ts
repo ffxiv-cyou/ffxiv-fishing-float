@@ -109,13 +109,37 @@ export class GameDatabase {
     }
   }
 
+  /**
+   * 拉取最新的版本列表
+   * @returns 
+   */
+  async fetchVersions(): Promise<{ [key: string]: string }> {
+    let versionsResp = await fetch(`/data/version.json?t=${Date.now()}`, {
+      cache: "no-cache",
+    });
+    if (!versionsResp.ok) {
+      throw new Error(`Failed to fetch version.json: ${versionsResp.status}`);
+    }
+    let versions: { [key: string]: string } = await versionsResp.json();
+    this.versions = versions;
+    return versions;
+  }
+
   async getVersions(): Promise<{ [key: string]: string }> {
     if (Object.keys(this.versions).length > 0) {
       return this.versions;
     }
-    let versionsResp = await fetch(`/data/version.json`);
-    this.versions = await versionsResp.json();
+    await this.fetchVersions();
     return this.versions;
+  }
+
+  /**
+   * 获取版本列表中最新的版本
+   * @returns 
+   */
+  getLatestVersion(): string | null {
+    let values = Object.values(this.versions);
+    return values.length > 0 ? values[0] : null;
   }
 
   async loadLatest(): Promise<void> {

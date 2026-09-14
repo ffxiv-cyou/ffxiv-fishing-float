@@ -40,6 +40,8 @@ export class FishingTracker extends EventTarget {
     db: GameDatabase;
     intuition: IntuitionCounter;
     memory?: IMemorySource;
+    // 当前已加载的游戏数据版本（internal version，如 2026.08.05.0000.0000）
+    public gameDataVersion: string | null = null;
 
     #subscribe;
     update: (() => void) | null = null;
@@ -67,8 +69,9 @@ export class FishingTracker extends EventTarget {
             this.update();
     }
 
-    public loadGameData(version: string): Promise<void> {
-        return this.db.load(version);
+    public async loadGameData(version: string): Promise<void> {
+        await this.db.load(version);
+        this.gameDataVersion = version;
     }
 
     public getVersions(): Promise<{ [key: string]: string }> {

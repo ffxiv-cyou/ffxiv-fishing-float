@@ -109,6 +109,61 @@
       });
   }
 
+  //#region 自动更新
+  let pendingGameVersion: string | null = null;
+  const DATA_REFRESH_INTERVAL_MS = 30 * 60 * 1000;
+
+  function isDataRefreshWindow(now: number = Date.now()): boolean {
+    const date = new Date(now);
+    const hour = date.getUTCHours();
+    return hour >= 8 && hour <= 10;
+  }
+
+  async function checkDataUpdate(): Promise<void> {
+    if (!isDataRefreshWindow()) return;
+    try {
+      await tracker.db.fetchVersions();
+      const latest = tracker.db.getLatestVersion();
+      if (latest === null) return;
+      const current = tracker.gameDataVersion;
+      if (
+        current !== null &&
+        latest !== current &&
+        latest !== pendingGameVersion
+      ) {
+        console.log("New game data version detected:", latest);
+        pendingGameVersion = latest;
+      }
+    } catch (e) {
+      console.log("Background data version check failed:", e);
+    }
+  }
+
+  async function applyPendingDataUpdate(): Promise<void> {
+    if (pendingGameVersion === null) return;
+    // 正在钓鱼（有未结算 session 或在钓鱼事件中）时不切换订阅，等空闲再应用，避免中断
+    if (tracker.CurrentSession !== null || tracker.IsInFishingEvent) {
+      console.log("Deferring game data update while fishing");
+      return;
+    }
+    const ver = pendingGameVersion;
+    try {
+      await tracker.loadGameData(ver);
+      logic.setOpcode(tracker.db.getOpcodes());
+      // Subscribe 按 name 覆盖，直接重订阅即可，无需先 Unsubscribe
+      logic.init(overlayToolkit);
+      pendingGameVersion = null;
+      console.log("Game data hot-updated to:", ver);
+    } catch (e) {
+      console.log("Background game data update failed:", e);
+    }
+  }
+
+  setInterval(() => {
+    checkDataUpdate().then(() => applyPendingDataUpdate());
+  }, DATA_REFRESH_INTERVAL_MS);
+  //#endregion
+
   function openHistory() {
     const spot = tracker.CurrentZone;
     const bait = tracker.CurrentBait;
