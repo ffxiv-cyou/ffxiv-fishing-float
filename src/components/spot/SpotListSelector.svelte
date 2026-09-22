@@ -94,7 +94,17 @@
       return undefined;
     }
 
-    for (const fish of fishList) {
+    // 只按钓鱼笔记判定完成度：过滤掉不在笔记中的鱼
+    const noteFishes = db.getFishingNoteInfo()?.fishes;
+    const checkList = noteFishes
+      ? fishList.filter((fish) => noteFishes.includes(fish))
+      : fishList;
+    // 过滤后为空说明全是笔记外鱼（如宇宙探索等），视为已完成
+    if (checkList.length === 0) {
+      return true;
+    }
+
+    for (const fish of checkList) {
       if (!storage.isFishingLogged(fish, false)) {
         return false;
       }
