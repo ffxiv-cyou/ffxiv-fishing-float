@@ -353,6 +353,22 @@ export class FishingTracker extends EventTarget {
         return this.buffs.has(BuffID.Chum);
     }
 
+    get HasFishersIntuition(): boolean {
+        this.#subscribe();
+        return this.buffs.has(BuffID.FishersIntuition);
+    }
+
+    /**
+     * 条件判定的时间（服务器 epoch 毫秒）：本次尝试的诱饵使用时间，否则抛竿时间；
+     * 两次抛竿之间用当前时间。
+     */
+    get CastAt(): number {
+        this.#subscribe();
+        const session = this.current;
+        if (!session) return Date.now();
+        return session.LureAt !== 0 ? session.LureAt : session.startTime;
+    }
+
     syncBuffState(session: FishingSession) {
         if (this.buffs.has(BuffID.AnglersFortune)) {
             if (this.buffs.has(BuffID.CatchAndRelease)) {
@@ -469,6 +485,7 @@ export class FishingTracker extends EventTarget {
 
                 // 抛竿
                 this.current.serverCast(epoch);
+                this.updateSub();
                 return;
             }
 

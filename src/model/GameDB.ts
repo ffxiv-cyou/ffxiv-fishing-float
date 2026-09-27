@@ -35,6 +35,7 @@ export interface FishingNoteInfo {
   spear_fishes: number[];
   spot_max_id: number;
   spear_spot_max_id: number;
+  lure_fish_indexes?: { [item: string]: number };
 }
 
 export interface FishIntuitionInfo {
@@ -51,6 +52,7 @@ export class GameDatabase {
   weatherNames: { [key: number]: string } = {};
   fishingNoteInfo?: FishingNoteInfo;
   intuitionInfo: FishIntuitionInfo[] = [];
+  private lureFishIndexes: Map<number, number> = new Map();
 
   versions: { [key: string]: string } = {};
   playerSetupInfo?: PlayerSetupInfo;
@@ -82,6 +84,7 @@ export class GameDatabase {
 
     let fishingNote = await fetch(`/data/${version}/note.json`);
     this.fishingNoteInfo = await fishingNote.json();
+    this.loadLureFishIndexes();
 
     let intuition = await fetch(`/data/intuition.json`);
     this.intuitionInfo = await intuition.json();
@@ -254,5 +257,33 @@ export class GameDatabase {
     }
     // 没有候选那没办法了……
     return undefined;
+  }
+
+  /**
+   * 获取钓场里「需要鱼识才能钓到」的鱼（物品 ID）。
+   */
+  getIntuitionRequiredFish(spotId: number): number[] {
+    this.#subscribe();
+
+    return this.intuitionInfo
+      .filter((info) => info.spot_id === spotId)
+      .map((info) => info.fish_id);
+  }
+
+  /**
+   * 鱼词鱼的 物品 ID → 图鉴序号；不是鱼词鱼或取不到时返回 0。
+   */
+  getLureFishIndex(fishId: number): number {
+    this.#subscribe();
+    return this.lureFishIndexes.get(fishId) ?? 0;
+  }
+
+  private loadLureFishIndexes(): void {
+    this.lureFishIndexes.clear();
+    const table = this.fishingNoteInfo?.lure_fish_indexes;
+    if (!table) return;
+    for (const [item, index] of Object.entries(table)) {
+      this.lureFishIndexes.set(Number(item), index);
+    }
   }
 }

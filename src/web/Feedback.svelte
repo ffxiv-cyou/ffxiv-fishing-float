@@ -94,6 +94,11 @@
 
 <div class="mx-auto max-w-2xl p-6">
   <Heading tag="h1" class="text-2xl">问题反馈</Heading>
+  <p>您也可以在以下渠道询问/反馈：</p>
+  <ul>
+    <li>NGA: <a href="https://ngabbs.com/read.php?tid=46065104" target="_blank" rel="nofollow noopener">帖子</a></li>
+  </ul>
+  <p>在使用中遇到 BUG，或是需要反馈数据上的问题，请填写以下表单：</p>
   <div class="mt-6 space-y-4">
     <div>
       <Label class="mb-1">反馈类型 *</Label>

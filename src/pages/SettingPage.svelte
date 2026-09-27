@@ -5,6 +5,11 @@
   import { GameDatabase } from "../model/GameDB";
   import { TugType } from "../model/InnerEnums";
   import TimerPreview from "@/components/TimerPreview.svelte";
+  import {
+    CONDITION_KINDS,
+    CONDITION_KIND_NAMES,
+    type ConditionKind,
+  } from "@/model/condition_filter";
 
   let config = new Config();
   let sound: Sound;
@@ -15,6 +20,15 @@
 
   function testSound(type: TugType) {
     sound.play(type);
+  }
+
+  function toggleConditionFilter(kind: ConditionKind, enabled: boolean) {
+    const current = config.ConditionFilters;
+    if (enabled) {
+      if (!current.includes(kind)) config.ConditionFilters = [...current, kind];
+    } else {
+      config.ConditionFilters = current.filter((item) => item !== kind);
+    }
   }
 </script>
 
@@ -331,6 +345,54 @@
           "调整历史显示"则会临时调整历史杆时的显示
         </span>
       </div>
+      <div class="setting-item">
+        <span class="setting-name">条件过滤样式</span>
+        <input
+          type="radio"
+          name="condition-style"
+          value="off"
+          id="condition-style-off"
+          bind:group={config.ConditionFilterStyle}
+        />
+        <label for="condition-style-off">关闭</label>
+        <input
+          type="radio"
+          name="condition-style"
+          value="dim"
+          id="condition-style-dim"
+          bind:group={config.ConditionFilterStyle}
+        />
+        <label for="condition-style-dim">暗淡</label>
+        <input
+          type="radio"
+          name="condition-style"
+          value="hide"
+          id="condition-style-hide"
+          bind:group={config.ConditionFilterStyle}
+        />
+        <label for="condition-style-hide">隐藏</label>
+        <span class="setting-desc">控制如何显示当前无法钓到的鱼</span>
+      </div>
+      {#if config.ConditionFilterStyle !== "off"}
+        <div class="setting-item">
+          <span class="setting-name">过滤条件</span>
+          {#each CONDITION_KINDS as kind}
+            <input
+              type="checkbox"
+              id={`condition-${kind}`}
+              checked={config.ConditionFilters.includes(kind)}
+              onchange={(event) =>
+                toggleConditionFilter(
+                  kind,
+                  (event.target as HTMLInputElement).checked,
+                )}
+            />
+            <label for={`condition-${kind}`}>{CONDITION_KIND_NAMES[kind]}</label
+            >
+          {/each}
+        <span class="setting-desc">控制条件的生效范围（全不选则关闭）</span>
+        </div>
+      {/if}
       {#if config.UploadHistory}
         <div class="setting-item">
           <span class="setting-name">在线数据</span>

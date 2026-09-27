@@ -1,7 +1,12 @@
 import { createSubscriber } from 'svelte/reactivity';
 import type { FisherStats } from './FishingTracker';
+import { CONDITION_KINDS, type ConditionKind } from './condition_filter';
+
+const CONDITION_KIND_SET = new Set<ConditionKind>(CONDITION_KINDS);
 
 export type TugLabelScheme = 'heavy' | 'big' | 'marks';
+
+export type ConditionFilterStyle = 'dim' | 'hide' | 'off';
 
 export class Config {
   #subscribe;
@@ -37,6 +42,10 @@ export class Config {
   minDuration: number = 0;
   /** 咬钩标签方案: 'heavy'-轻/中/重竿, 'big'-轻/中/鱼王竿, 'marks'-!/!!/!!! */
   tugLabelScheme: TugLabelScheme = 'heavy';
+  /** 条件过滤: 参与「当前钓不到」判定的条件（多选），空数组=关闭 */
+  conditionFilters: ConditionKind[] = ['phase', 'intuition', 'lure'];
+  /** 条件过滤呈现: 'dim'-暗淡, 'hide'-隐藏, 'off'-关闭 */
+  conditionFilterStyle: ConditionFilterStyle = 'dim';
 
   /** 极简模式颜色: [抛竿, 轻竿, 中竿, 重竿] */
   minimalColors: string[] = [];
@@ -64,7 +73,7 @@ export class Config {
     this.#subscribe = createSubscriber((update) => {
       this.update = update;
     });
-    
+
     window.addEventListener("message", this.messageHandler.bind(this), false);
 
     this.load();
@@ -97,6 +106,15 @@ export class Config {
     this.showUnknownIntuition = obj.showUnknownIntuition !== undefined ? obj.showUnknownIntuition : (obj.intuitionCounter !== 'off');
     this.minDuration = obj.minDuration !== undefined ? obj.minDuration : 0;
     this.tugLabelScheme = obj.tugLabelScheme || 'heavy';
+    this.conditionFilters = Array.isArray(obj.conditionFilters)
+      ? obj.conditionFilters.filter((kind: unknown): kind is ConditionKind =>
+        CONDITION_KIND_SET.has(kind as ConditionKind),
+      )
+      : ['phase', 'intuition', 'lure'];
+    this.conditionFilterStyle =
+      obj.conditionFilterStyle === 'hide' || obj.conditionFilterStyle === 'off'
+        ? obj.conditionFilterStyle
+        : 'dim';
 
     if (this.historyColors.length < 4) {
       this.historyColors.push('#b5c115');
@@ -109,10 +127,10 @@ export class Config {
   }
 
   messageHandler(event: MessageEvent) {
-     if (event.data.type === "config-changed") {
-        this.load();
-        this.update?.();
-      }
+    if (event.data.type === "config-changed") {
+      this.load();
+      this.update?.();
+    }
   }
 
   notifyOtherWindows() {
@@ -336,7 +354,7 @@ export class Config {
     this.statsThresold.perception = value;
     this.save();
   }
-  
+
   /** 启用三维阈值提醒功能 */
   get StatsThresoldEnabled() {
     this.#subscribe();
@@ -394,6 +412,25 @@ export class Config {
   }
   set TugLabelScheme(value: TugLabelScheme) {
     this.tugLabelScheme = value;
+    this.save();
+  }
+  /** 参与「当前钓不到」判定的条件（多选）*/
+  get ConditionFilters() {
+    this.#subscribe();
+    return this.conditionFilters;
+  }
+  set ConditionFilters(value: ConditionKind[]) {
+    this.conditionFilters = value;
+    this.save();
+  }
+
+  /** 条件过滤呈现方式: 'dim'-暗淡, 'hide'-隐藏, 'off'-关闭 */
+  get ConditionFilterStyle() {
+    this.#subscribe();
+    return this.conditionFilterStyle;
+  }
+  set ConditionFilterStyle(value: ConditionFilterStyle) {
+    this.conditionFilterStyle = value;
     this.save();
   }
 }

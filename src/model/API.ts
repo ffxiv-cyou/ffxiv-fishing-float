@@ -423,6 +423,25 @@ export interface FishDurationResponse {
   distributions: Array<FishDurationDistribution>;
   merged: Array<FishDurationDistribution>;
   samples: Array<FishSampleCount>;
+  conditions?: Array<FishRequirement>;
+}
+
+/**
+ * 单条鱼的条件描述。幻海流钓场只给 phases，普通钓场的条件鱼给真实 ET 区间/天气；
+ * 字段缺失表示无法判定，客户端应中性通过。
+ */
+export interface FishRequirement {
+  id: number;
+  /** 可用航段时相：1=白天 2=黄昏 3=夜晚 */
+  phases?: Array<number>;
+  /** 真实 ET 分钟区间；start >= end 表示跨午夜 */
+  time_start?: number;
+  time_end?: number;
+  /** 当前天气 / 上一个天气周期 */
+  cur_weather?: Array<number>;
+  prev_weather?: Array<number>;
+  /** 该鱼只有在「鱼词」（诱饵提示词）出现时才能钓到 */
+  is_lure_hidden?: boolean;
 }
 
 export interface FishSampleCount {

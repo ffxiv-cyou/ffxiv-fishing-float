@@ -6,6 +6,7 @@
   import { LureType, TugType } from "../model/InnerEnums";
   import { type FishDurationResponse, FishHookType } from "@/model/API";
   import { createPrecastLookup } from "@/components/spot/data_helper";
+  import { blockedFishes } from "@/model/condition_filter";
 
   let {
     tracker,
@@ -321,6 +322,43 @@
   });
 
   //#endregion
+
+  //#region 条件过滤（当前钓不到）
+  let castAt = $derived(tracker.CastAt);
+  let conditionContext = $derived({
+    cast: castAt,
+    place: zone,
+    weathers: zone ? tracker.db.getTerritoryByPlaceID(zone)?.weathers : undefined,
+    hasIntuition: tracker.HasFishersIntuition,
+    intuitionRequired: zone
+      ? tracker.db.getIntuitionRequiredFish(zone)
+      : [],
+    hiddenFish: current?.HiddenFish ?? 0,
+    lureFishIndex: (fishId: number) => tracker.db.getLureFishIndex(fishId),
+  });
+
+  let blockedFish = $derived.by(() =>
+    blockedFishes(
+      onlineHistory?.conditions,
+      tracker.config.ConditionFilters,
+      conditionContext,
+    ),
+  );
+
+  let displayStats = $derived.by(() => {
+    if (tracker.config.ConditionFilterStyle !== "hide" || blockedFish.size === 0) {
+      return historyStats;
+    }
+    return historyStats.filter((stat) => !blockedFish.has(stat.fish));
+  });
+
+  let displayDownplay = $derived.by(() => {
+    if (tracker.config.ConditionFilterStyle !== "dim" || blockedFish.size === 0) {
+      return downplay;
+    }
+    return [...downplay, ...blockedFish];
+  });
+  //#endregion
 </script>
 
 {#if showStats}
@@ -335,11 +373,11 @@
     tug={current?.TugType ?? null}
     result={result ?? null}
     lureRest={lureEmptyWindow}
-    {downplay}
+    downplay={displayDownplay}
     {now}
     {total}
     {highlight}
-    {historyStats}
+    historyStats={displayStats}
   ></Timer>
 {/if}
 <TugSound

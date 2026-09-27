@@ -28,7 +28,7 @@ export class FishingSession {
 
     private identicalFish: number = 0; // 专一垂钓
     private slapFish: number = 0; // 拍击水面
-    private hiddenFish: number = 0; // 隐藏鱼ID
+    private hiddenFish: number = 0; // 鱼词指向的鱼的图鉴序号（不是物品 ID）
     private hiddenStacks: number = 0; // 鱼词出现时的层数
 
     private tugType: TugType | null = null;
@@ -138,6 +138,7 @@ export class FishingSession {
     }
 
     get HiddenFish(): number {
+        this.#subscribe();
         return this.hiddenFish;
     }
 
