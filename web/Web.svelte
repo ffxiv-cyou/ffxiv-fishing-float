@@ -16,6 +16,11 @@
     Dropdown,
     DropdownItem,
   } from "flowbite-svelte";
+  import ChangelogModal from "../src/components/ChangelogModal.svelte";
+  import {
+    fetchUnreadChangelog,
+    markChangelogSeen,
+  } from "../src/lib/changelog";
   import ChevronDownOutline from "../src/components/icon/ChevronDownOutline.svelte";
   import SearchCombo from "../src/components/SearchCombo.svelte";
 
@@ -30,6 +35,28 @@
   let tracker = new FishingTracker();
   tracker.db.loadLatest().then(() => {
     console.log("FishingTracker loaded");
+  });
+
+  // 更新日志
+  let changelog: { version: string; html: string } | null = $state(null);
+  let changelogOpen = $state(false);
+
+  function closeChangelog() {
+    changelogOpen = false;
+    if (changelog) markChangelogSeen(changelog.version);
+  }
+
+  $effect(() => {
+    let cancelled = false;
+    fetchUnreadChangelog().then((entry) => {
+      if (!cancelled && entry) {
+        changelog = entry;
+        changelogOpen = true;
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
   });
 
   let theme: ThemeConfig = {
@@ -98,6 +125,14 @@
         {/each}
       </NavUl>
     </Navbar>
+
+    {#if changelog}
+      <ChangelogModal
+        bind:open={changelogOpen}
+        html={changelog.html}
+        onclose={closeChangelog}
+      />
+    {/if}
 
     <div class="web-content">
       {#each routes as route}

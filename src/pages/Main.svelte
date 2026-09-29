@@ -4,7 +4,13 @@
   import Timer from "@/pages/Timer.svelte";
   import overlayToolkit, { type GameVersion } from "overlay-toolkit";
   import { PcapReplay } from "@/model/dev/replay";
+  import { onMount } from "svelte";
   import Notice, { type Message } from "@/pages/Notice.svelte";
+  import ChangelogPopup from "@/components/ChangelogPopup.svelte";
+  import {
+    fetchUnreadChangelog,
+    markChangelogSeen,
+  } from "@/lib/changelog";
   import SpectralTimer from "@/components/SpectralTimer.svelte";
   import {
     initFeedbackOverlayHandler,
@@ -49,6 +55,33 @@
   function toggleConfig() {
     showConfig = !showConfig;
   }
+
+  //#region 更新日志弹窗
+  let changelog: { version: string; html: string } | null = $state(null);
+  let showChangelog = $state(false);
+
+  function closeChangelog() {
+    if (!showChangelog) return;
+    showChangelog = false;
+    if (changelog) markChangelogSeen(changelog.version);
+  }
+
+  onMount(() => {
+    fetchUnreadChangelog().then((entry) => {
+      if (!entry) return;
+      if (tracker.IsInFishingEvent || tracker.CurrentSession) {
+        markChangelogSeen(entry.version);
+        return;
+      }
+      changelog = entry;
+      showChangelog = true;
+    });
+  });
+
+  // 开始钓鱼后直接强制关闭
+  tracker.addEventListener("start", closeChangelog);
+  tracker.addEventListener("begin", closeChangelog);
+  //#endregion
 
   let message: Message | undefined = $state({
     title: "悬浮窗插件连接失败",
@@ -289,6 +322,13 @@
   </details>
 </div>
 <Notice {message} />
+{#if showChangelog && changelog}
+  <ChangelogPopup
+    html={changelog.html}
+    autoCloseSec={10}
+    onclose={closeChangelog}
+  />
+{/if}
 <SpectralTimer {tracker}>
   {#snippet childrenLeft()}
     <div class="round-hint"></div>

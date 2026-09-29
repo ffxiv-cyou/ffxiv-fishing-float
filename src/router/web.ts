@@ -9,6 +9,7 @@ import FAQ from "@/web/FAQ.svelte";
 import Methodology from "@/web/Methodology.svelte";
 import NoteExport from "@/web/NoteExport.svelte";
 import Feedback from "@/web/Feedback.svelte";
+import Changelog from "@/web/Changelog.svelte";
 import AdminLogin from "@/web/admin/AdminLogin.svelte";
 import AdminRecords from "@/web/admin/AdminRecords.svelte";
 import AdminDeleted from "@/web/admin/AdminDeleted.svelte";
@@ -59,6 +60,11 @@ export const routes: Array<RouteConfig> = [
     path: "/feedback",
     name: "问题反馈",
     component: Feedback,
+  },
+  {
+    path: "/changelog",
+    name: "更新日志",
+    component: Changelog,
   },
   {
     path: "/admin/login",
@@ -113,6 +119,10 @@ export const navTree: NavTree[] = [
       {
         name: "问题反馈",
         path: "/feedback"
+      },
+      {
+        name: "更新日志",
+        path: "/changelog"
       },
       {
         name: "隐私政策",
