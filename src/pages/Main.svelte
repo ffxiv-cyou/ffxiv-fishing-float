@@ -288,8 +288,7 @@
 
 <div class="debug-tool">
   <div>
-    <h2>钓鱼悬浮窗</h2>
-    <p>在ACT中添加此悬浮窗后开始使用</p>
+    <h2>鱼漂</h2>
     <div class="link-buttons">
       <a class="primary" href="/web/#/help/overlay" target="_blank">安装教程</a>
       <a class="primary" href="/web/#/help/app" target="_blank">桌面版</a>
