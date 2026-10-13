@@ -47,6 +47,38 @@ export const enum ClientTriggerType {
     Fishing = 0x2BD, // 701, Fishing
 };
 
+/**
+ * 刺鱼的 ClientTrigger 命令
+ */
+export const enum SpearClientTrigger {
+    UseSkill = 713, // 使用技能，param2 = 技能 ID
+    Sync = 714, // 等待期位置自动同步
+    Age = 715, // 三位置影的存活时长
+    Fish = 716, // 收鱼/提叉
+    Lock = 717, // 逐位置是否在中心命中窗，0 = 在中心
+    Ready = 718, // 叉鱼 UI 就绪
+}
+
+export const enum SpearSkill {
+    Gig = 7632, // 刺鱼
+    BaitedBreath = 26871, // 闭气
+    ElectricCurrent = 26872, // 电水流
+}
+
+/**
+ * DirectorUpdate（ActorControlSelf cat=0x6D）中 param2 的取值。
+ */
+export const enum SpearDirectorParam {
+    Spawn = 1, // 刷影：p3 = 槽位(+10000 发光)，p4 = 速度，p5 = 尺寸档
+    Close = 2, // 结束
+    Catch = 3, // 捕获：p3 = SpearFishID，p4 = 星寸，p5 = flag
+    Chain = 4, // 连击计数
+    Wariness = 5, // 警戒度计量
+    Seed = 6, // 开场随机种子
+    FirstCatch = 7, // 本点首获标记
+    Echo = 11, // 出手回显
+}
+
 export const enum FishingSpotName {
     UnrecordedSpot = 950, // 未知钓场
 }

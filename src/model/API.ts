@@ -21,6 +21,24 @@ export class API {
   }
 
   /**
+   * Upload spearfishing catch records (CBOR array of SpearSingle).
+   */
+  public async uploadSpearData(data: Uint8Array): Promise<Response> {
+    const headers = this.generateHeader(data);
+    const resp = await fetch(`${this.basePath}/spear/upload`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/cbor",
+        ...headers,
+      },
+      body: data as any,
+      credentials: "include",
+    });
+    this.handleResponseHeader(resp.headers);
+    return resp;
+  }
+
+  /**
    * Get fishing duration distribution for a specific fishing spot
    * @param spotID spot ID, required
    * @param opt optional parameters for filtering the results

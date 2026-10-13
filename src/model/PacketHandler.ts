@@ -1,7 +1,7 @@
 import type { Packet, PacketFilter } from "overlay-toolkit";
 import * as Sentry from "@sentry/svelte";
 import { FFXIVIpcActorControl, FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger, FFXIVIpcEventFinish, FFXIVIpcEventPlay, FFXIVIpcEventPlay4, FFXIVIpcEventStart, FFXIVIpcFishingResultMsg, FFXIVIpcGuessTargetAction, FFXIVIpcPlayerSetup, FFXIVIpcPlayerStats, FFXIVIpcStatusEffectList, FFXIVIpcStatusEffectList2, FFXIVIpcStatusEffectList3, FFXIVIpcSystemLogMessage, FFXIVIpcUpdateHpMpTp, FFXIVIpcWeatherChange, PacketSegment, PacketType, StatusEffect } from "./Opcode";
-import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType, FishingSpotName } from "./CommonEnums";
+import { ActorControlType, ClientTriggerType, EventID, EventPlayParamType, FishingActionType, FishingSpotName, SpearClientTrigger } from "./CommonEnums";
 import { FailReason, HookType, LureType, TugType } from "./InnerEnums";
 import { FishingTracker } from "./FishingTracker";
 import { createPcapFile } from "./dev/pcap";
@@ -293,7 +293,7 @@ export class PacketHandler {
                 this.handleSwimbaitMsg(actorControlSelf, epoch);
                 break;
             case ActorControlType.LogMsg:
-                this.handleLogMessage(actorControlSelf.param1, [actorControlSelf.param2, actorControlSelf.param3, actorControlSelf.param4], epoch);
+                this.handleLogMessage(actorControlSelf.param1, 0, [actorControlSelf.param2, actorControlSelf.param3, actorControlSelf.param4], epoch);
                 break;
             case ActorControlType.DirectorInit:
                 this.handleDirectorInit(actorControlSelf, epoch);
@@ -329,6 +329,12 @@ export class PacketHandler {
         switch (clientTrigger.commandId) {
             case ClientTriggerType.Fishing:
                 this.handleClientTriggerFishing(clientTrigger, epoch);
+                break;
+            case SpearClientTrigger.UseSkill:
+                this.tracker.spear.onUseSkill(clientTrigger, epoch);
+                break;
+            case SpearClientTrigger.Lock:
+                this.tracker.spear.onLock(clientTrigger, epoch);
                 break;
             default:
                 break;
@@ -408,6 +414,7 @@ export class PacketHandler {
         if (eventFinish.eventId === EventID.Fishing) {
             this.tracker.setFishingEvent(false, epoch);
         }
+        this.tracker.spear.finish(eventFinish.eventId);
     }
 
     private handleFishEventPlay(scene: number, args: number[], epoch: number): void {
@@ -459,10 +466,10 @@ export class PacketHandler {
     }
     private handleSystemLogMessage(dw: DataView, epoch: number): void {
         const log = new FFXIVIpcSystemLogMessage(dw);
-        this.handleLogMessage(log.messageId, [log.param1, log.param2].slice(0, log.paramSize), epoch);
+        this.handleLogMessage(log.messageId, log.eventId, [log.param1, log.param2].slice(0, log.paramSize), epoch);
     }
 
-    private handleLogMessage(id: number, params: number[], epoch: number): void {
+    private handleLogMessage(id: number, evtId: number, params: number[], epoch: number): void {
         switch (id) {
             case 1110: // ???在???甩出了鱼线开始钓鱼
                 this.tracker.setFishingSpot(params[0]);
@@ -536,6 +543,14 @@ export class PacketHandler {
             case 10769: // 请通过“当前任务”窗口选择“汇报”，完成任务。
                 this.tracker.setUsingWksBait(false);
                 break;
+
+            case 3571: // 在XXX开始捕鱼
+            case 3579: // 将新渔场“XXX”记录到了钓鱼笔记中！
+                this.tracker.spear.setSpot(evtId, params[0]);
+                return;
+            case 3598: // 在未知的渔场开始捕鱼。
+                this.tracker.spear.setSpot(evtId, 0);
+                return;
         }
         console.log("Log Message Packet:", id);
     }
@@ -595,18 +610,20 @@ export class PacketHandler {
     }
 
     private handleDirectorUpdate(data: FFXIVIpcActorControlSelf, epoch: number): void {
-        if (!this.isDirectorOceanFishing(data.param1))
+        if (this.isDirectorOceanFishing(data.param1)) {
+            const instance = data.param1 & 0xFFFF;
+            switch (data.param2) {
+                case 6:
+                    const phaseDuration = data.param3;
+                    const endAt = data.param4;
+                    this.tracker.newOceanFishingPhase(instance, phaseDuration, epoch);
+                    break;
+            }
             return;
-
-        const instance = data.param1 & 0xFFFF;
-        const type = data.param2;
-        switch (type) {
-            case 6:
-                const phaseDuration = data.param3;
-                const endAt = data.param4;
-                this.tracker.newOceanFishingPhase(instance, phaseDuration, epoch);
-                break;
         }
+
+        if (this.tracker.spear.handleDirectorUpdate(data, epoch))
+            return;
     }
 
     //#endregion

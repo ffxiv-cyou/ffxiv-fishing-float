@@ -7,6 +7,7 @@ import { GameDatabase } from "./GameDB";
 import { FishingHistory } from "./History";
 import { LureType, FailReason, HookType, TugType } from "./InnerEnums";
 import { IntuitionCounter } from "./IntuitionCounter";
+import { SpearTracker } from "./SpearTracker";
 import * as Sentry from "@sentry/svelte";
 
 import type { MemoryScanResult, MemoryReadResult } from "overlay-toolkit";
@@ -39,6 +40,7 @@ export class FishingTracker extends EventTarget {
     config: Config;
     db: GameDatabase;
     intuition: IntuitionCounter;
+    spear: SpearTracker;
     memory?: IMemorySource;
     // 当前已加载的游戏数据版本（internal version，如 2026.08.05.0000.0000）
     public gameDataVersion: string | null = null;
@@ -58,6 +60,7 @@ export class FishingTracker extends EventTarget {
         this.history = new FishingHistory(this.api, this.config);
         this.db = new GameDatabase();
         this.intuition = new IntuitionCounter();
+        this.spear = new SpearTracker(this.api, this.config, this.db);
     }
 
     public init(memory: IMemorySource) {
