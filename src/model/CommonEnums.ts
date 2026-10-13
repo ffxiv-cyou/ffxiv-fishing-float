@@ -66,6 +66,21 @@ export const enum SpearSkill {
 }
 
 /**
+ * 叉鱼记录 flags（uint16）位域，与后端 SpearRecord 的解读保持一致。
+ * 一条记录对应一次刷影；刺中后回填 fishId/size/captureFlags。
+ */
+export const enum SpearFlags {
+    CaptureMask = 0x7, // bit0-2 捕获结算 flag
+    Glowing = 1 << 3, // bit3 发光影（HQ）
+    SizeClassShift = 4, // bit4-5 尺寸档
+    SizeClassMask = 0x3,
+    SlotShift = 6, // bit6-7 槽位
+    SlotMask = 0x3,
+    Intuition = 1 << 8, // bit8 刺鱼人的直觉（鱼识）
+    Uncaught = 1 << 9, // bit9 仅生成、未被刺中（fishId=0）
+}
+
+/**
  * DirectorUpdate（ActorControlSelf cat=0x6D）中 param2 的取值。
  */
 export const enum SpearDirectorParam {
@@ -188,6 +203,7 @@ export const enum EventPlayParamType {
 
 export enum BuffID {
     FishersIntuition = 568, // 捕鱼人之识
+    SpearfishersIntuition = 2891, // 刺鱼人的直觉, 叉鱼的鱼识
     Snagging = 761, // 钓组, Action = 4100 钓组
     FishEyes = 762, // 鱼眼, Action = FishEyes
     Chum = 763, // 撒饵, Action = Chum

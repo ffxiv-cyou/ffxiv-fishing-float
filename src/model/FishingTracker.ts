@@ -60,7 +60,7 @@ export class FishingTracker extends EventTarget {
         this.history = new FishingHistory(this.api, this.config);
         this.db = new GameDatabase();
         this.intuition = new IntuitionCounter();
-        this.spear = new SpearTracker(this.api, this.config, this.db);
+        this.spear = new SpearTracker(this.api, this.config, this.db, () => this.buffs.has(BuffID.SpearfishersIntuition));
     }
 
     public init(memory: IMemorySource) {
