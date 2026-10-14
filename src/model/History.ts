@@ -75,6 +75,7 @@ export class FishingHistory {
   //#region Data Upload
   nextUpload: number | null = null;
   retryCount: number = 0;
+  private uploading = false;
   private triggerUpload(): void {
     if (!this.cfg.UploadHistory || this.pendingSessions.length === 0 || this.nextUpload !== null) {
       return;
@@ -84,16 +85,18 @@ export class FishingHistory {
     this.nextUpload = setTimeout(() => this.uploadPendingSessions(), 60 * 1000);
   }
 
-  uploadPendingSessions(): void {
-    const sessionsToUpload = this.pendingSessions;
-    if (sessionsToUpload.length === 0) {
+  async uploadPendingSessions(): Promise<void> {
+    if (this.uploading || this.pendingSessions.length === 0) {
       return;
     }
 
-    const data = sessionsToUpload.map((s) => s.serialize());
+    const batchSize = this.pendingSessions.length;
+    const data = this.pendingSessions.map((s) => s.serialize());
     const body = encode(data);
 
-    this.api.uploadFishingData(body).then((resp) => {
+    this.uploading = true;
+    try {
+      const resp = await this.api.uploadFishingData(body);
       if (!resp.ok) {
         console.error("Failed to upload fishing data, server responded with status", resp.status);
         this.retryCount++;
@@ -101,14 +104,17 @@ export class FishingHistory {
         return;
       }
 
-      this.pendingSessions.splice(0, sessionsToUpload.length);
+      this.pendingSessions.splice(0, batchSize);
       this.nextUpload = null;
       this.retryCount = 0;
-    }).catch((err) => {
+      this.triggerUpload(); // 上报过程中可能会插入一个新的数据，这里补上报
+    } catch (err) {
       console.error("Failed to upload fishing data:", err);
       this.retryCount++;
       this.nextUpload = setTimeout(() => this.uploadPendingSessions(), Math.min(10 * 60 * 1000, this.retryCount * 30000));
-    });
+    } finally {
+      this.uploading = false;
+    }
   }
   //#endregion
 }
