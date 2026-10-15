@@ -12,6 +12,7 @@
   } from "flowbite-svelte";
   import { Tabs, TabItem } from "flowbite-svelte";
   import SpearSpotByFish from "./SpearSpotByFish.svelte";
+  import SpearSpeedPreview from "./SpearSpeedPreview.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
   import type { SpearSpotResponse } from "@/model/API";
   import CheckDouble from "../icon/CheckCircle.svelte";
@@ -58,6 +59,20 @@
     return stats?.fishes.find((f) => f.id === fishID);
   }
 
+  // 按尺寸档分组（小→中→大→未知），同尺寸保持原顺序，方便对比同体型鱼的速度
+  let previewFishes = $derived.by(() =>
+    fishes
+      .map((id) => {
+        const stat = getFishStat(id);
+        return {
+          id,
+          speed: stat?.speed ?? 0,
+          sizeClass: stat?.size_class ?? 0,
+        };
+      })
+      .sort((a, b) => (a.sizeClass || 99) - (b.sizeClass || 99)),
+  );
+
   function sizeClassName(sizeClass: number): string {
     switch (sizeClass) {
       case 1:
@@ -94,7 +109,11 @@
 {:else}
   <Tabs tabStyle="underline" bind:selected={getSelectedTab, setSelectedTab}>
     <TabItem title="基本信息" key="basic">
-      <Heading tag="h2" class="relative text-2xl leading-tight mb-4"
+      <SpearSpeedPreview
+        fishes={previewFishes}
+        getName={(id) => tracker.db.getItemName(id)}
+      />
+      <Heading tag="h2" class="relative text-2xl leading-tight mb-4 mt-4"
         >鱼类列表</Heading
       >
       <P>
