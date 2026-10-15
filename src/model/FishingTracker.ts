@@ -147,10 +147,23 @@ export class FishingTracker extends EventTarget {
     }
 
     public setBait(baitId: number) {
+        const oldBait = this.bait;
         this.bait = baitId;
         if (this.useWksBait) {
             console.log(`Bait set to: ${baitId}, reset wks bait status`);
             this.useWksBait = false;
+        }
+
+        // 手速过快时，鱼饵会比抛竿后到，这里修复一下
+        const s = this.current;
+        if (
+            this.swimBait === 0 &&
+            s && !s.HasResult && !s.isMooch &&
+            s.baitId === oldBait && s.baitId !== baitId &&
+            Date.now() - s.startLocalTime < 1000
+        ) {
+            console.warn("update bait for current session:", s.baitId, baitId);
+            s.clientSetBait(baitId);
         }
         this.updateSub();
     }
@@ -412,9 +425,10 @@ export class FishingTracker extends EventTarget {
     }
 
     public cast(epoch: number, bait: number = 0): void {
-        console.log("local cast with bait:", bait, this.CurrentBait, epoch, Date.now());
+        const isMooch = bait !== 0;
         if (bait === 0)
             bait = this.CurrentBait;
+        console.log("local cast with bait:", bait, this.CurrentBait, epoch, Date.now());
 
         if (this.current) {
             const now = Date.now();
@@ -436,13 +450,14 @@ export class FishingTracker extends EventTarget {
             }
         }
 
-        this.current = this.newSession(epoch, bait);
+        this.current = this.newSession(epoch, bait, isMooch);
         this.dispatchEvent(new Event("begin"));
         this.updateSub();
     }
 
-    newSession(epoch: number, bait: number): FishingSession {
+    newSession(epoch: number, bait: number, isMooch: boolean = false): FishingSession {
         const session = new FishingSession(epoch, bait, this.fisherStats);
+        session.isMooch = isMooch;
         session.Zone = this.currentZone;
 
         if (this.nextIdenticalFish) {

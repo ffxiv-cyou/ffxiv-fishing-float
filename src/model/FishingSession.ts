@@ -10,6 +10,7 @@ export class FishingSession {
     endLocalTime: number | null = null;
 
     baitId: number;
+    public isMooch: boolean = false;
     private zone: number = 0; // PlaceName actually
 
     chum: boolean = false; // 撒饵
@@ -118,6 +119,11 @@ export class FishingSession {
     public setPatienceResult(isPrecision: boolean, success: boolean): void {
         this.patienceHookResult = { isPrecision, success };
         this.onUpdate();
+    }
+
+    /** 是否已经钓完了 */
+    get HasResult(): boolean {
+        return this.result !== null;
     }
 
     setHiddenFish(fishID: number, epoch: number) {
