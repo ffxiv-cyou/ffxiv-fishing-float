@@ -49,6 +49,7 @@ export class GameDatabase {
   itemNames: { [key: number]: string } = {};
   opcodes: { [key: string]: number } = {};
   placeTree: PlaceTree[] = [];
+  spearSpotTree: PlaceTree[] = [];
   weatherNames: { [key: number]: string } = {};
   fishingNoteInfo?: FishingNoteInfo;
   intuitionInfo: FishIntuitionInfo[] = [];
@@ -78,6 +79,11 @@ export class GameDatabase {
 
     let placetree = await fetch(`/data/${version}/placetree.json`);
     this.placeTree = await placetree.json();
+
+    let speartree = await fetch(`/data/${version}/speartree.json`);
+    if (speartree.ok) {
+      this.spearSpotTree = await speartree.json();
+    }
 
     let weathers = await fetch(`/data/${version}/weather.json`);
     this.weatherNames = await weathers.json();
@@ -183,6 +189,18 @@ export class GameDatabase {
     return this.placeTree;
   }
 
+  getSpearSpotTree(): PlaceTree[] {
+    this.#subscribe();
+    return this.spearSpotTree;
+  }
+
+  /**
+   * 是否为叉鱼钓场。钓鱼/叉鱼钓场 ID 不重合，以叉鱼树命中为准。
+   */
+  isSpearSpot(id: number): boolean {
+    return this.getSpearPlaceTreeByID(id) !== null;
+  }
+
   getPlayerSetupInfo(): PlayerSetupInfo | undefined {
     this.#subscribe();
     return this.playerSetupInfo;
@@ -191,6 +209,10 @@ export class GameDatabase {
   getFishingNoteInfo(): FishingNoteInfo | undefined {
     this.#subscribe();
     return this.fishingNoteInfo;
+  }
+
+  getSpearPlaceTreeByID(id: number): PlaceTree | null {
+    return this.getPlaceTreeByID(id, this.spearSpotTree);
   }
 
   getPlaceTreeByID(id: number, tree: PlaceTree[] = this.placeTree): PlaceTree | null {

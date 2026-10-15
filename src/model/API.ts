@@ -135,6 +135,22 @@ export class API {
     return await resp.json();
   }
 
+  /**
+   * Get spearfishing stats for a specific spearfishing spot.
+   * @param spotID spearfishing spot (PlaceName) ID, required
+   * @returns fish list with size class, speed, size range and sample counts
+   */
+  public async getSpearSpot(spotID: number): Promise<SpearSpotResponse> {
+    const resp = await fetch(`${this.basePath}/spear/spot?spot_id=${spotID}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to get spear spot info: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
   public async getProbability(spotID: number, baitID: number, opt?: {
     lure?: number,
     slap?: number,
@@ -613,6 +629,23 @@ export interface HomeStatsResponse {
   recent_catches: {
     [key: string]: RecentCatchesItem[];
   };
+}
+
+export interface SpearSpotFish {
+  id: number;
+  size_class: number;
+  speed: number;
+  size_min: number;
+  size_max: number;
+  count: number;
+  rate: number;
+  is_intuition: number;
+}
+
+export interface SpearSpotResponse {
+  spot_id: number;
+  updated_at: number;
+  fishes: SpearSpotFish[];
 }
 
 export interface RecordFilter {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import SpotInfoView from "@/components/spot/SpotInfoView.svelte";
+  import SpearSpotInfoView from "@/components/spot/SpearSpotInfoView.svelte";
   import SpotList from "@/components/spot/SpotListSelector.svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
 
@@ -27,6 +28,10 @@
   } = $props();
 
   let spotID = $derived(parseInt(spot) || 0);
+  // 钓鱼 / 叉鱼钓场 ID 不重合，命中叉鱼树即为叉鱼钓场，调叉鱼接口
+  let isSpearSpot = $derived(
+    spotID > 0 && tracker.db.isSpearSpot(spotID),
+  );
   let myBaitID = $derived(parseInt(bait) || 0);
   let fishID = $derived(parseInt(fish_id) || 0);
   let baitID = $derived(parseInt(bait_id) || 0);
@@ -81,13 +86,23 @@
   />
   <div class="content-pane flex-1 p-4 overflow-y-auto">
     {#if spotID > 0}
-      <SpotInfoView
-        {spotID}
-        bind:myBaitID={() => myBaitID, setMyBait}
-        bind:fishID={() => fishID, setFish}
-        bind:baitID={() => baitID, setBait}
-        {tracker}
-      />
+      {#if isSpearSpot}
+        {#key spotID}
+          <SpearSpotInfoView
+            {spotID}
+            bind:fishID={() => fishID, setFish}
+            {tracker}
+          />
+        {/key}
+      {:else}
+        <SpotInfoView
+          {spotID}
+          bind:myBaitID={() => myBaitID, setMyBait}
+          bind:fishID={() => fishID, setFish}
+          bind:baitID={() => baitID, setBait}
+          {tracker}
+        />
+      {/if}
     {:else}
       <div class="h-16 flex flex-row items-center justify-center">
         <div class="flex-1">

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { GameDatabase } from "@/model/GameDB";
+  import type { GameDatabase, PlaceTree } from "@/model/GameDB";
   import { Search } from "flowbite-svelte";
 
   import("@/lib/pinyinlite").then((m) => {
@@ -17,6 +17,7 @@
 
   type FilterItem = {
     type: "spot" | "fish";
+    isSpear: boolean;
     spot_id: number;
     fish_id?: number;
     name: string;
@@ -59,19 +60,19 @@
     return match;
   }
 
-  let filterList: FilterItem[] = $derived.by(() => {
-    if (!searchValue) return [];
-
-    let results: FilterItem[] = [];
-    let fishSet = new Set<number>();
-
-    var placeTree = db.getPlaceTree();
-    for (const territory of placeTree) {
+  function searchTree(
+    tree: PlaceTree[],
+    isSpear: boolean,
+    results: FilterItem[],
+    fishSet: Set<number>,
+  ) {
+    for (const territory of tree) {
       for (const zone of territory.children ?? []) {
         for (const spot of zone.children ?? []) {
           if (isNameMatch(spot.name, searchValue)) {
             results.push({
               type: "spot",
+              isSpear,
               spot_id: spot.id,
               name: spot.name,
               desc: territory.name,
@@ -84,6 +85,7 @@
             if (isNameMatch(fishName, searchValue)) {
               results.push({
                 type: "fish",
+                isSpear,
                 spot_id: spot.id,
                 fish_id: fishID,
                 name: fishName,
@@ -95,6 +97,16 @@
         }
       }
     }
+  }
+
+  let filterList: FilterItem[] = $derived.by(() => {
+    if (!searchValue) return [];
+
+    let results: FilterItem[] = [];
+    let fishSet = new Set<number>();
+
+    searchTree(db.getPlaceTree(), false, results, fishSet);
+    searchTree(db.getSpearSpotTree(), true, results, fishSet);
 
     return results.slice(0, 50);
   });
