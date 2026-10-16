@@ -22,7 +22,7 @@ export interface SpearRecord {
     speed: number; // 速度 150~500；未知为 0
     sizeClass: number; // 尺寸档 1/2/3；未知为 0
     intuition: boolean; // 刷影时是否处于刺鱼人的直觉（鱼识）
-    spotId: number; // 渔场 PlaceName id
+    spotId: number; // 渔场 PlaceName id；建档时未知为 0，setSpot 后回填
     fishId: number; // 物品 ID；0 表示未捕获
     spearFishId: number; // 原始 SpearFishID；未捕获为 0
     size: number; // 尺寸；未捕获为 0
@@ -82,6 +82,7 @@ export class SpearTracker {
         // 不在笔记中的钓场
         if (this.eventId === eventId && this.spotId === 0) {
             this.spotId = spotId;
+            this.claimSpotlessSpawns();
             return;
         }
 
@@ -97,17 +98,28 @@ export class SpearTracker {
 
         this.eventId = eventId;
         this.spotId = spotId;
+        this.claimSpotlessSpawns();
+    }
+
+    /**
+     * 钓场刚明确时，把此前以 spotId=0 建档的影归属到当前钓场。
+     */
+    private claimSpotlessSpawns(): void {
+        if (this.spotId === 0) {
+            return;
+        }
+        for (const record of this.unresolved) {
+            if (record.spotId === 0) {
+                record.spotId = this.spotId;
+            }
+        }
     }
 
     /** 
      * 生成一条鱼（影）
      */
     public onSpawn(param: FFXIVIpcActorControlSelf, epoch: number): void {
-        // 未知渔场不记录：后端要求 spot_id 非 0
-        if (this.spotId === 0) {
-            return;
-        }
-
+        // 上报前会过滤 spotId==0 的记录，未知渔场之后补上
         const slot = param.param3 % 10000;
         const hq = param.param3 >= 10000;
         const speed = param.param4;
@@ -183,7 +195,6 @@ export class SpearTracker {
 
         if (this.spotId === 0) {
             console.warn("Spear catch without a known spot, dropped:", spearFishId);
-            return;
         }
 
         let fishId = this.resolveItemId(spearFishId);
@@ -261,6 +272,9 @@ export class SpearTracker {
         if (!this.unresolved.delete(record)) {
             return;
         }
+        if (record.spotId === 0) {
+            return;
+        }
         this.pending.push(record);
         this.triggerUpload();
     }
@@ -268,7 +282,9 @@ export class SpearTracker {
     /** 结算所有尚未结算的影（换场/离场时），并把队列送去上传。 */
     private finalizeAll(): void {
         for (const record of this.unresolved) {
-            this.pending.push(record);
+            if (record.spotId !== 0) {
+                this.pending.push(record);
+            }
         }
         this.unresolved.clear();
         this.liveSpawns.clear();
