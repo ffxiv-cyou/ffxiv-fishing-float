@@ -59,10 +59,18 @@
 
   // 手风琴的手动开合也要落到父级状态，否则切 Tab 重建后展开态丢失
   function setTerritoryOpen(id: number, v: boolean) {
-    territoryID = v ? id : -1;
+    if (v) {
+      territoryID = id;
+    } else if (territoryID === id) {
+      territoryID = -1;
+    }
   }
   function setZoneOpen(id: number, v: boolean) {
-    zoneID = v ? id : 0;
+    if (v) {
+      zoneID = id;
+    } else if (zoneID === id) {
+      zoneID = 0;
+    }
   }
 
   let spot = $derived(zone?.children?.find((p) => p.id === spotID));
@@ -223,7 +231,11 @@
         </Button>
       </ButtonGroup>
     </div>
-    <Accordion flush class={["overflow-y-auto", "flex-1", "min-h-0"].join(" ")}>
+    <Accordion
+      flush
+      multiple
+      class={["overflow-y-auto", "flex-1", "min-h-0"].join(" ")}
+    >
       {#each tree as territory (territory.id)}
         <AccordionItem
           classes={getSpotClasses(territory, true)}
@@ -233,7 +245,7 @@
           }
         >
           {#snippet header()}{territory.name}{/snippet}
-          <Accordion flush>
+          <Accordion flush multiple>
             {#each territory.children as zone (zone.id)}
               <AccordionItem
                 classes={getSpotClasses(zone, false)}

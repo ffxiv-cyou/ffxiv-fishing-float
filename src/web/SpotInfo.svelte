@@ -36,22 +36,20 @@
   let fishID = $derived(parseInt(fish_id) || 0);
   let baitID = $derived(parseInt(bait_id) || 0);
 
+  // 等 hash 回流后派生值自动重算即可
   function setSpot(id: number) {
-    spotID = id;
     bait_id = "";
     fish_id = "";
     bait = "";
     navigate({
-      spot: spotID.toString(),
+      spot: id.toString(),
       bait: myBaitID > 0 ? myBaitID.toString() : "",
     });
   }
   function setMyBait(id: number) {
-    myBaitID = id;
-    navigate({ spot: spotID.toString(), bait: myBaitID.toString() });
+    navigate({ spot: spotID.toString(), bait: id.toString() });
   }
   function setFish(id: number) {
-    fishID = id;
     navigate({
       spot: spotID.toString(),
       bait: "",
@@ -59,7 +57,6 @@
     });
   }
   function setBait(id: number) {
-    baitID = id;
     navigate({
       spot: spotID.toString(),
       bait: "",
