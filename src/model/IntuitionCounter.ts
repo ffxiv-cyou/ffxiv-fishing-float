@@ -165,7 +165,8 @@ export class IntuitionCounter {
             return;
 
         // 自然状态下这个 duration 也会流逝，所以要排除这种情况
-        if (this.intuitionDuration > duration)
+        const remain = this.intuitionDuration - (Date.now() - this.intuitionTriggerAt) / 1000;
+        if (duration <= remain + 1.5)
             return;
 
         this.intuitionDuration = duration;
