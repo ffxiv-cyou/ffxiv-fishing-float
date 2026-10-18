@@ -7,6 +7,8 @@
   import { type FishDurationResponse, FishHookType } from "@/model/API";
   import { createPrecastLookup } from "@/components/spot/data_helper";
   import { blockedFishes } from "@/model/condition_filter";
+  import { readApiCache, writeApiCache } from "@/lib/apiCache";
+  import { untrack } from "svelte";
 
   let {
     tracker,
@@ -241,23 +243,43 @@
       return;
     }
 
-    onlineHistory = undefined;
+    const applyOnlineHistory = (response: FishDurationResponse) => {
+      onlineHistory = response;
+
+      // 部分情况下一个钓场可能有多个鱼识（宇宙探索），这里重新做一次 filter
+      let fishesForBait = (response.distributions ?? [])
+        .filter((d) => d.bait_id === bait)
+        .map((d) => d.fish_id);
+      tracker.updateIntuitionFilter(zone, fishesForBait);
+    };
+
+    // 先用缓存托底（untrack 避免把 bait 变成 effect 依赖），再照常请求刷新
+    const cacheKey = `fishing-duration:${zone}`;
+    const cached = readApiCache<FishDurationResponse>(cacheKey);
+    if (cached) {
+      untrack(() => applyOnlineHistory(cached));
+    } else {
+      onlineHistory = undefined;
+    }
+
     tracker.api
       .getFishingDuration(zone, {})
       .then((response) => {
         if (!cancelled) {
-          onlineHistory = response;
-
-          // 部分情况下一个钓场可能有多个鱼识（宇宙探索），这里重新做一次 filter
-          let fishesForBait = response.distributions
-            .filter((d) => d.bait_id === bait)
-            .map((d) => d.fish_id);
-          tracker.updateIntuitionFilter(zone, fishesForBait);
+          writeApiCache(cacheKey, response);
+          applyOnlineHistory(response);
         }
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error("Failed to load online fishing history:", err);
+          if (cached) {
+            console.warn(
+              "Failed to refresh online fishing history, using cached data:",
+              err,
+            );
+          } else {
+            console.error("Failed to load online fishing history:", err);
+          }
         }
       });
 
