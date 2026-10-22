@@ -12,6 +12,7 @@
     markChangelogSeen,
   } from "@/lib/changelog";
   import SpectralTimer from "@/components/SpectralTimer.svelte";
+  import SpearLanes from "@/components/SpearLanes.svelte";
   import {
     initFeedbackOverlayHandler,
     submitFeedbackToSentry,
@@ -370,6 +371,9 @@
     {/if}
   {/snippet}
 </SpectralTimer>
+{#if tracker.spear.isActive}
+  <SpearLanes {tracker} />
+{/if}
 <Timer {tracker} onclick={toggleConfig} />
 
 <style>

@@ -1,5 +1,6 @@
 import { encode } from "cbor2";
 import * as Sentry from "@sentry/svelte";
+import { createSubscriber } from "svelte/reactivity";
 import { SpearDirectorParam, SpearFlags, SpearSkill } from "./CommonEnums";
 import type { API } from "./API";
 import type { Config } from "./Config";
@@ -7,6 +8,18 @@ import type { GameDatabase } from "./GameDB";
 import type { FFXIVIpcActorControlSelf, FFXIVIpcClientTrigger } from "./Opcode";
 
 const SPEAR_FISH_ID_OFFSET = 19999;
+
+/**
+ * 一条泳道的展示快照，供悬浮窗绘制。
+ * `spawnTime = 0` 表示该槽位当前没有影。
+ */
+export interface SpearLane {
+    slot: number; // 槽位 0/1/2
+    speed: number;
+    sizeClass: number;
+    hq: boolean; // 发光影
+    spawnTime: number; // 刷影时的本地时刻（Date.now()，毫秒）
+}
 
 /**
  * 一条叉鱼记录，对应一次刷影（影）。
@@ -17,6 +30,7 @@ const SPEAR_FISH_ID_OFFSET = 19999;
  */
 export interface SpearRecord {
     time: number; // 刷影时刻（服务器 epoch，毫秒）
+    localTime: number; // 刷影时的本地时刻（Date.now()，毫秒），只用于动画
     slot: number; // 槽位 0/1/2
     hq: boolean; // 发光影
     speed: number; // 速度 150~500；未知为 0
@@ -39,6 +53,9 @@ export class SpearTracker {
     private db: GameDatabase;
     /** 查询当前是否处于刺鱼人的直觉（鱼识）。 */
     private hasIntuition: () => boolean;
+
+    #subscribe;
+    update: (() => void) | null = null;
 
     /** 当前叉鱼会话的 eventId（来自 SystemLogMessage 3571/3579）；0 表示不在叉鱼中。 */
     eventId: number = 0;
@@ -76,6 +93,46 @@ export class SpearTracker {
         this.config = config;
         this.db = db;
         this.hasIntuition = hasIntuition;
+
+        this.#subscribe = createSubscriber((update) => {
+            this.update = update;
+        });
+    }
+
+    private updateSub() {
+        if (this.update)
+            this.update();
+    }
+
+    /** 是否处于叉鱼中（悬浮窗据此显示泳道）。 */
+    public get isActive(): boolean {
+        this.#subscribe();
+        return this.eventId !== 0;
+    }
+
+    /** 当前叉鱼的渔场，用于查询鱼表。 */
+    public get spotID(): number {
+        this.#subscribe();
+        return this.spotId;
+    }
+
+    /**
+     * 三条泳道的快照（槽位 0 在最上），供悬浮窗绘制。
+     */
+    public get lanes(): SpearLane[] {
+        this.#subscribe();
+        const lanes: SpearLane[] = [];
+        for (let slot = 0; slot < 3; slot++) {
+            const record = this.liveSpawns.get(slot);
+            lanes.push({
+                slot,
+                speed: record?.speed ?? 0,
+                sizeClass: record?.sizeClass ?? 0,
+                hq: record?.hq ?? false,
+                spawnTime: record?.localTime ?? 0,
+            });
+        }
+        return lanes;
     }
 
     public setSpot(eventId: number, spotId: number): void {
@@ -83,6 +140,7 @@ export class SpearTracker {
         if (this.eventId === eventId && this.spotId === 0) {
             this.spotId = spotId;
             this.claimSpotlessSpawns();
+            this.updateSub();
             return;
         }
 
@@ -99,6 +157,7 @@ export class SpearTracker {
         this.eventId = eventId;
         this.spotId = spotId;
         this.claimSpotlessSpawns();
+        this.updateSub();
     }
 
     /**
@@ -134,6 +193,7 @@ export class SpearTracker {
 
         const record: SpearRecord = {
             time: epoch,
+            localTime: Date.now(),
             slot,
             hq,
             speed,
@@ -148,6 +208,7 @@ export class SpearTracker {
         };
         this.unresolved.add(record);
         this.liveSpawns.set(slot, record);
+        this.updateSub();
     }
 
     /**
@@ -234,6 +295,7 @@ export class SpearTracker {
             this.liveSpawns.delete(slot);
         }
         this.resolve(record);
+        this.updateSub();
     }
 
     public handleDirectorUpdate(data: FFXIVIpcActorControlSelf, epoch: number): boolean {
@@ -263,6 +325,7 @@ export class SpearTracker {
         this.roundCatchIndex = 0;
         this.lockTime = 0;
         this.skillTime = 0;
+        this.updateSub();
         if (this.config.UploadHistory)
             this.uploadPending();
     }
