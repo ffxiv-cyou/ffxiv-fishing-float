@@ -122,6 +122,7 @@
             <TableHeadCell>鱼</TableHeadCell>
             <TableHeadCell>大小</TableHeadCell>
             <TableHeadCell>速度</TableHeadCell>
+            <TableHeadCell>概率</TableHeadCell>
           </TableHead>
           <TableBody class="divide-y">
             {#each fishes as fishID}
@@ -140,6 +141,9 @@
                 </TableBodyCell>
                 <TableBodyCell>
                   {stat ? stat.speed : "-"}
+                </TableBodyCell>
+                <TableBodyCell>
+                  {stat ? (stat.rate * 100).toFixed(1) + "%" : "-"}
                 </TableBodyCell>
               </TableBodyRow>
             {/each}
