@@ -297,6 +297,88 @@ export class API {
     return await resp.json();
   }
 
+  public async getAdminSpearRecords(filter: SpearRecordFilter, page: number, limit: number): Promise<AdminSpearRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    this.setFilterParams(filter, params);
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/spear/records?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get admin spear records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async deleteSpearRecords(ids: number[]): Promise<DeleteRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/spear/records?${params}`, {
+      method: 'DELETE',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to delete spear records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async getDeletedSpearRecords(filter: SpearRecordFilter, page: number, limit: number): Promise<AdminSpearRecordListResponse> {
+    const params = new URLSearchParams();
+    params.set('_t', Date.now().toString());
+    this.setFilterParams(filter, params);
+    params.set('page', page.toString());
+    params.set('limit', limit.toString());
+
+    const resp = await fetch(`${this.basePath}/admin/spear/records/deleted?${params}`, {
+      method: 'GET',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to get deleted spear records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
+  public async restoreSpearRecords(ids: number[]): Promise<RestoreRecordsResponse> {
+    const params = new URLSearchParams();
+    ids.forEach(id => params.append('id', id.toString()));
+
+    const resp = await fetch(`${this.basePath}/admin/spear/records/restore?${params}`, {
+      method: 'POST',
+      headers: this.getAdminHeaders(),
+      credentials: 'include',
+    });
+    if (!resp.ok) {
+      if (resp.status === 401) {
+        localStorage.removeItem('admin_token');
+        throw new Error('Unauthorized');
+      }
+      throw new Error(`Failed to restore spear records: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
   /**
    * Export fishing records as a CSV file download.
    * Requires at least one of spot, bait, or fish in the filter.
@@ -696,6 +778,38 @@ export interface AdminFishingRecord {
   ambious_lure?: number;
   modest_lure?: number;
   flags: number;
+}
+
+export interface SpearRecordFilter {
+  spot?: number;
+  fish?: number;
+  user?: number;
+  from?: number;
+  to?: number;
+  source?: string;
+}
+
+export interface AdminSpearRecord {
+  id: number;
+  time: number;
+  spot_id: number;
+  fish_id: number;
+  size: number;
+  speed: number;
+  flags: number;
+  user_id: number;
+  deleted_at?: number;
+  size_class: number;
+  hq: boolean;
+  intuition: boolean;
+  uncaught: boolean;
+  slot: number;
+  capture_flag: number;
+}
+
+export interface AdminSpearRecordListResponse {
+  data: AdminSpearRecord[];
+  count: number;
 }
 
 export interface AdminRecordListResponse {

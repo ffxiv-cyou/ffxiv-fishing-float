@@ -6,14 +6,16 @@
     db,
     placeholder = "选择钓场",
     id,
+    spear = false,
   }: {
     value: number;
     db: GameDatabase;
     placeholder?: string;
     id?: string;
+    spear?: boolean;
   } = $props();
 
-  let tree = $derived(db.getPlaceTree());
+  let tree = $derived(spear ? db.getSpearSpotTree() : db.getPlaceTree());
 
   function handleChange(e: Event) {
     const target = e.target as HTMLSelectElement;

@@ -14,6 +14,7 @@ import AdminLogin from "@/web/admin/AdminLogin.svelte";
 import AdminRecords from "@/web/admin/AdminRecords.svelte";
 import AdminDeleted from "@/web/admin/AdminDeleted.svelte";
 import AdminSuspicious from "@/web/admin/AdminSuspicious.svelte";
+import AdminSpearRecords from "@/web/admin/AdminSpearRecords.svelte";
 
 export const routes: Array<RouteConfig> = [
   {
@@ -85,6 +86,16 @@ export const routes: Array<RouteConfig> = [
     path: "/admin/suspicious",
     name: "可疑记录",
     component: AdminSuspicious,
+  },
+  {
+    path: "/admin/spear",
+    name: "刺鱼记录",
+    component: AdminSpearRecords,
+  },
+  {
+    path: "/admin/spear/deleted",
+    name: "已删除刺鱼",
+    component: AdminSpearRecords,
   }
 ];
 

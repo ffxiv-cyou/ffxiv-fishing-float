@@ -20,6 +20,14 @@
       name: "可疑记录",
       key: "/admin/suspicious",
     },
+    {
+      name: "刺鱼记录",
+      key: "/admin/spear",
+    },
+    {
+      name: "已删除刺鱼",
+      key: "/admin/spear/deleted",
+    },
   ];
 
   let selectedTab = $state(location.hash.substring(1));
