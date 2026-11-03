@@ -26,7 +26,7 @@
   import { type Snippet } from "svelte";
   import TableSkeleton from "./TableSkeleton.svelte";
   import ItemCombo from "../ItemCombo.svelte";
-  import { formatTime } from "../spot/data_helper";
+  import { formatEorzeaTime, formatTime } from "../spot/data_helper";
 
   let {
     selectedIds,
@@ -212,6 +212,7 @@
       {/if}
       <TableHeadCell>用户</TableHeadCell>
       <TableHeadCell>时间</TableHeadCell>
+      <TableHeadCell>ET</TableHeadCell>
       <TableHeadCell>钓场</TableHeadCell>
       <TableHeadCell>鱼种</TableHeadCell>
       <TableHeadCell>尺寸</TableHeadCell>
@@ -241,6 +242,7 @@
           {/if}
           <TableBodyCell>{record.user_id}</TableBodyCell>
           <TableBodyCell>{formatTime(record.time)}</TableBodyCell>
+          <TableBodyCell>{formatEorzeaTime(record.time)}</TableBodyCell>
           <TableBodyCell>{getSpotName(record.spot_id)}</TableBodyCell>
           <TableBodyCell>{getFishName(record.fish_id)}</TableBodyCell>
           <TableBodyCell>{getFishSize(record.size)}</TableBodyCell>
@@ -261,7 +263,7 @@
     </TableBody>
   </Table>
   {#if isLoading}
-    <TableSkeleton rows={20} columns={13} />
+    <TableSkeleton rows={20} columns={14} />
   {:else if records.length === 0}
     <P class="text-center py-4">暂无数据</P>
   {/if}
