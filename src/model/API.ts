@@ -720,6 +720,7 @@ export interface SpearSpotFish {
   size_min: number;
   size_max: number;
   count: number;
+  spawn_count: number;
   rate: number;
   is_intuition: number;
 }

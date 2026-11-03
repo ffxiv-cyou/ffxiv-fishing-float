@@ -147,7 +147,7 @@
                   {stat ? (stat.rate * 100).toFixed(1) + "%" : "-"}
                 </TableBodyCell>
                 <TableBodyCell>
-                  {stat ? stat.count : "-"}
+                  {stat ? stat.spawn_count : "-"}
                 </TableBodyCell>
               </TableBodyRow>
             {/each}
