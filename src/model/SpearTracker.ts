@@ -42,6 +42,8 @@ export interface SpearRecord {
     size: number; // 尺寸；未捕获为 0
     captureFlags: number; // 捕获结算 flag；未捕获为 0
     captureTime: number; // 捕获结算的时刻；未捕获为 0
+    /** 刷出时被熟练技巧拍掉的鱼种物品 ID；0 表示没有生效。 */
+    slapFishId: number;
 }
 
 /**
@@ -75,6 +77,8 @@ export class SpearTracker {
     private lockTime: number = 0;
     /** 最近一次使用刺鱼技能（713, Gig）的时刻；保留用于诊断与将来切换记录时间语义。 */
     private skillTime: number = 0;
+    /** 当前拍水的鱼 */
+    private slapFishId: number = 0;
 
     /** 顺序配对断言计数：锁数与鱼数不一致的丢弃次数（遥测/排障用）。 */
     orderViolations = 0;
@@ -152,6 +156,7 @@ export class SpearTracker {
             this.roundCatchIndex = 0;
             this.lockTime = 0;
             this.skillTime = 0;
+            this.slapFishId = 0;
         }
 
         this.eventId = eventId;
@@ -205,6 +210,7 @@ export class SpearTracker {
             size: 0,
             captureFlags: 0,
             captureTime: 0,
+            slapFishId: this.slapFishId,
         };
         this.unresolved.add(record);
         this.liveSpawns.set(slot, record);
@@ -247,6 +253,14 @@ export class SpearTracker {
             return;
         }
         this.skillTime = epoch;
+    }
+
+    public setSlapFish(fishID: number): void {
+        this.slapFishId = fishID;
+    }
+
+    public clearSlap(): void {
+        this.slapFishId = 0;
     }
 
     public onCatch(param: FFXIVIpcActorControlSelf, epoch: number): void {
@@ -325,6 +339,7 @@ export class SpearTracker {
         this.roundCatchIndex = 0;
         this.lockTime = 0;
         this.skillTime = 0;
+        this.slapFishId = 0;
         this.updateSub();
         if (this.config.UploadHistory)
             this.uploadPending();
@@ -398,8 +413,9 @@ export class SpearTracker {
         flags |= (record.slot & SpearFlags.SlotMask) << SpearFlags.SlotShift;
         if (record.intuition) flags |= SpearFlags.Intuition;
         if (fishId === 0) flags |= SpearFlags.Uncaught;
+        if (record.slapFishId !== 0) flags |= SpearFlags.Slap;
 
-        return [record.time, record.spotId, fishId, record.size, record.speed, flags];
+        return [record.time, record.spotId, fishId, record.size, record.speed, flags, record.slapFishId];
     }
 
     private triggerUpload(): void {

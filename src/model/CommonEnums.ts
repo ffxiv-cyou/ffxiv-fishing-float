@@ -78,6 +78,7 @@ export const enum SpearFlags {
     SlotMask = 0x3,
     Intuition = 1 << 8, // bit8 刺鱼人的直觉（鱼识）
     Uncaught = 1 << 9, // bit9 仅生成、未被刺中（fishId=0）
+    Slap = 1 << 10, // bit10 刷出时熟练技巧正在生效（同 slap_id 非 0）
 }
 
 /**
@@ -214,6 +215,7 @@ export enum BuffID {
     Fathom = 1166, // 鱼群测定
     TruthOfOceans = 1173, //  海洋之相
     SurfaceSlap = 1803, // 拍击水面, Action = 4595
+    MasterfulArtistry = 1169, // 熟练技巧（叉鱼）, Action = 7906
     IdenticalCast = 1804, // 专一垂钓, Action = 4596
     AnglersArt = 2778, // 捕鱼人之计, Lose when Action = 26804 沙利亚克的恩宠
     MakeshiftBait = 2779, // 不受以小钓大发动条件限制, Action = MakeshiftBait

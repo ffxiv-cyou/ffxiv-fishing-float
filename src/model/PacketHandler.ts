@@ -544,6 +544,9 @@ export class PacketHandler {
                 this.tracker.setUsingWksBait(false);
                 break;
 
+            case 3562: // XXX开始警惕，消失了踪迹……
+                this.tracker.spear.setSlapFish(params[0]);
+                return;
             case 3571: // 在XXX开始捕鱼
             case 3579: // 将新渔场“XXX”记录到了钓鱼笔记中！
                 this.tracker.spear.setSpot(evtId, params[0]);

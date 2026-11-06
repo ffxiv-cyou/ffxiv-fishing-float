@@ -350,6 +350,9 @@ export class FishingTracker extends EventTarget {
             case BuffID.SurfaceSlap:
                 this.setSlapFishID(0);
                 break;
+            case BuffID.MasterfulArtistry:
+                this.spear.clearSlap();
+                break;
             case BuffID.FishersIntuition:
                 this.intuition.reset();
                 break;
