@@ -137,6 +137,11 @@
         return "未知";
     }
   }
+
+  function getSlapName(id: number | undefined): string {
+    if (!id) return "-";
+    return getFishName(id);
+  }
   //#endregion
 </script>
 
@@ -221,6 +226,7 @@
       <TableHeadCell>状态</TableHeadCell>
       <TableHeadCell>发光</TableHeadCell>
       <TableHeadCell>鱼识</TableHeadCell>
+      <TableHeadCell>拍水</TableHeadCell>
       <TableHeadCell>操作</TableHeadCell>
     </TableHead>
     <TableBody>
@@ -255,6 +261,7 @@
           </TableBodyCell>
           <TableBodyCell>{record.hq ? "是" : "-"}</TableBodyCell>
           <TableBodyCell>{record.intuition ? "是" : "-"}</TableBodyCell>
+          <TableBodyCell>{getSlapName(record.slap_id)}</TableBodyCell>
           <TableBodyCell>
             {@render operation(record)}
           </TableBodyCell>
@@ -263,7 +270,7 @@
     </TableBody>
   </Table>
   {#if isLoading}
-    <TableSkeleton rows={20} columns={14} />
+    <TableSkeleton rows={20} columns={15} />
   {:else if records.length === 0}
     <P class="text-center py-4">暂无数据</P>
   {/if}

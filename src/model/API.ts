@@ -799,6 +799,7 @@ export interface AdminSpearRecord {
   speed: number;
   flags: number;
   user_id: number;
+  slap_id?: number;
   deleted_at?: number;
   size_class: number;
   hq: boolean;
