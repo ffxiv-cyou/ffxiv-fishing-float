@@ -30,6 +30,12 @@ h2 {
   font-size: 1.2em;
 }
 
+hr {
+  border: none;
+  border-top: 1px solid #999;
+  margin: 1em 0;
+}
+
 #app {
   max-width: 980px;
   margin: 0 auto;
@@ -42,6 +48,12 @@ h2 {
   --color-xiv-blue: #085677;
   --color-xiv-brown: #aa8422;
   --color-xiv-red: #e4004e;
+}
+
+@media(max-width: 600px) {
+  #app {
+    padding: 0;
+  }
 }
 
 .xiv-text {

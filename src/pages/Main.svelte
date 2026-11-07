@@ -290,6 +290,7 @@
 <div class="debug-tool">
   <div>
     <h2>鱼漂</h2>
+    <p>最终幻想XIV捕鱼计时器</p>
     <div class="link-buttons">
       <a class="primary" href="/web/#/help/overlay" target="_blank">安装教程</a>
       <a class="primary" href="/web/#/help/app" target="_blank">桌面版</a>
@@ -320,6 +321,7 @@
       />
     </div>
   </details>
+  <hr>
 </div>
 <Notice {message} />
 {#if showChangelog && changelog}
@@ -411,6 +413,7 @@
     gap: 10px;
     justify-content: center;
     margin-bottom: 10px;
+    flex-wrap: wrap;
   }
 
   .link-buttons a {
