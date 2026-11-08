@@ -5,6 +5,7 @@
   import SpotInfoWKS from "./SpotInfoWKS.svelte";
 
   import { P, Skeleton, Toggle } from "flowbite-svelte";
+  import { untrack } from "svelte";
   import { Tabs, TabItem } from "flowbite-svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
   import type {
@@ -19,12 +20,14 @@
     myBaitID = $bindable(0),
     baitID = $bindable(0),
     fishID = $bindable(0),
+    wksID = 0,
     tracker,
   }: {
     spotID: number;
     myBaitID: number;
     baitID: number;
     fishID: number;
+    wksID: number;
     tracker: FishingTracker;
   } = $props();
 
@@ -79,7 +82,13 @@
     );
   });
 
-  let selectedTab = "";
+  let wksInfos = $derived(spot?.wks);
+  let isWks = $derived(wksInfos !== undefined);
+  let dbReady = $derived(tracker.db.getPlaceTree().length > 0);
+
+  // 带任务参数的跳转直接落在「按任务」上（SpotInfo 会按任务参数重新挂载本组件）
+  const initialWksID = untrack(() => wksID);
+  let selectedTab = $state(initialWksID > 0 ? "by-mission" : "");
   function getSelectedTab() {
     if (selectedTab) return selectedTab;
     if (myBaitID > 0) {
@@ -106,12 +115,10 @@
     selectedTab = tab;
   }
 
-  let wksInfos = $derived(spot?.wks);
-  let isWks = $derived(wksInfos !== undefined);
-
   $effect(() => {
-    if (!isWks && selectedTab === "by-mission")
+    if (dbReady && !isWks && selectedTab === "by-mission") {
       setSelectedTab("basic");
+    }
   });
 </script>
 
@@ -123,12 +130,12 @@
       <SpotInfoBasic {spot} {tracker} stats={spotStats} durations={merged} />
     {/if}
   </TabItem>
-  {#if isWks}
+  {#if isWks || (wksID > 0 && !dbReady)}
     <TabItem title="按任务" key="by-mission">
-      {#if loading}
+      {#if loading || !isWks}
         <Skeleton />
       {:else}
-        <SpotInfoWKS {spot} {tracker} stats={spotStats} durations={merged} />
+        <SpotInfoWKS {spot} {tracker} stats={spotStats} durations={merged} {wksID} />
       {/if}
     </TabItem>
   {/if}

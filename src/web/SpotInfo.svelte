@@ -9,6 +9,7 @@
     bait = $bindable(""),
     b: bait_id = $bindable(""),
     f: fish_id = $bindable(""),
+    w = "",
     tracker,
     navigate,
     setTitle,
@@ -17,6 +18,7 @@
     bait: string;
     b: string;
     f: string;
+    w: string;
     tracker: FishingTracker;
     navigate: (params: {
       spot: string;
@@ -35,6 +37,7 @@
   let myBaitID = $derived(parseInt(bait) || 0);
   let fishID = $derived(parseInt(fish_id) || 0);
   let baitID = $derived(parseInt(bait_id) || 0);
+  let wksID = $derived(parseInt(w) || 0);
 
   // 等 hash 回流后派生值自动重算即可
   function setSpot(id: number) {
@@ -92,13 +95,17 @@
           />
         {/key}
       {:else}
-        <SpotInfoView
-          {spotID}
-          bind:myBaitID={() => myBaitID, setMyBait}
-          bind:fishID={() => fishID, setFish}
-          bind:baitID={() => baitID, setBait}
-          {tracker}
-        />
+        <!-- 任务跳转时重新挂载，让「按任务」标签按新参数重新初始化 -->
+        {#key wksID}
+          <SpotInfoView
+            {spotID}
+            {wksID}
+            bind:myBaitID={() => myBaitID, setMyBait}
+            bind:fishID={() => fishID, setFish}
+            bind:baitID={() => baitID, setBait}
+            {tracker}
+          />
+        {/key}
       {/if}
     {:else}
       <div class="h-16 flex flex-row items-center justify-center">

@@ -16,10 +16,11 @@
   let searchValue = $state("");
 
   type FilterItem = {
-    type: "spot" | "fish";
+    type: "spot" | "fish" | "mission";
     isSpear: boolean;
     spot_id: number;
     fish_id?: number;
+    wks_id?: number;
     name: string;
     desc: string;
   };
@@ -94,6 +95,19 @@
               fishSet.add(fishID);
             }
           }
+          // 宇宙探索钓场的任务
+          for (const wks of spot.wks ?? []) {
+            const wksName = wks.name.replace(/[\ue000-\uf8ff]/g, "").trim();
+            if (!isNameMatch(wksName, searchValue)) continue;
+            results.push({
+              type: "mission",
+              isSpear,
+              spot_id: spot.id,
+              wks_id: wks.id,
+              name: wksName,
+              desc: `宇宙探索`,
+            });
+          }
         }
       }
     }
@@ -116,6 +130,8 @@
       window.location.hash = `/info/${item.spot_id}`;
     } else if (item.type === "fish") {
       window.location.hash = `/info/${item.spot_id}?f=${item.fish_id}`;
+    } else if (item.type === "mission") {
+      window.location.hash = `/info/${item.spot_id}?w=${item.wks_id}`;
     }
     searchValue = "";
   }

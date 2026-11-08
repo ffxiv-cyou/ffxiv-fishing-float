@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Tabs, TabItem, Hr } from "flowbite-svelte";
+  import { untrack } from "svelte";
   import type { FishingTracker } from "@/model/FishingTracker";
   import type {
     DurationBucket,
@@ -15,11 +16,13 @@
     tracker,
     durations,
     stats,
+    wksID = 0,
   }: {
     spot: PlaceTree | null;
     stats: SpotStatsResponse | null;
     tracker: FishingTracker;
     durations: FishDurationDistribution[];
+    wksID: number;
   } = $props();
 
   let wksInfos = $derived(spot?.wks);
@@ -61,8 +64,17 @@
 
   let baitID = $state(0);
   let fishID = $state(0);
-  let wksID = $state("");
-  let info = $derived(wksInfos?.find((x) => x.id === parseInt(wksID)));
+  const initialWksID = untrack(() => wksID);
+  let selectedWks = $state(initialWksID > 0 ? initialWksID.toString() : "");
+
+  $effect(() => {
+    const tabID = parseInt(selectedWks);
+    if (!wksInfos?.some((x) => x.id === tabID)) {
+      selectedWks = wksInfos?.[0]?.id.toString() ?? "";
+    }
+  });
+
+  let info = $derived(wksInfos?.find((x) => x.id === parseInt(selectedWks)));
 </script>
 
 <Tabs
@@ -71,7 +83,7 @@
     content: "p-0",
   }}
   ulClass="flex flex-wrap"
-  bind:selected={wksID}
+  bind:selected={selectedWks}
 >
   {#each wksInfos as info}
     <TabItem key={info.id.toString()}>
