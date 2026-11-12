@@ -52,7 +52,7 @@ hr {
 
 @media(max-width: 600px) {
   #app {
-    padding: 0;
+    padding: 20px 0;
   }
 }
 
