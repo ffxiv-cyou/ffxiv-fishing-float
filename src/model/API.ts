@@ -151,6 +151,32 @@ export class API {
     return await resp.json();
   }
 
+  /**
+   * Recalculate spear spawn probabilities of a spot from raw records filtered by condition.
+   * @param spotID spearfishing spot (PlaceName) ID, required
+   * @param opt.slap slapped fish ID (0 = no slap), omit for all slap states
+   * @param opt.intuition intuition state, omit for all states
+   */
+  public async getSpearSpotConditional(spotID: number, opt?: {
+    slap?: number,
+    intuition?: boolean,
+  }): Promise<SpearConditionalSpotResponse> {
+    let query = `spot_id=${spotID}`;
+    if (opt?.slap !== undefined)
+      query += `&slap_id=${opt.slap}`;
+    if (opt?.intuition !== undefined)
+      query += `&has_intuition=${opt.intuition}`;
+
+    const resp = await fetch(`${this.basePath}/spear/spot/conditional?${query}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!resp.ok) {
+      throw new Error(`Failed to get spear spot conditional info: ${resp.statusText}`);
+    }
+    return await resp.json();
+  }
+
   public async getProbability(spotID: number, baitID: number, opt?: {
     lure?: number,
     slap?: number,
@@ -722,13 +748,30 @@ export interface SpearSpotFish {
   count: number;
   spawn_count: number;
   rate: number;
-  is_intuition: number;
+  is_intuition: boolean;
 }
 
 export interface SpearSpotResponse {
   spot_id: number;
   updated_at: number;
   fishes: SpearSpotFish[];
+}
+
+export interface SpearConditionalSpotFish {
+  id: number;
+  size_class: number;
+  speed: number;
+  count: number;
+  spawn_count: number;
+  rate: number;
+  is_intuition: boolean;
+}
+
+export interface SpearConditionalSpotResponse {
+  spot_id: number;
+  slap_id?: number;
+  has_intuition?: boolean;
+  fishes: SpearConditionalSpotFish[];
 }
 
 export interface RecordFilter {
