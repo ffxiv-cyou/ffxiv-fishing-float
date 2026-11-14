@@ -6,7 +6,8 @@ export const FEEDBACK_MSG_PREFIX = "fishing-float:feedback-";
 export const FEEDBACK_MSG_SUBMIT = "fishing-float:feedback-submit";
 export const FEEDBACK_MSG_RESULT = "fishing-float:feedback-result";
 
-export const FEEDBACK_SUBMIT_TIMEOUT_MS = 8000;
+export const FEEDBACK_SUBMIT_TIMEOUT_MS = 20000;
+export const FEEDBACK_SEND_TIMEOUT_MS = 15000;
 
 export type FeedbackCategory = "suggestion" | "bug" | "data_error";
 
@@ -45,23 +46,61 @@ export function isFeedbackFromOverlay(): boolean {
 }
 
 /**
+ * 等待 Sentry 实际投递结果：2xx 视为成功，其余（含 transport 网络失败吞成的空对象）视为失败。
+ * afterSendEvent 的 sendResponse 无 statusCode 表示请求未到达服务器。
+ */
+function waitForSendResult(eventId: string): Promise<FeedbackResult> {
+  const client = Sentry.getClient();
+  if (!client) return Promise.resolve({ ok: false, error: "sentry 未初始化" });
+
+  return new Promise((resolve) => {
+    let done = false;
+    let off: () => void = () => {};
+    const finish = (r: FeedbackResult) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      off();
+      resolve(r);
+    };
+    off = client.on("afterSendEvent", (event, res) => {
+      if (event.event_id !== eventId) return;
+      const code = res?.statusCode;
+      if (typeof code === "number" && code >= 200 && code < 300) finish({ ok: true });
+      else if (code === 413)
+        finish({ ok: false, error: "附件过大，服务器拒绝了本次提交" });
+      else if (code === 429) finish({ ok: false, error: "提交过于频繁，请稍后重试" });
+      else
+        finish({
+          ok: false,
+          error: code === undefined ? "网络错误，未能发送" : `服务器返回 ${code}`,
+        });
+    });
+    const timer = setTimeout(
+      () => finish({ ok: false, error: "提交超时" }),
+      FEEDBACK_SEND_TIMEOUT_MS,
+    );
+  });
+}
+
+/**
  * 通过 Sentry 提交反馈事件（overlay 与 web 共用）。
  * 自动关联最近 10 分钟内的错误事件（当前窗口自身捕获的）。
  */
-export function submitFeedbackToSentry(
+export async function submitFeedbackToSentry(
   fields: FeedbackFields,
   screenshot: FeedbackAttachment | undefined,
   opts: {
     source: "overlay" | "web";
     extraAttachments?: FeedbackAttachment[];
   },
-): FeedbackResult {
+): Promise<FeedbackResult> {
   const attachments: FeedbackAttachment[] = [];
   if (screenshot) attachments.push(screenshot);
   if (opts.extraAttachments) attachments.push(...opts.extraAttachments);
 
   try {
-    Sentry.captureFeedback(
+    const eventId = Sentry.captureFeedback(
       {
         message: fields.message,
         name: fields.name || undefined,
@@ -71,7 +110,8 @@ export function submitFeedbackToSentry(
       },
       { attachments },
     );
-    return { ok: true };
+    if (!eventId) return { ok: false, error: "sentry 未启用" };
+    return waitForSendResult(eventId);
   } catch (e) {
     return { ok: false, error: String(e) };
   }
