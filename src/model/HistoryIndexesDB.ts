@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/svelte";
 import { openDB, type IDBPDatabase, type DBSchema, type IDBPObjectStore, type IDBPTransaction } from 'idb';
-import type { HistoryItem, HistoryStatsItem, HistoryStorageBackend } from './HistoryStorage';
+import type { HistoryItem, HistoryRecordFilter, HistoryStatsItem, HistoryStorageBackend } from './HistoryStorage';
 import { TugType } from './InnerEnums';
 
 interface DbStatsItem extends HistoryStatsItem {
@@ -122,6 +122,36 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
    */
   static numToBool(value: number): boolean {
     return value !== 0;
+  }
+
+  /**
+   * 判断日志记录是否符合筛选条件
+   * @param item 
+   * @param filter 
+   * @returns 
+   */
+  static matchLog(item: HistoryLogItem, filter: HistoryRecordFilter): boolean {
+    if (filter.tugType !== undefined && item.tugType !== filter.tugType) {
+      return false;
+    }
+    if (filter.fish !== undefined) {
+      // -1 表示脱钩（没有渔获）
+      return filter.fish === -1 ? item.fish === undefined : item.fish === filter.fish;
+    }
+    return true;
+  }
+
+  /**
+   * 提取有效筛选条件，无条件时返回 null
+   * @param filter 
+   * @returns 
+   */
+  static activeFilter(filter?: HistoryRecordFilter): HistoryRecordFilter | null {
+    if (filter === undefined)
+      return null;
+    if (filter.tugType === undefined && filter.fish === undefined)
+      return null;
+    return filter;
   }
 
   async addRaw(item: HistoryItem): Promise<void> {
@@ -362,7 +392,7 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     return result;
   }
 
-  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number, filter?: HistoryRecordFilter): Promise<HistoryItem[]> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return [];
@@ -374,28 +404,63 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const store = tx.objectStore("historyLog");
     const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
     const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
-    let cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
-    if (offset && cursor) {
-      cursor = await cursor.advance(offset);
+
+    // 竿型/渔获无法用索引表达，需要逐条过滤
+    const active = HistoryIndexedDBBackend.activeFilter(filter);
+
+    if (active === null) {
+      let cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
+      if (offset && cursor) {
+        cursor = await cursor.advance(offset);
+      }
+      const results: HistoryItem[] = [];
+      let count = 0;
+      while (cursor && (!limit || count < limit)) {
+        if (!cursor.value) {
+          break;
+        }
+        results.push({
+          ...cursor.value,
+          chum: HistoryIndexedDBBackend.numToBool(cursor.value.chumNum),
+        });
+        count++;
+        cursor = await cursor.continue();
+      }
+
+      return results;
     }
+
     const results: HistoryItem[] = [];
-    let count = 0;
-    while (cursor && (!limit || count < limit)) {
+    let skipped = 0;
+    let cursor = await useIndex.openCursor(IDBKeyRange.only(key), 'prev');
+    while (cursor) {
       if (!cursor.value) {
         break;
+      }
+      if (!HistoryIndexedDBBackend.matchLog(cursor.value, active)) {
+        cursor = await cursor.continue();
+        continue;
+      }
+      // 只跳过命中的记录，offset 才能和过滤后的计数对齐
+      if (skipped < (offset ?? 0)) {
+        skipped++;
+        cursor = await cursor.continue();
+        continue;
       }
       results.push({
         ...cursor.value,
         chum: HistoryIndexedDBBackend.numToBool(cursor.value.chumNum),
       });
-      count++;
+      if (limit && results.length >= limit) {
+        break;
+      }
       cursor = await cursor.continue();
     }
 
     return results;
   }
 
-  public async countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+  public async countHistory(zone: number, bait?: number, chum?: boolean, filter?: HistoryRecordFilter): Promise<number> {
     if (!this.db) {
       console.error("IndexedDB is not initialized");
       return 0;
@@ -407,7 +472,24 @@ export class HistoryIndexedDBBackend implements HistoryStorageBackend {
     const store = tx.objectStore("historyLog");
     const useIndex = chum === undefined ? (bait === undefined ? store.index("byZone") : store.index("byZoneBait")) : store.index("byZoneBaitChum");
     const key = chum === undefined ? (bait === undefined ? [zone] : [zone, bait]) : [zone, bait, HistoryIndexedDBBackend.boolToNum(chum)];
-    const count = await useIndex.count(IDBKeyRange.only(key));
+
+    // 竿型/渔获无法用索引表达，用游标计数，避免把整条记录读进内存
+    const active = HistoryIndexedDBBackend.activeFilter(filter);
+    if (active === null) {
+      return await useIndex.count(IDBKeyRange.only(key));
+    }
+
+    let count = 0;
+    let cursor = await useIndex.openCursor(IDBKeyRange.only(key));
+    while (cursor) {
+      if (!cursor.value) {
+        break;
+      }
+      if (HistoryIndexedDBBackend.matchLog(cursor.value, active)) {
+        count++;
+      }
+      cursor = await cursor.continue();
+    }
     return count;
   }
 
