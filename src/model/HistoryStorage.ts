@@ -25,6 +25,12 @@ export interface HistoryItem {
   isHQ?: boolean;
 }
 
+// 原始记录筛选条件
+export interface HistoryRecordFilter {
+  tugType?: TugType; // undefined = 不筛选
+  fish?: number; // undefined = 不筛选，-1 = 脱钩（fish 为空）
+}
+
 // 统计记录
 export interface HistoryStatsItem {
   zone: number;
@@ -217,14 +223,14 @@ export class FishingStorage {
     return this.histories.getBait(zone);
   }
 
-  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+  public async listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number, filter?: HistoryRecordFilter): Promise<HistoryItem[]> {
     this.#subscribe();
-    return this.histories.listHistory(zone, bait, chum, limit, offset);
+    return this.histories.listHistory(zone, bait, chum, limit, offset, filter);
   }
 
-  public async countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+  public async countHistory(zone: number, bait?: number, chum?: boolean, filter?: HistoryRecordFilter): Promise<number> {
     this.#subscribe();
-    return this.histories.countHistory(zone, bait, chum);
+    return this.histories.countHistory(zone, bait, chum, filter);
   }
 
   public clear(): void {
@@ -265,9 +271,10 @@ export interface HistoryStorageBackend {
    * @param chum 
    * @param limit 
    * @param offset 
+   * @param filter 竿型/渔获筛选，无法用索引表达，需逐条过滤
    */
-  listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]>;
-  countHistory(zone: number, bait?: number, chum?: boolean): Promise<number>;
+  listHistory(zone: number, bait?: number, chum?: boolean, limit?: number, offset?: number, filter?: HistoryRecordFilter): Promise<HistoryItem[]>;
+  countHistory(zone: number, bait?: number, chum?: boolean, filter?: HistoryRecordFilter): Promise<number>;
 
   /**
    * 获取所有鱼饵ID
@@ -346,12 +353,12 @@ class HistoryLocalStorageBackend implements HistoryStorageBackend {
     return this.histories;
   }
 
-  listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number): Promise<HistoryItem[]> {
+  listHistory(zone: number, bait: number, chum?: boolean, limit?: number, offset?: number, filter?: HistoryRecordFilter): Promise<HistoryItem[]> {
     // Not supported in localStorage backend
     return Promise.resolve([]);
   }
 
-  countHistory(zone: number, bait?: number, chum?: boolean): Promise<number> {
+  countHistory(zone: number, bait?: number, chum?: boolean, filter?: HistoryRecordFilter): Promise<number> {
     // Not supported in localStorage backend
     return Promise.resolve(0);
   }
