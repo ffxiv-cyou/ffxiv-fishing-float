@@ -16,13 +16,13 @@
   const SHADOW_BODY =
     '<ellipse cx="28" cy="8" rx="18" ry="6.5" /><polygon points="12,8 1,1 4.5,8 1,15" />';
 
-  /** 渔场鱼表的键：速度 + 尺寸档唯一确定一条鱼。 */
+  /** 渔场鱼表的键：速度 + 尺寸档（同一键可能对应多条鱼）。 */
   function fishKey(speed: number, sizeClass: number): string {
     return `${speed}:${sizeClass}`;
   }
 
-  /** 当前渔场的鱼表：(速度, 尺寸档) → 物品 ID，用于识别泳道里的影。 */
-  let spotFishes: Map<string, number> = $state(new Map());
+  /** 当前渔场的鱼表：(速度, 尺寸档) → 物品 ID 列表，用于识别泳道里的影。 */
+  let spotFishes: Map<string, number[]> = $state(new Map());
   let spotID = $derived(tracker.spear.spotID);
 
   $effect(() => {
@@ -35,9 +35,16 @@
     let cancelled = false;
     const apply = (fishes: SpearSpotFish[] | undefined) => {
       if (cancelled) return;
-      spotFishes = new Map(
-        (fishes ?? []).map((f) => [fishKey(f.speed, f.size_class), f.id]),
-      );
+      const fishesByKey = new Map<string, number[]>();
+      for (const f of fishes ?? []) {
+        const key = fishKey(f.speed, f.size_class);
+        const ids = fishesByKey.get(key) ?? [];
+        if (f.id && !ids.includes(f.id)) {
+          ids.push(f.id);
+        }
+        fishesByKey.set(key, ids);
+      }
+      spotFishes = fishesByKey;
     };
 
     // 先用缓存托底，再照常请求刷新
@@ -90,7 +97,7 @@
       const progress = alive && crossing > 0 ? elapsed / crossing : 0;
       return {
         ...lane,
-        fishId: spotFishes.get(fishKey(lane.speed, lane.sizeClass)) ?? 0,
+        fishIds: spotFishes.get(fishKey(lane.speed, lane.sizeClass)) ?? [],
         alive,
         progress,
       };
@@ -108,11 +115,11 @@
     }
   }
 
-  function laneName(fishId: number): string {
-    if (fishId === 0) {
+  function laneNames(ids: number[]): string {
+    if (ids.length === 0) {
       return "未知";
     }
-    return tracker.db.getItemName(fishId);
+    return ids.map((id) => tracker.db.getItemName(id)).join("/");
   }
 
   /** 按尺寸档沿用历史统计的颜色（轻/中/重） */
@@ -139,8 +146,8 @@
 <div class="lanes" style={colorVars}>
   {#each lanes as lane (lane.slot)}
     <div class={["lane", sizeClassColor(lane.alive ? lane.sizeClass : 0)]}>
-      <span class="fish-name" data-unknown={lane.fishId === 0}>
-        {lane.alive ? laneName(lane.fishId) : ""}
+      <span class="fish-name" data-unknown={lane.fishIds.length === 0}>
+        {lane.alive ? laneNames(lane.fishIds) : ""}
       </span>
       <span class="hit-window" style={`width: ${HIT_WINDOW * 100}%`}></span>
       {#if lane.alive}
