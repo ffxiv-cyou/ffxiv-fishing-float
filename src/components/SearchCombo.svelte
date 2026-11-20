@@ -1,3 +1,7 @@
+<script module lang="ts">
+  let comboSeq = 0;
+</script>
+
 <script lang="ts">
   import type { GameDatabase, PlaceTree } from "@/model/GameDB";
   import { Search } from "flowbite-svelte";
@@ -14,6 +18,13 @@
   } = $props();
 
   let searchValue = $state("");
+  let activeIndex = $state(-1);
+  // Esc 收起列表后，输入框仍有内容，需要单独记一个开关
+  let dismissed = $state(false);
+
+  const uid = `search-combo-${++comboSeq}`;
+  const listboxId = `${uid}-listbox`;
+  const optionId = (i: number) => `${uid}-option-${i}`;
 
   type FilterItem = {
     type: "spot" | "fish" | "mission";
@@ -125,6 +136,59 @@
     return results.slice(0, 50);
   });
 
+  let expanded = $derived(searchValue !== "" && !dismissed);
+
+  // 结果变化后旧的 activeIndex 就没意义了
+  $effect(() => {
+    filterList;
+    activeIndex = -1;
+  });
+
+  // 用键盘上下移动时把当前项滚进可视区
+  $effect(() => {
+    if (activeIndex < 0) return;
+    document
+      .getElementById(optionId(activeIndex))
+      ?.scrollIntoView({ block: "nearest" });
+  });
+
+  // 结果数播报去抖，否则每敲一个字都是一次播报
+  let announcedCount = $state(0);
+  $effect(() => {
+    const count = filterList.length;
+    const t = setTimeout(() => (announcedCount = count), 300);
+    return () => clearTimeout(t);
+  });
+
+  function onKeydown(e: KeyboardEvent) {
+    const count = filterList.length;
+    if (e.key === "ArrowDown") {
+      if (count === 0) return;
+      e.preventDefault();
+      dismissed = false;
+      activeIndex = activeIndex >= count - 1 ? 0 : activeIndex + 1;
+    } else if (e.key === "ArrowUp") {
+      if (count === 0) return;
+      e.preventDefault();
+      dismissed = false;
+      activeIndex = activeIndex <= 0 ? count - 1 : activeIndex - 1;
+    } else if (e.key === "Enter") {
+      const target = filterList[activeIndex] ?? filterList[0];
+      if (!target) return;
+      e.preventDefault();
+      visit(target);
+    } else if (e.key === "Escape") {
+      if (expanded) {
+        e.preventDefault();
+        dismissed = true;
+        activeIndex = -1;
+      } else if (searchValue) {
+        e.preventDefault();
+        searchValue = "";
+      }
+    }
+  }
+
   function visit(item: FilterItem) {
     if (item.type === "spot") {
       window.location.hash = `/info/${item.spot_id}`;
@@ -134,6 +198,8 @@
       window.location.hash = `/info/${item.spot_id}?w=${item.wks_id}`;
     }
     searchValue = "";
+    dismissed = false;
+    activeIndex = -1;
   }
 </script>
 
@@ -141,29 +207,54 @@
   size="md"
   class="ms-auto"
   placeholder="搜索钓场/鱼"
+  autocomplete="off"
+  role="combobox"
+  aria-label="搜索钓场/鱼"
+  aria-expanded={expanded}
+  aria-controls={listboxId}
+  aria-autocomplete="list"
+  aria-activedescendant={expanded && activeIndex >= 0
+    ? optionId(activeIndex)
+    : undefined}
   bind:value={searchValue}
-  onkeydown={(e) => {
-    if (e.key === "Enter" && filterList.length > 0) {
-      visit(filterList[0]);
-    }
+  oninput={() => {
+    dismissed = false;
+  }}
+  onkeydown={onKeydown}
+  onfocusout={(e) => {
+    // 点到结果项时 relatedTarget 为空，交给 onclick 处理
+    if (e.relatedTarget) dismissed = true;
   }}
   classes={{
     content:
       "absolute inset-y-auto top-full right-0 left-0 z-20 mt-1 max-h-60 flex-col overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800",
   }}
-  children={searchValue ? children : undefined}
+  children={expanded ? children : undefined}
 />
 
 {#snippet children()}
-  {#each filterList as item}
-    <button
-      class="px-4 py-2 w-full flex text-left items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
-      onclick={() => visit(item)}
-    >
-      <div>{item.name}</div>
-      <div class="text-xs text-gray-400">
-        {item.desc}
-      </div>
-    </button>
-  {/each}
+  <div id={listboxId} role="listbox" aria-label="搜索结果">
+    {#each filterList as item, i (i)}
+      <button
+        type="button"
+        role="option"
+        tabindex="-1"
+        id={optionId(i)}
+        aria-selected={i === activeIndex}
+        class="px-4 py-2 w-full flex text-left items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer {i ===
+        activeIndex
+          ? 'bg-gray-100 dark:bg-gray-700'
+          : ''}"
+        onclick={() => visit(item)}
+        onmouseenter={() => (activeIndex = i)}
+        onmousedown={(e) => e.preventDefault()}
+      >
+        <div>{item.name}</div>
+        <div class="text-xs text-gray-400">
+          {item.desc}
+        </div>
+      </button>
+    {/each}
+  </div>
+  <div class="sr-only" role="status">{announcedCount} 个结果</div>
 {/snippet}

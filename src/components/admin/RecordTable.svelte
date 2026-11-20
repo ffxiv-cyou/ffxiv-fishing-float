@@ -76,9 +76,14 @@
     if (!dateStr) return undefined;
     return new Date(dateStr).getTime();
   }
+  function pad2(n: number): string {
+    return String(n).padStart(2, "0");
+  }
+  // datetime-local 只接受本地墙钟时间，不能用 toISOString（那是 UTC）
   function timeToDate(time?: number): string {
     if (!time) return "";
-    return new Date(time).toISOString().slice(0, 16);
+    const d = new Date(time);
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
   }
   function booleanToStr(val?: boolean): string {
     if (val === undefined) return "";
@@ -203,10 +208,17 @@
 </script>
 
 <div class="p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
-  <div class="flex gap-4 flex-wrap">
+  <form
+    class="flex gap-4 flex-wrap"
+    onsubmit={(e) => {
+      e.preventDefault();
+      applyFilters();
+    }}
+  >
     <div>
       <Label for="spot">钓场 ID</Label>
       <SpotSelector
+        id="spot"
         bind:value={() => filters.spot ?? 0, (v) => (filters.spot = v)}
         db={tracker.db}
         placeholder="选择钓场"
@@ -260,6 +272,7 @@
     <div class="w-32">
       <Label for="isChum">撒饵</Label>
       <Select
+        id="isChum"
         placeholder="不过滤"
         items={[
           { value: "", name: "不过滤" },
@@ -294,13 +307,13 @@
     </div>
     <div class="w-60">
       <Label class="invisible">操作</Label>
-      <Button onclick={applyFilters}>查询</Button>
+      <Button type="submit">查询</Button>
       <Button color="alternative" onclick={resetFilters}>重置</Button>
       {#if filterBar}
         {@render filterBar(filters)}
       {/if}
     </div>
-  </div>
+  </form>
 </div>
 
 <div class="overflow-x-auto">
