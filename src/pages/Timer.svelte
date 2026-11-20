@@ -357,6 +357,8 @@
       : [],
     hiddenFish: current?.HiddenFish ?? 0,
     lureFishIndex: (fishId: number) => tracker.db.getLureFishIndex(fishId),
+    // 用抛竿时的快照；还没抛竿（或站起后清空）时用当前 buff
+    fishEyes: current ? current.fishEyes : tracker.HasFishEyes,
   });
 
   let blockedFish = $derived.by(() =>

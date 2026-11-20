@@ -1,5 +1,6 @@
 // 按勾选的条件种类判定「当前钓不到」；任何一项无法判定都中性通过。
-// 时间相关条件统一用抛竿时间（使用了雄心/谦逊时用其使用时间）评估。
+// 时间相关条件统一用抛竿时间（使用了雄心/谦逊时用其使用时间）评估；
+// 抛竿时带鱼眼且该鱼受鱼眼影响时跳过时间判定。
 import type { FishRequirement } from "./API";
 import { OceanPhase, voyagePhase } from "./ocean/schedule";
 import {
@@ -36,6 +37,8 @@ export interface ConditionContext {
   intuitionRequired: number[];
   /** 当前鱼词指向的鱼（图鉴序号，0 = 无鱼词） */
   hiddenFish: number;
+  /** 抛竿时是否处于鱼眼状态（鱼眼只豁免时间条件） */
+  fishEyes: boolean;
   /** 鱼词鱼的 物品 ID → 图鉴序号；不是鱼词鱼或取不到返回 0 */
   lureFishIndex: (fishId: number) => number;
 }
@@ -81,6 +84,7 @@ export function isFishBlocked(
   if (
     enabled("et") &&
     castKnown &&
+    !(ctx.fishEyes && condition.fish_eyes) &&
     condition.time_start !== undefined &&
     condition.time_end !== undefined
   ) {

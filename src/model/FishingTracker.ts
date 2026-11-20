@@ -377,6 +377,11 @@ export class FishingTracker extends EventTarget {
         return this.buffs.has(BuffID.FishersIntuition);
     }
 
+    get HasFishEyes(): boolean {
+        this.#subscribe();
+        return this.buffs.has(BuffID.FishEyes);
+    }
+
     /**
      * 条件判定的时间（服务器 epoch 毫秒）：本次尝试的诱饵使用时间，否则抛竿时间；
      * 两次抛竿之间用当前时间。

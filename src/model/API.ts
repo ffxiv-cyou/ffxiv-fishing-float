@@ -579,6 +579,8 @@ export interface FishRequirement {
   /** 真实 ET 分钟区间；start >= end 表示跨午夜 */
   time_start?: number;
   time_end?: number;
+  /** 时间条件可被鱼眼技能豁免（海钓时相、钓场之皇不适用） */
+  fish_eyes?: boolean;
   /** 当前天气 / 上一个天气周期 */
   cur_weather?: Array<number>;
   prev_weather?: Array<number>;
